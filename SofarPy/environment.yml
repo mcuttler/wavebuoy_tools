@@ -3,7 +3,11 @@ channels:
   - conda-forge
 dependencies:
   - python
-  - numpy=1.16.3
+  - bokeh
+  - cartopy
+  - dask
+  - numpy
+  - netCDF4
   - matplotlib
   - pillow
   - earthengine-api
