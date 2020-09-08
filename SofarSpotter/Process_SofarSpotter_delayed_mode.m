@@ -22,14 +22,17 @@
 %     M. Cuttler     | 01 Sep 2020 | 1.1                      | Modified how files are appended to bulkparameters.csv 
 %                                                                           output to account for when python parser generates files in sub-directories. 
 %     M. Cuttler     | 03 Sep 2020 | 1.2                      | Included displacements.csv into the workflow and output 
-%     
+%     M. Cuttler     | 08 Sep 2020 | 2.0                      | Modify code
+%                                                                         | such that all data is appended to Matlab structures and then sub-set
+%                                                                         | into monthly files for more efficient storage (may still run into
+%                                                                         | Matlab memory issues 
 %
 
 %% set initial paths for Spotter data to process and parser script
 
 %path to Spotter data to process - contains raw dump of SD card (_SYS,_FLT,
 %_LOC files)
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SPOT0093_PerthCanyon_20191015_to_20200903'; 
+datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\Data_for_testing'; 
 %path of Sofar parser script
 parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.10.0';
 
@@ -46,10 +49,10 @@ if ~exist(outpathMAT)
 end
 
 %spotter serial number and deployment info 
-SpotterID = 'SPOT0093'; 
-DeployLoc = 'PerthCanyon_Drifting';
-StartDate = '20191015';
-EndDate = '20200903';
+SpotterID = 'SPOT0172'; 
+DeployLoc = 'Testing';
+StartDate = '20200319';
+EndDate = '20200529';
 
 
 %% get list of files within datapath to figure out how many chunks to make
@@ -73,6 +76,12 @@ end
 chunk = 10; 
 fidx = 1:chunk:size(flist,1); 
 %% prcoess chunks of data
+
+%initiate structures for saving data
+bulkparams = struct('time',[], 'hs',[],'tm',[]','tp',[],'dm',[],'dp',[],'meanspr',[],'pkspr',[]); 
+locations = struct('time',[],'lat',[],'lon',[]); 
+displacements = struct('time',[], 'x',[],'y',[],'z',[]); 
+spec = struct('time',[],'a1',[],'b1',[],'a2',[],'b2',[],'Sxx',[],'Syy',[],'Szz',[]); 
 
 for j = 1:size(fidx,2)
     if j==size(fidx,2)
@@ -196,8 +205,11 @@ for i = 1:size(bulkparams.data,1)
     qf(i,3) = sum(qf(i,1:2)); 
 end      
     
- %% now build final netCDF files
+ %% now build final netCDF files 
 disp(['Saving data for ' SpotterID 'as netCDF and MAT files']);         
+
+%add IMOS toolbox
+addpath('D:\CUTTLER_GitHub\imos-toolbox\NetCDF'); 
 
 
 filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' StartDate '_' EndDate '.nc'];
