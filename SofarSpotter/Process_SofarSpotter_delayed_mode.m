@@ -498,6 +498,13 @@ for i = 1:size(tdata,1)
     ncwrite(filenameNC,'QualityFlag',qfbulk(idx_spec,3));  
     ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: 0 = good data, 1 = problem with wave height or period, 2 = problem with wave height and period');  
     ncwriteatt(filenameNC,'QualityFlag','units','-');
+    
+    %only save .mat file at the end - contains all data, not split by
+    %monthly 
+    if i == size(tdata,1)
+        filenameMAT = [outpathMAT '\' SpotterID '_' DeployLoc '_' datestr(tstart,'yyyymm') '_' datestr(tend,'yyyymm') '.mat']; 
+        save(filenameMAT,'bulkparams','spec','locations','displacements','-v7.3'); 
+    end
         
 end
     
