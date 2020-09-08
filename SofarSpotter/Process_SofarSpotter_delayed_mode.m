@@ -29,7 +29,7 @@
 %
 
 %% set initial paths for Spotter data to process and parser script
-
+clear; clc
 %path to Spotter data to process - contains raw dump of SD card (_SYS,_FLT,
 %_LOC files)
 datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\Data_for_testing'; 
@@ -49,10 +49,8 @@ if ~exist(outpathMAT)
 end
 
 %spotter serial number and deployment info 
-SpotterID = 'SPOT0172'; 
+SpotterID = 'SPOT0171'; 
 DeployLoc = 'Testing';
-StartDate = '20200319';
-EndDate = '20200529';
 
 
 %% get list of files within datapath to figure out how many chunks to make
@@ -124,43 +122,94 @@ for j = 1:size(fidx,2)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %append data from parser to single output file 
-    disp(['Adding data for chunk ' num2str(j) ' to bulkparameters and displacement output CSV'])
-    
-    %append each chunk to bulkparameters.csv and displacements --- I wonder
-    %if more memory efficient to just build large variables/structures and
-    %then save CSV at end? 
-    if exist([datapath '\tmp\bulkparameters.csv'])~=0 && j == 1
-        copyfile([datapath '\tmp\bulkparameters.csv'], datapath)
-        copyfile([datapath '\tmp\displacement.csv'], datapath)
-        copyfile([datapath '\tmp\location.csv'], datapath)
-    elseif exist([datapath '\tmp\bulkparameters.csv'])~=0 && j > 1
-        dumdata = importdata([datapath '\tmp\bulkparameters.csv']);
-        dlmwrite([datapath '\bulkparameters.csv'], dumdata.data, 'delimiter',',', '-append');        
-        dumdata2 = importdata([datapath '\tmp\displacement.csv']);
-        dlmwrite([datapath '\displacement.csv'], dumdata2.data, 'delimiter',',', '-append');        
-        dumdata3 = importdata([datapath '\tmp\location.csv']);
-        dlmwrite([datapath '\location.csv'], dumdata3.data, 'delimiter',',', '-append');     
+    disp(['Adding data for chunk ' num2str(j) ' to data arrays'])    
+
     %for some instances parser generates subdirectories
-    elseif exist([datapath '\tmp\bulkparameters.csv'])==0
+    if exist([datapath '\tmp\bulkparameters.csv'])==0
         %get list of subfolders
         subdir = dir([datapath '\tmp']); 
         subdir = subdir(3:end); 
         dirFlags = [subdir.isdir]; 
         for k = 1:size(dirFlags,2); 
             if dirFlags(k)>0
-                dumdata = importdata([datapath '\tmp\' subdir(k).name '\bulkparameters.csv']);
-                dlmwrite([datapath '\bulkparameters.csv'], dumdata.data, 'delimiter',',', '-append');
-                dumdata2 = importdata([datapath '\tmp\' subdir(k).name '\bulkparameters.csv']);
-                dlmwrite([datapath '\displacement.csv'], dumdata2.data, 'delimiter',',', '-append');
-                dumdata3 = importdata([datapath '\tmp\' subdir(k).name '\bulkparameters.csv']);
-                dlmwrite([datapath '\location.csv'], dumdata3.data, 'delimiter',',', '-append');   
-                rmdir([datapath '\tmp\' subdir(k).name],'s'); 
+                filenames = {'bulkparameters','location','displacement','a1','a2','b1','b2','Sxx','Syy','Szz'}; 
+                for kk = 1:length(filenames)
+                    if kk<4
+                        dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv']); 
+                        data = dumdata.data;             
+                        if kk == 1
+                            bulkparams.time = [bulkparams.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                            bulkparams.hs = [bulkparams.hs; data(:,8)];
+                            bulkparams.tm = [bulkparams.tm; data(:,9)];
+                            bulkparams.tp = [bulkparams.tp; data(:,10)]; 
+                            bulkparams.dm = [bulkparams.dm; data(:,11)];
+                            bulkparams.dp = [bulkparams.dp; data(:,12)]; 
+                            bulkparams.meanspr = [bulkparams.meanspr; data(:,13)];
+                            bulkparams.pkspr = [bulkparams.pkspr; data(:,14)]; 
+                        elseif kk == 2
+                            locations.time = [locations.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                            locations.lat = [locations.lat; data(:,8)]; 
+                            locations.lon = [locations.lon; data(:,9)];
+                        elseif kk == 3
+                            displacements.time = [displacements.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                            displacements.x = [displacements.x; data(:,8)];
+                            displacements.y = [displacements.y; data(:,9)];
+                            displacements.z = [displacements.z; data(:,10)]; 
+                        end
+                    else
+                        dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'],',',1);
+                        data = dumdata.data; 
+                        if kk==4                    
+                            spec.freq = str2double(dumdata.textdata(9:end)); 
+                            spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                        end
+                        
+                        eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; data(:,9:end)];']);
+                    end
+                end
+                
+                rmdir([datapath '\tmp\' subdir(k).name],'s');
             end
-        end                            
+        end
+    else
+        filenames = {'bulkparameters','location','displacement','a1','a2','b1','b2','Sxx','Syy','Szz'};
+        for kk = 1:length(filenames)
+            if kk<4
+                dumdata = importdata([filenames{kk} '.csv']); 
+                data = dumdata.data;             
+                if kk == 1
+                    bulkparams.time = [bulkparams.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                    bulkparams.hs = [bulkparams.hs; data(:,8)];
+                    bulkparams.tm = [bulkparams.tm; data(:,9)];
+                    bulkparams.tp = [bulkparams.tp; data(:,10)]; 
+                    bulkparams.dm = [bulkparams.dm; data(:,11)];
+                    bulkparams.dp = [bulkparams.dp; data(:,12)]; 
+                    bulkparams.meanspr = [bulkparams.meanspr; data(:,13)];
+                    bulkparams.pkspr = [bulkparams.pkspr; data(:,14)]; 
+                elseif kk == 2
+                    locations.time = [locations.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                    locations.lat = [locations.lat; data(:,8)]; 
+                    locations.lon = [locations.lon; data(:,9)];
+                elseif kk == 3
+                    displacements.time = [displacements.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                    displacements.x = [displacements.x; data(:,8)];
+                    displacements.y = [displacements.y; data(:,9)];
+                    displacements.z = [displacements.z; data(:,10)]; 
+                end
+            else
+                dumdata = importdata([filenames{kk} '.csv'],',',1);
+                data = dumdata.data; 
+                if kk==4                    
+                    spec.freq = str2double(dumdata.textdata(9:end)); 
+                    spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                end
+               
+                eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; data(:,9:end)];']); 
+            end
+        end                                                                                                                                                  
+        
     end
     disp(['Finished bulk parameters, adding chunk ' num2str(j) ' to displacements and spectra'])   
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %add code for displacements and spectral data
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %clean up tmp directory for next chunk
@@ -171,112 +220,248 @@ for j = 1:size(fidx,2)
         cd(datapath); 
         rmdir([datapath '\tmp'],'s'); 
     end
-    clear dumdata
+    clear dumdata data 
 end
 
-%% import combined data files and perform QA/QC
-bulkparams = importdata([datapath '\bulkparameters.csv']);   
-displacements = importdata([datapath '\displacement.csv']); 
-locations = importdata([datapath '\location.csv']); 
-    
+%% import combined data files and perform QA/QC   
 
-qf = []; 
-for i = 1:size(bulkparams.data,1)
+%quality checks on bulkparams - applies to spec outputs too 
+qfbulk = []; 
+for i = 1:size(bulkparams.time,1)
     %basic quality control by checking that mean and peak wave period aren't greater than 25 s
-    if bulkparams.data(i,9) > 25| bulkparams.data(i,10) > 25
-        qf(i,1) = 1; 
+    if bulkparams.tm > 25 | bulkparams.tp > 25
+        qfbulk(i,1) = 1; 
     else
-        qf(i,1) = 0; 
+        qfbulk(i,1) = 0; 
     end
     
     %check that wave height isn't more than 3 times larger than previous
     %measurement
     if i > 1
-        if bulkparams.data(i,8) > 2*bulkparams.data(i-1,8)
-            qf(i,2) = 1;
+        if bulkparams.hs > 2*bulkparams.hs(i-1)
+            qfbulk(i,2) = 1;
         else
-            qf(i,2) = 0; 
+            qfbulk(i,2) = 0; 
         end
     else
-        qf(i,2) = 0; 
+        qfbulk(i,2) = 0; 
     end
     
     %add flags together
-    qf(i,3) = sum(qf(i,1:2)); 
+    qfbulk(i,3) = sum(qfbulk(i,1:2)); 
 end      
-    
- %% now build final netCDF files 
-disp(['Saving data for ' SpotterID 'as netCDF and MAT files']);         
+
+%quality check for displacements 
+qfdisp = []; 
+for i = 1:size(displacements.x,1)
+    qfdisp(i,1) = 0;
+end
+
+%quality check for GPS
+qflocs = []; 
+for i = 1:size(locations.time,1)
+    qflocs(i,1) = 0;
+end
+
+ %% now build monthly netCDF files 
+disp(['Saving data for ' SpotterID ' as netCDF']);         
 
 %add IMOS toolbox
-addpath('D:\CUTTLER_GitHub\imos-toolbox\NetCDF'); 
+% addpath('D:\CUTTLER_GitHub\imos-toolbox\NetCDF'); 
 
+%determine min and max months
+t = datevec(bulkparams.time); 
+tdata = unique(t(:,1:2),'rows'); 
 
-filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' StartDate '_' EndDate '.nc'];
-%save netcdf file for bulk parameters
-[m,c] = size(bulkparams.data);
-nccreate(filenameNC,'time','Dimensions',{'time',m});
-nccreate(filenameNC,'Hs','Dimensions',{'Hs',m});
-nccreate(filenameNC,'Tm','Dimensions',{'Tm',m});
-nccreate(filenameNC,'Tp','Dimensions',{'Tp',m});
-nccreate(filenameNC,'Dm','Dimensions',{'Dm',m});
-nccreate(filenameNC,'Dp','Dimensions',{'Dp',m});
-nccreate(filenameNC,'MeanSpr','Dimensions',{'MeanSpr',m});
-nccreate(filenameNC,'PeakSpr','Dimensions',{'PeakSpr',m});
-nccreate(filenameNC,'QualityFlag','Dimensions',{'QualityFlag',m}); 
+for i = 1:size(tdata,1)
+ 
+    tstart = datenum(tdata(i,1), tdata(i,2),1); 
+    tend = datenum(tdata(i,1), tdata(i,2)+1, 1); 
+    
+    disp(['Saving ' datestr(tstart,'mmm yyyy')]); 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %output for BULK PARAMETERS 
+    idx_bulk = []; 
+    idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend);                 
+    filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc']; 
+  
+    [m,c] = size(bulkparams.time(idx_bulk)); 
+    %create variable entries
+    nccreate(filenameNC,'time','Dimensions',{'time',m});
+    nccreate(filenameNC,'Hs','Dimensions',{'Hs',m});
+    nccreate(filenameNC,'Tm','Dimensions',{'Tm',m});
+    nccreate(filenameNC,'Tp','Dimensions',{'Tp',m});
+    nccreate(filenameNC,'Dm','Dimensions',{'Dm',m});
+    nccreate(filenameNC,'Dp','Dimensions',{'Dp',m});
+    nccreate(filenameNC,'MeanSpr','Dimensions',{'MeanSpr',m});
+    nccreate(filenameNC,'PeakSpr','Dimensions',{'PeakSpr',m});
+    nccreate(filenameNC,'QualityFlag','Dimensions',{'QualityFlag',m}); 
+    
+    %write data to variables 
+    ncwrite(filenameNC,'time',bulkparams.time(idx_bulk));  
+    ncwriteatt(filenameNC,'time','long_name','UTC');  
+    ncwriteatt(filenameNC,'time','units','days since Jan-1-0000');
+    
+    ncwrite(filenameNC,'Hs',bulkparams.hs(idx_bulk)); 
+    ncwriteatt(filenameNC,'Hs','long_name','significant wave height');  
+    ncwriteatt(filenameNC,'Hs','units','m');
+    
+    ncwrite(filenameNC,'Tm',bulkparams.tm(idx_bulk));  
+    ncwriteatt(filenameNC,'Tm','long_name','mean wave period');  
+    ncwriteatt(filenameNC,'Tm','units','s');
+    
+    ncwrite(filenameNC,'Tp',bulkparams.tp(idx_bulk)); 
+    ncwriteatt(filenameNC,'Tp','long_name','peak wave period');  
+    ncwriteatt(filenameNC,'Tp','units','s');
+    
+    ncwrite(filenameNC,'Dm',bulkparams.dm(idx_bulk)); 
+    ncwriteatt(filenameNC,'Dm','long_name','mean wave FROM direction');  
+    ncwriteatt(filenameNC,'Dm','units','deg');
+    
+    ncwrite(filenameNC,'Dp',bulkparams.dp(idx_bulk));  
+    ncwriteatt(filenameNC,'Dp','long_name','peak wave FROM direction');  
+    ncwriteatt(filenameNC,'Dp','units','deg');
+    
+    ncwrite(filenameNC,'MeanSpr',bulkparams.meanspr(idx_bulk)); 
+    ncwriteatt(filenameNC,'MeanSpr','long_name','mean spreading');  
+    ncwriteatt(filenameNC,'MeanSpr','units','deg');
+    
+    ncwrite(filenameNC,'PeakSpr',bulkparams.pkspr(idx_bulk)); 
+    ncwriteatt(filenameNC,'PeakSpr','long_name','peak spreading');  
+    ncwriteatt(filenameNC,'PeakSpr','units','deg');
+    
+    ncwrite(filenameNC,'QualityFlag',qfbulk(idx_bulk,3)); 
+    ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: 0 = good data, 1 = problem with wave height or period, 2 = problem with wave height and period');  
+    ncwriteatt(filenameNC,'QualityFlag','units','-');
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %output netCDF for DISPLACEMENTS
+    idx_disp = []; 
+    idx_disp = find(displacements.time>=tstart&displacements.time<tend);                 
+    filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' datestr(tstart,'yyyymm') '_disp.nc']; 
+    
+    [m,c] = size(displacements.time(idx_disp)); 
+    nccreate(filenameNC,'disp_time','Dimensions',{'time',m});
+    nccreate(filenameNC,'x','Dimensions',{'x',m}); 
+    nccreate(filenameNC,'y','Dimensions',{'y',m}); 
+    nccreate(filenameNC,'z','Dimensions',{'z',m});     
+    nccreate(filenameNC,'QualityFlag','Dimensions',{'QualityFlag',m}); 
+    
+    ncwrite(filenameNC,'disp_time',displacements.time(idx_disp)); 
+    ncwriteatt(filenameNC,'disp_time','long_name','UTC');  
+    ncwriteatt(filenameNC,'disp_time','units','days since Jan-1-0000, includes milliseconds');    
+    
+    ncwrite(filenameNC,'x',displacements.x(idx_disp)); 
+    ncwriteatt(filenameNC,'x','long_name','x displacement');  
+    ncwriteatt(filenameNC,'x','units','m');
+    
+    ncwrite(filenameNC,'y',displacements.y(idx_disp));           
+    ncwriteatt(filenameNC,'y','long_name','y displacement');  
+    ncwriteatt(filenameNC,'y','units','m');   
+    
+    ncwrite(filenameNC,'z',displacements.z(idx_disp)); 
+    ncwriteatt(filenameNC,'z','long_name','z displacement');  
+    ncwriteatt(filenameNC,'z','units','m');
+    
+    ncwrite(filenameNC,'QualityFlag',qfdisp(idx_disp)); 
+    ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: COMPLETE WHEN QUALITY FLAGS ARE FINISHED');  
+    ncwriteatt(filenameNC,'QualityFlag','units','-');
+    
+        
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %output netCDF for LOCATIONS
+    idx_locs = []; 
+    idx_locs = find(locations.time>=tstart&locations.time<tend);                 
+    filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' datestr(tstart,'yyyymm') '_gps.nc']; 
+    
+    [m,c] = size(locations.time(idx_locs)); 
+    nccreate(filenameNC,'time','Dimensions',{'time',m});
+    nccreate(filenameNC,'lat','Dimensions',{'lat',m}); 
+   nccreate(filenameNC,'lon','Dimensions',{'lon',m});   
+    nccreate(filenameNC,'QualityFlag','Dimensions',{'QualityFlag',m}); 
+    
+    ncwrite(filenameNC,'time',locations.time(idx_locs)); 
+    ncwriteatt(filenameNC,'time','long_name','UTC');  
+    ncwriteatt(filenameNC,'time','units','days since Jan-1-0000, includes milliseconds');    
+    
+    ncwrite(filenameNC,'lat',locations.lat(idx_locs)); 
+    ncwriteatt(filenameNC,'lat','long_name','latitude');  
+    ncwriteatt(filenameNC,'lat','units','deg');
+    
+    ncwrite(filenameNC,'lon', locations.lon(idx_locs)); 
+    ncwriteatt(filenameNC,'lon','long_name','longitude');  
+    ncwriteatt(filenameNC,'lon','units','m');
+    
+    ncwrite(filenameNC,'QualityFlag',qflocs(idx_locs)); 
+    ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: COMPLETE WHEN QUALITY FLAGS ARE FINISHED');  
+    ncwriteatt(filenameNC,'QualityFlag','units','-');
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %output netCDF for SPECTRAL DATA
+    idx_spec = []; 
+    idx_spec = find(spec.time>=tstart&spec.time<tend);                 
+    filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' datestr(tstart,'yyyymm') '_spec.nc']; 
+    
+    [m,c] = size(spec.a1(idx_spec,:)); 
 
-ncwrite(filenameNC,'time',datenum(bulkparams.data(:,1:6))); 
-ncwriteatt(filenameNC,'time','long_name','UTC');  
-ncwriteatt(filenameNC,'time','units','days since Jan-1-0000');
+    nccreate(filenameNC,'time','Dimensions',{'time',m});
+    nccreate(filenameNC,'a1','Dimensions',{'time',m,'freq',c}); 
+    nccreate(filenameNC,'a2','Dimensions',{'time',m,'freq',c}); 
+    nccreate(filenameNC,'b1','Dimensions',{'time',m,'freq',c}); 
+    nccreate(filenameNC,'b2','Dimensions',{'time',m,'freq',c}); 
+    nccreate(filenameNC,'Sxx','Dimensions',{'time',m,'freq',c}); 
+    nccreate(filenameNC,'Syy','Dimensions',{'time',m,'freq',c}); 
+    nccreate(filenameNC,'Szz','Dimensions',{'time',m,'freq',c}); 
+    nccreate(filenameNC,'freq','Dimensions',{'time',m,'freq',c}); 
+    nccreate(filenameNC,'QualityFlag','Dimensions',{'QualityFlag',m}); 
+    
+    ncwrite(filenameNC,'time', spec.time(idx_spec)); 
+    ncwriteatt(filenameNC,'time','long_name','UTC');  
+    ncwriteatt(filenameNC,'time','units','days since Jan-1-0000, includes milliseconds');    
+    
+    ncwrite(filenameNC,'a1', spec.a1(idx_spec,:)); 
+    ncwriteatt(filenameNC,'a1','long_name','spectral coefficient a1');  
+    ncwriteatt(filenameNC,'a1','units','-');    
+        
+    ncwrite(filenameNC,'b1', spec.b1(idx_spec,:)); 
+    ncwriteatt(filenameNC,'b1','long_name','spectral coefficient a1');  
+    ncwriteatt(filenameNC,'b1','units','-');
+        
+    ncwrite(filenameNC,'a2', spec.a2(idx_spec,:)); 
+    ncwriteatt(filenameNC,'a2','long_name','spectral coefficient a1');  
+    ncwriteatt(filenameNC,'a2','units','-');    
+        
+    ncwrite(filenameNC,'b2', spec.b2(idx_spec,:)); 
+    ncwriteatt(filenameNC,'b2','long_name','spectral coefficient a1');  
+    ncwriteatt(filenameNC,'b2','units','-');    
+        
+    ncwrite(filenameNC,'Sxx', spec.Sxx(idx_spec,:)); 
+    ncwriteatt(filenameNC,'Sxx','long_name','spectral coefficient a1');  
+    ncwriteatt(filenameNC,'Sxx','units','-');    
+        
+    ncwrite(filenameNC,'Syy', spec.Syy(idx_spec,:)); 
+    ncwriteatt(filenameNC,'Syy','long_name','spectral coefficient a1');  
+    ncwriteatt(filenameNC,'Syy','units','-');
+        
+    ncwrite(filenameNC,'Szz', spec.Szz(idx_spec,:)); 
+    ncwriteatt(filenameNC,'Szz','long_name','spectral coefficient a1');  
+    ncwriteatt(filenameNC,'Szz','units','-');        
+    
+    %frequency is longer than spectral coefficients because Sofar pads with
+    %nans
+    ncwrite(filenameNC,'freq', spec.freq(1:c)); 
+    ncwriteatt(filenameNC,'freq','long_name','frequency');  
+    ncwriteatt(filenameNC,'freq','units','Hz'); 
 
-ncwrite(filenameNC,'Hs',bulkparams.data(:,8));
-ncwriteatt(filenameNC,'Hs','long_name','significant wave height');  
-ncwriteatt(filenameNC,'Hs','units','m');
-
-ncwrite(filenameNC,'Tm',bulkparams.data(:,9));
-ncwriteatt(filenameNC,'Tm','long_name','mean wave period');  
-ncwriteatt(filenameNC,'Tm','units','s');
-
-ncwrite(filenameNC,'Tp',bulkparams.data(:,10));
-ncwriteatt(filenameNC,'Tp','long_name','peak wave period');  
-ncwriteatt(filenameNC,'Tp','units','s');
-
-ncwrite(filenameNC,'Dm',bulkparams.data(:,11));
-ncwriteatt(filenameNC,'Dm','long_name','mean wave FROM direction');  
-ncwriteatt(filenameNC,'Dm','units','deg');
-
-ncwrite(filenameNC,'Dp',bulkparams.data(:,12));
-ncwriteatt(filenameNC,'Dp','long_name','peak wave FROM direction');  
-ncwriteatt(filenameNC,'Dp','units','deg');
-
-ncwrite(filenameNC,'MeanSpr',bulkparams.data(:,13));
-ncwriteatt(filenameNC,'MeanSpr','long_name','mean spreading');  
-ncwriteatt(filenameNC,'MeanSpr','units','deg');
-
-ncwrite(filenameNC,'PeakSpr',bulkparams.data(:,14));
-ncwriteatt(filenameNC,'PeakSpr','long_name','peak spreading');  
-ncwriteatt(filenameNC,'PeakSpr','units','deg');
-
-ncwrite(filenameNC,'QualityFlag',qf(:,3)); 
-ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: 0 = good data, 1 = problem with wave height or period, 2 = problem with wave height and period');  
-ncwriteatt(filenameNC,'QualityFlag','units','deg');
-
-%add data for displacements
-[m,c] = size(displacements.data);
-nccreate(filenameNC,'disp_time','Dimensions',{'time',m});
-nccreate(filenameNC,'displacements','Dimensions',{'QualityFlag',m}); 
-
-ncwrite(filenameNC,'disp_time',datenum(displacements.data(:,1:6))+displacements.data(:,7)/(8.64*10^7)); 
-ncwriteatt(filenameNC,'disp_time','long_name','UTC');  
-ncwriteatt(filenameNC,'disp_time','units','days since Jan-1-0000, includes milliseconds');
-
-ncwrite(filenameNC,'displacements',displacements.data(:,8:10)); 
-ncwriteatt(filenameNC,'displacements','long_name','xyz displacements, [x, y, z]');  
-ncwriteatt(filenameNC,'displacements','units','m');
-
-%save .mat file
-filenameMAT = [outpathMAT '\' SpotterID '_' DeployLoc '_' StartDate '_' EndDate '.mat'];
-save(filenameMAT, 'bulkparams', 'displacements','-v7.3');    
+    ncwrite(filenameNC,'QualityFlag',qfbulk(idx_spec,3));  
+    ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: 0 = good data, 1 = problem with wave height or period, 2 = problem with wave height and period');  
+    ncwriteatt(filenameNC,'QualityFlag','units','-');
+        
+end
     
 %clear command window and displayed finished processing
 clc; 
@@ -286,9 +471,9 @@ disp(['Finished processing ' SpotterID ' delayed mode']);
 figure; 
 plot(datenum(bulkparams.data(:,1:6)), bulkparams.data(:,8)); 
 hold on;
-idx1 = find(qf(:,3)==0); 
-idx2 = find(qf(:,3)==1); 
-idx3 = find(qf(:,3)==2); 
+idx1 = find(qfbulk(:,3)==0); 
+idx2 = find(qfbulk(:,3)==1); 
+idx3 = find(qfbulk(:,3)==2); 
 
 if ~isempty(idx1)
     h(1) = plot(datenum(bulkparams.data(idx1,1:6)), bulkparams.data(idx1,8),'g.'); 
