@@ -1,0 +1,21 @@
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python
+  - numpy=1.16.3
+  - matplotlib
+  - pillow
+  - earthengine-api
+  - gdal
+  - pandas
+  - geopandas
+  - pytz
+  - scikit-image
+  - scikit-learn
+  - shapely
+  - scipy
+  - astropy
+  - spyder
+  - notebook
+  - xarray
