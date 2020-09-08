@@ -32,7 +32,7 @@
 clear; clc
 %path to Spotter data to process - contains raw dump of SD card (_SYS,_FLT,
 %_LOC files)
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\Data_for_testing'; 
+datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SPOT0093_PerthCanyon_20191015_to_20200903'; 
 %path of Sofar parser script
 parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.10.0';
 
@@ -49,8 +49,8 @@ if ~exist(outpathMAT)
 end
 
 %spotter serial number and deployment info 
-SpotterID = 'SPOT0171'; 
-DeployLoc = 'Testing';
+SpotterID = 'SPOT0093'; 
+DeployLoc = 'PerthCanyon';
 
 
 %% get list of files within datapath to figure out how many chunks to make
@@ -209,7 +209,8 @@ for j = 1:size(fidx,2)
         end                                                                                                                                                  
         
     end
-    disp(['Finished bulk parameters, adding chunk ' num2str(j) ' to displacements and spectra'])   
+    disp(['Finished chunk ' num2str(j) ' out of ' num2str(size(fidx,2))]); 
+    clc
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %clean up tmp directory for next chunk
@@ -225,7 +226,8 @@ end
 
 %% import combined data files and perform QA/QC   
 
-%quality checks on bulkparams - applies to spec outputs too 
+%quality checks on bulkparams - applies to spec outputs too
+%also find times in GPS file to save lat/lon for buoy position
 qfbulk = []; 
 for i = 1:size(bulkparams.time,1)
     %basic quality control by checking that mean and peak wave period aren't greater than 25 s
@@ -249,7 +251,33 @@ for i = 1:size(bulkparams.time,1)
     
     %add flags together
     qfbulk(i,3) = sum(qfbulk(i,1:2)); 
-end      
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %add gps
+    idx = find(abs(bulkparams.time(i)-locations.time)==min(abs(bulkparams.time(i)-locations.time))); 
+    %check if empty
+    if ~isempty(idx)
+        %if not empty but more than 1 corresponding location point averge
+        if length(idx)>1
+            bulkparams.lat(i,1) = mean(locations.data(idx,8)); 
+            bulkparams.lon(i,1) = mean(locations.data(idx,9));            
+        %if not empty and only 1 point, make sure not more than 5 minutes
+        %apart 
+        else
+            if abs(bulkparams.time(i)-locations.time(idx))>5/1440 %5 minutes
+                bulkparams.lat(i,1) = nan;
+                bulkparams.lon(i,1) = nan;              
+            else
+                bulkparams.lat(i,1) = locations.lat(idx);
+                bulkparams.lon(i,1) = locations.lon(idx);  
+            end
+        end
+    %if empty fill with nan
+    else
+        bulkparams.lat(i,1) = nan;
+        bulkparams.lon(i,1) = nan; 
+    end
+       
+end
 
 %quality check for displacements 
 qfdisp = []; 
@@ -296,6 +324,8 @@ for i = 1:size(tdata,1)
     nccreate(filenameNC,'Dp','Dimensions',{'Dp',m});
     nccreate(filenameNC,'MeanSpr','Dimensions',{'MeanSpr',m});
     nccreate(filenameNC,'PeakSpr','Dimensions',{'PeakSpr',m});
+    nccreate(filenameNC,'Latitude','Dimensions',{'Latitude',m});
+    nccreate(filenameNC,'Longitude','Dimensions',{'Longitude',m});
     nccreate(filenameNC,'QualityFlag','Dimensions',{'QualityFlag',m}); 
     
     %write data to variables 
@@ -330,6 +360,14 @@ for i = 1:size(tdata,1)
     ncwrite(filenameNC,'PeakSpr',bulkparams.pkspr(idx_bulk)); 
     ncwriteatt(filenameNC,'PeakSpr','long_name','peak spreading');  
     ncwriteatt(filenameNC,'PeakSpr','units','deg');
+        
+    ncwrite(filenameNC,'Latitude',bulkparams.lat(idx_bulk)); 
+    ncwriteatt(filenameNC,'Latitude','long_name','latitude');  
+    ncwriteatt(filenameNC,'Latitude','units','deg');
+        
+    ncwrite(filenameNC,'Longitude',bulkparams.lon(idx_bulk)); 
+    ncwriteatt(filenameNC,'Longitude','long_name','longitude');  
+    ncwriteatt(filenameNC,'Longitude','units','deg');
     
     ncwrite(filenameNC,'QualityFlag',qfbulk(idx_bulk,3)); 
     ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: 0 = good data, 1 = problem with wave height or period, 2 = problem with wave height and period');  
@@ -468,39 +506,39 @@ clc;
 disp(['Finished processing ' SpotterID ' delayed mode']); 
 
 %% plot quick figure
-figure; 
-plot(datenum(bulkparams.data(:,1:6)), bulkparams.data(:,8)); 
-hold on;
-idx1 = find(qfbulk(:,3)==0); 
-idx2 = find(qfbulk(:,3)==1); 
-idx3 = find(qfbulk(:,3)==2); 
-
-if ~isempty(idx1)
-    h(1) = plot(datenum(bulkparams.data(idx1,1:6)), bulkparams.data(idx1,8),'g.'); 
-else
-    h(1) = plot(0,0,'g.');
-end
-
-if ~isempty(idx2)
-    h(2) = plot(datenum(bulkparams.data(idx2,1:6)), bulkparams.data(idx2,8),'y.'); 
-else
-     h(2) = plot(0,0,'g.');
-end
-
-if ~isempty(idx3)
-    h(3) = plot(datenum(bulkparams.data(idx3,1:6)), bulkparams.data(idx3,8),'r.'); 
-else
-    h(3) = plot(0,0,'r.'); 
-end
-
-set(gca,'xlim',[datenum(StartDate,'yyyymmdd') datenum(EndDate,'yyyymmdd')]); 
-datetick('x','mmm-dd','keepticks'); 
-xlabel('Date (mmm-dd');
-ylabel('Hs (m)'); 
-grid on; 
-title(SpotterID); 
-legend(h,{'Good','Questionable','Bad'},'location','best'); 
-        
+% figure; 
+% plot(datenum(bulkparams.data(:,1:6)), bulkparams.data(:,8)); 
+% hold on;
+% idx1 = find(qfbulk(:,3)==0); 
+% idx2 = find(qfbulk(:,3)==1); 
+% idx3 = find(qfbulk(:,3)==2); 
+% 
+% if ~isempty(idx1)
+%     h(1) = plot(datenum(bulkparams.data(idx1,1:6)), bulkparams.data(idx1,8),'g.'); 
+% else
+%     h(1) = plot(0,0,'g.');
+% end
+% 
+% if ~isempty(idx2)
+%     h(2) = plot(datenum(bulkparams.data(idx2,1:6)), bulkparams.data(idx2,8),'y.'); 
+% else
+%      h(2) = plot(0,0,'g.');
+% end
+% 
+% if ~isempty(idx3)
+%     h(3) = plot(datenum(bulkparams.data(idx3,1:6)), bulkparams.data(idx3,8),'r.'); 
+% else
+%     h(3) = plot(0,0,'r.'); 
+% end
+% 
+% set(gca,'xlim',[datenum(StartDate,'yyyymmdd') datenum(EndDate,'yyyymmdd')]); 
+% datetick('x','mmm-dd','keepticks'); 
+% xlabel('Date (mmm-dd');
+% ylabel('Hs (m)'); 
+% grid on; 
+% title(SpotterID); 
+% legend(h,{'Good','Questionable','Bad'},'location','best'); 
+%         
 
         
         
