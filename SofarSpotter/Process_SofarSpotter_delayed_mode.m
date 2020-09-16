@@ -32,7 +32,7 @@
 clear; clc
 %path to Spotter data to process - contains raw dump of SD card (_SYS,_FLT,
 %_LOC files)
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SPOT0093_PerthCanyon_20191015_to_20200903'; 
+datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\Data_for_testing'; 
 %path of Sofar parser script
 parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.10.0';
 
@@ -49,8 +49,8 @@ if ~exist(outpathMAT)
 end
 
 %spotter serial number and deployment info 
-SpotterID = 'SPOT0093'; 
-DeployLoc = 'PerthCanyon';
+SpotterID = 'SPOT0171'; 
+DeployLoc = 'Testing';
 
 
 %% get list of files within datapath to figure out how many chunks to make
