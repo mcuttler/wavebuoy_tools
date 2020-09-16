@@ -28,6 +28,8 @@ import numpy as np
 import os
 import csv
 import shutil 
+import xarray as xr
+import netCDF4
 from datetime import datetime as dt
 from matplotlib import pyplot as plt
 
@@ -61,7 +63,7 @@ bulkparams = {'time':[],'hs':[],'tm':[],'tp':[],'dm':[],'dp':[],
               'meanspr':[],'pkspr':[]}
 displacements = {'time':[],'x':[],'y':[],'z':[]}
 locations = {'time':[],'lat':[],'lon':[]}
-spec = {'time':[],'a1':[],'b1':[],'a2':[],'b2':[],
+spec = {'time':[],'a1':np.array([]),'b1':[],'a2':[],'b2':[],
               'Sxx':[],'Syy':[],'Szz':[],'freq':[]}
 #%%
 for i in range(0, len(file_nums), chunk_size):
@@ -77,7 +79,56 @@ for i in range(0, len(file_nums), chunk_size):
     
     #check whether parser generated subdirectories or not
     if os.path.exists('bulkparameters.csv')==False:
-        # ;ljasdf
+        ff = os.listdir(tmp_path)
+        for checkfile in ff:
+            if os.path.isdir(checkfile)==True:
+                
+                dum = np.loadtxt(os.path.join(tmp_path, checkfile,'bulkparameters.csv'),delimiter=',',skiprows=1)
+                for j in dum:
+                    bulkparams['time'].append(dt(int(j[0]),int(j[1]),int(j[2]),
+                                                 int(j[3]),int(j[4]),int(j[5])))
+                    bulkparams['hs'].append(j[7])
+                    bulkparams['tm'].append(j[8])
+                    bulkparams['tp'].append(j[9])
+                    bulkparams['dm'].append(j[10])
+                    bulkparams['dp'].append(j[11])
+                    bulkparams['meanspr'].append(j[12])
+                    bulkparams['pkspr'].append(j[13])
+    
+                dum = np.loadtxt(os.path.join(tmp_path, checkfile,'displacement.csv'),delimiter=',',skiprows=1)
+                for j in dum:
+                    displacements['time'].append(dt(int(j[0]),int(j[1]),int(j[2]),
+                                            int(j[3]),int(j[4]),int(j[5])))
+                    displacements['x'].append(j[7])
+                    displacements['y'].append(j[8])
+                    displacements['z'].append(j[9])
+    
+                dum = np.loadtxt(os.path.join(tmp_path, checkfile, 'location.csv'),delimiter=',',skiprows=1)
+                for j in dum:
+                    locations['time'].append(dt(int(j[0]),int(j[1]),int(j[2]),
+                                        int(j[3]),int(j[4]),int(j[5])))
+                    locations['lat'].append(j[7])
+                    locations['lon'].append(j[8])    
+    
+                filenames = ['a1','a2','b1','b2','Sxx','Syy','Szz']
+                for j,file in enumerate(filenames):
+                    if j==0:            
+                        f = csv.DictReader(os.path.join(tmp_path, checkfile,file+'.csv'))
+                        spec['freq'] = [float(i) for i in f.fieldnames[8:]]
+                        dum = np.loadtxt(os.path.join(tmp_path, checkfile,file+'.csv'),delimiter=',',skiprows=1)
+                
+                        for j in dum: 
+                            spec['time'].append(dt(int(j[0]),int(j[1]),int(j[2]),
+                                                   int(j[3]),int(j[4]),int(j[5])))
+                            spec[file].append(np.array(dum[:,8:]))
+            
+                    else:
+                        dum = np.loadtxt(os.path.join(tmp_path, checkfile,file+'.csv'),delimiter=',',skiprows=1)
+                        for j,row in enumerate(dum):                            
+                            spec[file] = np.append(spec[file],row[8:])
+           
+                        spec[file] = np.array(dum[:,8:])                                        
+        
     else:
         dum = np.loadtxt('bulkparameters.csv',delimiter=',',skiprows=1)
         for j in dum:
@@ -120,7 +171,7 @@ for i in range(0, len(file_nums), chunk_size):
             
             else:
                 dum = np.loadtxt(file+'.csv',delimiter=',',skiprows=1)
-                spec[file] = np.array(dum[:,8:])
+                spec[file].append(dum[:,8:])
         
       
     #delete files from tmp directory
@@ -129,11 +180,46 @@ for i in range(0, len(file_nums), chunk_size):
             os.remove(i)
         elif i[-3:]=='CSV':
             os.remove(i)
+        elif os.path.isdir(i):
+            shutil.rmtree(i)
     
-    %clear        
-            
-#%% now output dictionaries to netCDF       
+    %clear  
+    
+#delete tmp directory if last file      
+print('Finished processing ' + SpotterID)
+os.chdir(datapath)
+shutil.rmtree(tmp_path)     
 
+#%% quality control 
+       
+#%% now output dictionaries to netCDF   
+ds_bulk = xr.Dataset()    
+for key, val in bulkparams.items():
+    x = xr.DataArray(val, coords=[list(range(0, len(val)))], dims=("obstime"), name=key)
+    ds_bulk = xr.merge([ds_bulk, x])
+
+ds_disp = xr.Dataset()    
+for key, val in displacements.items():
+    x = xr.DataArray(val, coords=[list(range(0, len(val)))], dims=("obstime"), name=key)
+    ds_disp = xr.merge([ds_disp, x])
+
+ds_locs = xr.Dataset()    
+for key, val in locations.items():
+    x = xr.DataArray(val, coords=[list(range(0, len(val)))], dims=("obstime"), name=key)
+    ds_locs = xr.merge([ds_locs, x])
+
+ds_spec = xr.Dataset()
+for key, val in spec.items():
+    if key == 'time':       
+        x = xr.DataArray(val, coords=[list(range(0, len(val)))], dims=("obstime"), name=key)    
+    elif key == 'freq':
+        x = xr.DataArray(val, coords=[list(range(0, len(val)))], dims=("frequency"), name=key)
+    else:
+        time = spec['time']
+        freq = spec['freq']
+        x = xr.DataArray(val, coords=[time, freq], dims=("obstime", "frequency"), name=key)
+        
+    
 
                 
     
