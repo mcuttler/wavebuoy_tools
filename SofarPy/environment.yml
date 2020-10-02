@@ -10,7 +10,6 @@ dependencies:
   - netCDF4
   - matplotlib
   - pillow
-  - earthengine-api
   - gdal
   - pandas
   - geopandas
