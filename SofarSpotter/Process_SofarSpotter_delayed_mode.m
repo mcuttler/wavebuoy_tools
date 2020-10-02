@@ -315,7 +315,7 @@ for i = 1:size(tdata,1)
     filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc']; 
   
     [m,c] = size(bulkparams.time(idx_bulk)); 
-    %create variable entries
+    %create Dimensions entries
     nccreate(filenameNC,'time','Dimensions',{'time',m});
     nccreate(filenameNC,'Hs','Dimensions',{'Hs',m});
     nccreate(filenameNC,'Tm','Dimensions',{'Tm',m});
