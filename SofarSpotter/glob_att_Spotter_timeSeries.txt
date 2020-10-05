@@ -22,7 +22,7 @@ citation                 = The citation to be used in publications using the dat
 geospatial_lat_units     = degrees_north
 geospatial_lon_units     = degrees_east
 subsetVariables          = station_id, longitude, latitude
-instrument				 = Sofar Spotter 
+instrument				 = Sofar Spotter
 
 
 [TIME]

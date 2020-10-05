@@ -17,15 +17,22 @@
 % Code history
 % 
 %     Author          | Date             | Script Version     | Update
-%     --------------------------------------------------------
-%     M. Cuttler     | 27 Aug 2020 | 1.0                      | Initial creation
-%     M. Cuttler     | 01 Sep 2020 | 1.1                      | Modified how files are appended to bulkparameters.csv 
+%     -------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 27 Aug 2020 | 1.0                     | Initial creation
+% -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 01 Sep 2020 | 1.1                     | Modified how files are appended to bulkparameters.csv 
 %                                                                           output to account for when python parser generates files in sub-directories. 
-%     M. Cuttler     | 03 Sep 2020 | 1.2                      | Included displacements.csv into the workflow and output 
-%     M. Cuttler     | 08 Sep 2020 | 2.0                      | Modify code
-%                                                                         | such that all data is appended to Matlab structures and then sub-set
-%                                                                         | into monthly files for more efficient storage (may still run into
-%                                                                         | Matlab memory issues 
+% ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 03 Sep 2020 | 1.2                     | Included displacements.csv into the workflow and output 
+% ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 08 Sep 2020 | 2.0                     | Modify code
+%                                                                          such that all data is appended to Matlab structures and then sub-set
+%                                                                          into monthly files for more efficient storage (may still run into
+%                                                                          Matlab memory issues 
+% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 05 Oct 2020 | 2.1                     | Incorporate
+%                                                                          first QARTOD QA/QC tests - Time series bulk wave parameters
+%                                                                          max/min/acceptable range (test 19, required)
 %
 
 %% set initial paths for Spotter data to process and parser script
@@ -49,8 +56,8 @@ if ~exist(outpathMAT)
 end
 
 %spotter serial number and deployment info 
-SpotterID = 'SPOT0171'; 
-DeployLoc = 'Testing';
+spot_info.SpotterID = 'SPOT0171'; 
+spot_info.DeployLoc = 'Testing';
 
 
 %% get list of files within datapath to figure out how many chunks to make
@@ -224,34 +231,9 @@ for j = 1:size(fidx,2)
     clear dumdata data 
 end
 
-%% import combined data files and perform QA/QC   
+%% get GPS location that corresponds to each bulkparameters measurement 
 
-%quality checks on bulkparams - applies to spec outputs too
-%also find times in GPS file to save lat/lon for buoy position
-qfbulk = []; 
 for i = 1:size(bulkparams.time,1)
-    %basic quality control by checking that mean and peak wave period aren't greater than 25 s
-    if bulkparams.tm > 25 | bulkparams.tp > 25
-        qfbulk(i,1) = 1; 
-    else
-        qfbulk(i,1) = 0; 
-    end
-    
-    %check that wave height isn't more than 3 times larger than previous
-    %measurement
-    if i > 1
-        if bulkparams.hs > 2*bulkparams.hs(i-1)
-            qfbulk(i,2) = 1;
-        else
-            qfbulk(i,2) = 0; 
-        end
-    else
-        qfbulk(i,2) = 0; 
-    end
-    
-    %add flags together
-    qfbulk(i,3) = sum(qfbulk(i,1:2)); 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %add gps
     idx = find(abs(bulkparams.time(i)-locations.time)==min(abs(bulkparams.time(i)-locations.time))); 
     %check if empty
@@ -279,12 +261,40 @@ for i = 1:size(bulkparams.time,1)
        
 end
 
+%%  perform QA/QC   
+
+%add path to QARTOD QA/QC check codes
+addpath('.\qartod'); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%quality checks on bulkparams - QARTOD TEST 19
+check_bulkparams.time = bulkparams.time; 
+check_bulkparams.WVHGT = bulkparams.hs; 
+
+%should these be mean or peak parameters? 
+check_bulkparams.WVPD = bulkparams.tp; 
+check_bulkparams.WVDIR = bulkparams.dp; 
+check_bulkparams.WVSP = bulkparams.pkspr; 
+
+%    User defined test criteria
+check_bulkparams.MINWH = 0.05;
+check_bulkparams.MAXWH = 8;
+check_bulkparams.MINWP = 2; 
+check_bulkparams.MAXWP = 24;
+check_bulkparams.MINSV = 0.07; 
+check_bulkparams.MAXSV =65.0; 
+
+[qfbulk] = qartod_bulkparams_range(check_bulkparams); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %quality check for displacements 
 qfdisp = []; 
 for i = 1:size(displacements.x,1)
     qfdisp(i,1) = 0;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %quality check for GPS
 qflocs = []; 
 for i = 1:size(locations.time,1)
@@ -309,72 +319,17 @@ for i = 1:size(tdata,1)
     disp(['Saving ' datestr(tstart,'mmm yyyy')]); 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %output for BULK PARAMETERS 
+    
+    %output for BULK PARAMETERS     
     idx_bulk = []; 
     idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend);                 
     filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc']; 
-  
-    [m,c] = size(bulkparams.time(idx_bulk)); 
-    %create Dimensions entries
-    nccreate(filenameNC,'time','Dimensions',{'time',m});
-    nccreate(filenameNC,'Hs','Dimensions',{'Hs',m});
-    nccreate(filenameNC,'Tm','Dimensions',{'Tm',m});
-    nccreate(filenameNC,'Tp','Dimensions',{'Tp',m});
-    nccreate(filenameNC,'Dm','Dimensions',{'Dm',m});
-    nccreate(filenameNC,'Dp','Dimensions',{'Dp',m});
-    nccreate(filenameNC,'MeanSpr','Dimensions',{'MeanSpr',m});
-    nccreate(filenameNC,'PeakSpr','Dimensions',{'PeakSpr',m});
-    nccreate(filenameNC,'Latitude','Dimensions',{'Latitude',m});
-    nccreate(filenameNC,'Longitude','Dimensions',{'Longitude',m});
-    nccreate(filenameNC,'QualityFlag','Dimensions',{'QualityFlag',m}); 
     
-    %write data to variables 
-    ncwrite(filenameNC,'time',bulkparams.time(idx_bulk));  
-    ncwriteatt(filenameNC,'time','long_name','UTC');  
-    ncwriteatt(filenameNC,'time','units','days since Jan-1-0000');
+    spotter_to_IMOSnc(bulkparams, idx_bulk, filenameNC, spot_info); 
     
-    ncwrite(filenameNC,'Hs',bulkparams.hs(idx_bulk)); 
-    ncwriteatt(filenameNC,'Hs','long_name','significant wave height');  
-    ncwriteatt(filenameNC,'Hs','units','m');
-    
-    ncwrite(filenameNC,'Tm',bulkparams.tm(idx_bulk));  
-    ncwriteatt(filenameNC,'Tm','long_name','mean wave period');  
-    ncwriteatt(filenameNC,'Tm','units','s');
-    
-    ncwrite(filenameNC,'Tp',bulkparams.tp(idx_bulk)); 
-    ncwriteatt(filenameNC,'Tp','long_name','peak wave period');  
-    ncwriteatt(filenameNC,'Tp','units','s');
-    
-    ncwrite(filenameNC,'Dm',bulkparams.dm(idx_bulk)); 
-    ncwriteatt(filenameNC,'Dm','long_name','mean wave FROM direction');  
-    ncwriteatt(filenameNC,'Dm','units','deg');
-    
-    ncwrite(filenameNC,'Dp',bulkparams.dp(idx_bulk));  
-    ncwriteatt(filenameNC,'Dp','long_name','peak wave FROM direction');  
-    ncwriteatt(filenameNC,'Dp','units','deg');
-    
-    ncwrite(filenameNC,'MeanSpr',bulkparams.meanspr(idx_bulk)); 
-    ncwriteatt(filenameNC,'MeanSpr','long_name','mean spreading');  
-    ncwriteatt(filenameNC,'MeanSpr','units','deg');
-    
-    ncwrite(filenameNC,'PeakSpr',bulkparams.pkspr(idx_bulk)); 
-    ncwriteatt(filenameNC,'PeakSpr','long_name','peak spreading');  
-    ncwriteatt(filenameNC,'PeakSpr','units','deg');
-        
-    ncwrite(filenameNC,'Latitude',bulkparams.lat(idx_bulk)); 
-    ncwriteatt(filenameNC,'Latitude','long_name','latitude');  
-    ncwriteatt(filenameNC,'Latitude','units','deg');
-        
-    ncwrite(filenameNC,'Longitude',bulkparams.lon(idx_bulk)); 
-    ncwriteatt(filenameNC,'Longitude','long_name','longitude');  
-    ncwriteatt(filenameNC,'Longitude','units','deg');
-    
-    ncwrite(filenameNC,'QualityFlag',qfbulk(idx_bulk,3)); 
-    ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: 0 = good data, 1 = problem with wave height or period, 2 = problem with wave height and period');  
-    ncwriteatt(filenameNC,'QualityFlag','units','-');
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %output netCDF for DISPLACEMENTS
     idx_disp = []; 
     idx_disp = find(displacements.time>=tstart&displacements.time<tend);                 
@@ -408,8 +363,8 @@ for i = 1:size(tdata,1)
     ncwriteatt(filenameNC,'QualityFlag','units','-');
     
         
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %output netCDF for LOCATIONS
     idx_locs = []; 
     idx_locs = find(locations.time>=tstart&locations.time<tend);                 
@@ -437,8 +392,8 @@ for i = 1:size(tdata,1)
     ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: COMPLETE WHEN QUALITY FLAGS ARE FINISHED');  
     ncwriteatt(filenameNC,'QualityFlag','units','-');
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %output netCDF for SPECTRAL DATA
     idx_spec = []; 
     idx_spec = find(spec.time>=tstart&spec.time<tend);                 
