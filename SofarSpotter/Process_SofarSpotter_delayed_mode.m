@@ -283,7 +283,7 @@ check_bulkparams.MAXWH = 8;
 check_bulkparams.MINWP = 2; 
 check_bulkparams.MAXWP = 24;
 check_bulkparams.MINSV = 0.07; 
-check_bulkparams.MAXSV =65.0; 
+check_bulkparams.MAXSV = 65.0; 
 
 [qfbulk] = qartod_bulkparams_range(check_bulkparams); 
 

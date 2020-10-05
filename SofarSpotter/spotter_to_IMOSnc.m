@@ -18,11 +18,13 @@ fgetl(fid);
 for i = 1:24
     txt = fgetl(fid); 
     idx = find(txt == '='); 
-    ncwriteatt(filenameNC,'/',txt(1:idx-1),txt(idx+1:end)); 
+    attname = txt(find(txt(1:idx-1)~= ' '))
+    attvalue = txt(find(txt(idx+1:end)~= ' '))
+    ncwriteatt(ncid,'/',txt(1:idx-1),txt(idx+1:end)); 
     
 
 fileattrib(filenameNC,'+w');
-ncwriteatt(filenameNC,'/','creation_date',datestr(now));
+ncwriteatt(n,'/','creation_date',datestr(now));
 
 
 %variable attributes

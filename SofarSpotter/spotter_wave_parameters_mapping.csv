@@ -1,0 +1,10 @@
+ORIGINAL_VARNAME,VARNAME,STANDARD_NAME,LONG_NAME,UNITS,COMMENT,ANCILLARY_VARIABLES,VALID_MIN,VALID_MAX,REFERENCE_DATUM,POSITIVE
+hs,WSSH,,sea surface wave spectral significant height,m,Analysed by spectral method,,0,100,,
+tp,WPPE,sea_surface_wave_period_at_variance_spectral_density_maximum,,s,Analysed by spectral method. Period of the peak of the energy spectrum,,0,50,,
+tm,WPFM,sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment,,s,Analysed by spectral method. The first wave period is calculated as m0/m1 where m0 and m1 are the zeroth order and first order moments of the wave spectrum,,0,50,,
+dp,WPDI,sea_surface_wave_from_direction_at_variance_spectral_density_maximum,,degree,Analysed by spectral method,,0,360,magnetic north,clockwise
+dm,WPDM,sea_surface_mean_wave_from_direction,,degree,Analysed by spectral method,,0,360,magnetic north,clockwise
+pkspr,WSPP,sea_surface_peak_wave_spreading,,degree,Analysed by spectral method,,,,,
+meanspr,WSPM,sea_surface_mean_wave_spreading,,degree,Analysed by spectral method,,,,,
+,,,,,,,,,,
+Temp,TEMP,sea_water_temperature,sea water temperature at sea surface,degrees celsius,,,0,40,buoy,
