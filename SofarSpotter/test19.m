@@ -1,5 +1,27 @@
+%%  Apply QARTOD QA/QC 
+% This script processes Sofar Spotter data stored on the SD card (i.e. processes data after retrieval of buoy). 
+% This requires the Sofar parser script (Python), accessible here: https://www.sofarocean.com/posts/parsing-script
+% 
+% The parser script will process all available data files (_FLT, _LOC, _SYS) available in a folder, however, due to computer memory issues, 
+% this code chunks the data files into temporary folders and then concatenates results at the end. 
+% 
+% Final output files include: 
+%     -bulkparameters.csv : CSV file containing wave parameters (Hs, Tp, Dp, etc.)
+%     -displacements.csv: CSV file containin the raw displacements
+%
+% Example usage
+%     MC to fill when finished
+%     
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
+% Code history
+% 
+%     Author          | Date             | Script Version     | Update
+%     --------------------------------------------------------
+%     M. Hatcher   | 02 Oct 2020 | 1.0                      | Initial creation
+%
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [out1] = test19(in1,in2,in3,in4,in5,in6,in7,in8,in9,in10,in11)
 %test19: Function to do Qartod test 19 on a time series 
 %   inputs:
