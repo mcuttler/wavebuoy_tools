@@ -39,7 +39,7 @@
 clear; clc
 %path to Spotter data to process - contains raw dump of SD card (_SYS,_FLT,
 %_LOC files)
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\Data_for_testing'; 
+datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Data_for_testing'; 
 %path of Sofar parser script
 parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.10.0';
 
@@ -59,6 +59,8 @@ end
 spot_info.SpotterID = 'SPOT0171'; 
 spot_info.DeployLoc = 'Testing';
 
+%location of wavebuoy_tools repo
+homepath = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter'; 
 
 %% get list of files within datapath to figure out how many chunks to make
 
@@ -264,7 +266,7 @@ end
 %%  perform QA/QC   
 
 %add path to QARTOD QA/QC check codes
-addpath('.\qartod'); 
+addpath([homepath '\qartod']); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -285,7 +287,7 @@ check_bulkparams.MAXWP = 24;
 check_bulkparams.MINSV = 0.07; 
 check_bulkparams.MAXSV = 65.0; 
 
-[qfbulk] = qartod_bulkparams_range(check_bulkparams); 
+[bulkparams.qf] = qartod_bulkparams_range(check_bulkparams); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %quality check for displacements 
@@ -302,8 +304,8 @@ for i = 1:size(locations.time,1)
 end
 
  %% now build monthly netCDF files 
-disp(['Saving data for ' SpotterID ' as netCDF']);         
-
+disp(['Saving data for ' spot_info.SpotterID ' as netCDF']);         
+cd(homepath); 
 %add IMOS toolbox
 % addpath('D:\CUTTLER_GitHub\imos-toolbox\NetCDF'); 
 
@@ -323,9 +325,12 @@ for i = 1:size(tdata,1)
     %output for BULK PARAMETERS     
     idx_bulk = []; 
     idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend);                 
-    filenameNC = [outpathNC '\' SpotterID '_' DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc']; 
+    filenameNC = [outpathNC '\' spot_info.SpotterID '_' spot_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc']; 
     
-    spotter_to_IMOSnc(bulkparams, idx_bulk, filenameNC, spot_info); 
+    globfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter\glob_att_Spotter_timeSeries.txt';     
+    varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter\spotter_wave_parameters_mapping.csv';
+    
+    spotter_to_IMOSnc(bulkparams, idx_bulk, filenameNC, globfile, varsfile); 
     
       
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -450,7 +455,7 @@ for i = 1:size(tdata,1)
     ncwriteatt(filenameNC,'freq','long_name','frequency');  
     ncwriteatt(filenameNC,'freq','units','Hz'); 
 
-    ncwrite(filenameNC,'QualityFlag',qfbulk(idx_spec,3));  
+    ncwrite(filenameNC,'QualityFlag',qf(idx_spec,3));  
     ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: 0 = good data, 1 = problem with wave height or period, 2 = problem with wave height and period');  
     ncwriteatt(filenameNC,'QualityFlag','units','-');
     
