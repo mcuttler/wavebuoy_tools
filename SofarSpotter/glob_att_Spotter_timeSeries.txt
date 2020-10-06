@@ -1,5 +1,4 @@
-[global_attributes]
-Conventions              = CF-1.6,IMOS-1.4
+Conventions              = CF-1.6, IMOS-1.4
 project                  = IMOS NPT - Wave Buoys
 institution              = University of Western Australia (UWA)
 publisher_name           = Cuttler, Michael
@@ -22,37 +21,5 @@ citation                 = The citation to be used in publications using the dat
 geospatial_lat_units     = degrees_north
 geospatial_lon_units     = degrees_east
 subsetVariables          = station_id, longitude, latitude
-instrument				 = Sofar Spotter
-
-
-[TIME]
-standard_name = time
-long_name = time
-units = days since 1950-01-01 00:00:00 UTC
-calendar = gregorian
-axis = T
-
-[STATION_ID]
-long_name = station name
-cf_role = timeseries_id
-ioos_category = Identifier
-_Encoding = ISO-8859-1
-
-[LATITUDE]
-standard_name = latitude
-long_name = latitude of each location
-units = degrees_north
-axis = Y
-valid_max = 90.
-valid_min = -90.
-reference_datum = WGS84 coordinate reference system
-
-[LONGITUDE]
-standard_name = longitude
-long_name = longitude of each location
-units = degrees_east
-axis = X
-valid_min = -180.0
-valid_max = 180.0
-reference_datum = WGS84 coordinate reference system
-
+instrument_maker         = Sofar Spotter
+instrument_model         = Spotter v1
