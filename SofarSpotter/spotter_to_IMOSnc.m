@@ -1,83 +1,99 @@
 %% IMOS-compliant netCDF
-
-
+% 
+% filenameNC = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Output_testing\test2.nc'; 
+% globfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter\glob_att_Spotter_timeSeries.txt'; 
+% 
+% varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter\spotter_wave_parameters_mapping.csv';
+% spot_info.SpotterID = 'SPOT0171'; 
+% spot_info.DeployLoc = 'Testing';
+% idx_bulk = [1:50]; 
 %%
 
-function [] = spotter_to_IMOSnc(bulkparams, idx_bulk, filenameNC, spot_info); 
+function [] = spotter_to_IMOSnc(bulkparams, idx_bulk, filenameNC, globfile, varsfile); 
 
-  
-%create output netCDF4 file 
-ncid = netcdf.create(filenameNC, 'netcdf4');   
 
-%global attributes
-globfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter\glob_att_Spotter_timeSeries.txt'; 
+%create output netCDF4 file     
+ncid = netcdf.create(filenameNC,'NETCDF4'); 
+netcdf.close(ncid); 
+
+% global attributes
 
 fid = fopen(globfile); 
-%skip first line
-fgetl(fid); 
-for i = 1:24
-    txt = fgetl(fid); 
-    idx = find(txt == '='); 
-    attname = txt(find(txt(1:idx-1)~= ' '))
-    attvalue = txt(find(txt(idx+1:end)~= ' '))
-    ncwriteatt(ncid,'/',txt(1:idx-1),txt(idx+1:end)); 
+globatts = textscan(fid, '%s%s','delimiter','='); 
+fclose(fid);
+
+ncid = netcdf.open(filenameNC,'WRITE'); 
+varid = netcdf.getConstant('GLOBAL');
+
+for ii = 1:size(globatts{1,1},1);
+        
+    attname = globatts{1,1}{ii};
+    %get rid of trailing spaces
+    idx = find(attname~= ' '); 
+    attname = attname(idx); 
+    attvalue = globatts{1,2}{ii}; 
     
+    netcdf.putAtt(ncid,varid, attname, attvalue);          
+end
 
-fileattrib(filenameNC,'+w');
-ncwriteatt(n,'/','creation_date',datestr(now));
+
+% define dimensions 
+
+dimname = 'TIME';
+dimlength = size(bulkparams.time(idx_bulk),1);
+
+dimid_TIME = netcdf.defDim(ncid, dimname, dimlength); 
+
+% write variables 
+
+%parameter mapping file organised as: 
+% [original name, varname, standard name, long name, units, comments, ancillary invo, valid min, valid max, reference, positive]
+
+fid = fopen(varsfile); 
+varinfo = textscan(fid, '%s%s%s%s%s%s%s%f%f%s%s','delimiter',',','headerlines',1); 
+fclose(fid);      
+
+attnames = {'standard_name', 'long_name', 'units', 'comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference', 'positive'}; 
+attinfo = varinfo(3:end); 
+
+[m,~] = size(varinfo{1,1}); 
+for ii = 1:m    
+    %create and define variable and attributes      
+    netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'double', dimid_TIME); 
+    
+    varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});   
+    
+    %add attributes
+    for j = 1:length(attinfo); 
+        if j==6|j==7
+            if ~isnan(attinfo{1,j}(ii))
+                netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii));
+            end
+        else
+            if ~isempty(attinfo{1,j}{ii})
+                netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
+            end
+        end
+    end
+
+    %put data to variable
+    if strcmp(varinfo{1,1}{ii,1},'temp')
+        %modify this for spotter v2
+        netcdf.putVar(ncid, varid, ones(size(bulkparams.time(idx_bulk))).*nan); 
+    else
+        netcdf.putVar(ncid, varid, bulkparams.(varinfo{1,1}{ii,1})(idx_bulk));
+    end
+
+end
+    
+netcdf.close(ncid); 
+
+% check that it all worked 
+
+ncdisp(filenameNC)
+end
 
 
-%variable attributes
-fileattrib(filenameNC,'+w');
-ncwriteatt(filenameNC, 'peaks','description','Output of PEAKS');
 
-  [m,c] = size(bulkparams.time(idx_bulk)); 
 
   
-  'time','Dimensions',{'time',m});    
-        
-        %write data to variables 
-        ncwrite(filenameNC,'time',bulkparams.time(idx_bulk));  
-        ncwriteatt(filenameNC,'time','long_name','UTC');  
-        ncwriteatt(filenameNC,'time','units','days since Jan-1-0000');        
-        
-        ncwrite(filenameNC,'Hs',bulkparams.hs(idx_bulk)); 
-        ncwriteatt(filenameNC,'Hs','long_name','significant wave height');  
-        ncwriteatt(filenameNC,'Hs','units','m');
-        
-        ncwrite(filenameNC,'Tm',bulkparams.tm(idx_bulk));  
-        ncwriteatt(filenameNC,'Tm','long_name','mean wave period');  
-        ncwriteatt(filenameNC,'Tm','units','s');
-        
-        ncwrite(filenameNC,'Tp',bulkparams.tp(idx_bulk)); 
-        ncwriteatt(filenameNC,'Tp','long_name','peak wave period');  
-        ncwriteatt(filenameNC,'Tp','units','s');
-        
-        ncwrite(filenameNC,'Dm',bulkparams.dm(idx_bulk)); 
-        ncwriteatt(filenameNC,'Dm','long_name','mean wave FROM direction');  
-        ncwriteatt(filenameNC,'Dm','units','deg');
-        
-        ncwrite(filenameNC,'Dp',bulkparams.dp(idx_bulk));  
-        ncwriteatt(filenameNC,'Dp','long_name','peak wave FROM direction');  
-        ncwriteatt(filenameNC,'Dp','units','deg');
-        
-        ncwrite(filenameNC,'MeanSpr',bulkparams.meanspr(idx_bulk)); 
-        ncwriteatt(filenameNC,'MeanSpr','long_name','mean spreading');  
-        ncwriteatt(filenameNC,'MeanSpr','units','deg');
-    
-    ncwrite(filenameNC,'PeakSpr',bulkparams.pkspr(idx_bulk)); 
-    ncwriteatt(filenameNC,'PeakSpr','long_name','peak spreading');  
-    ncwriteatt(filenameNC,'PeakSpr','units','deg');
-        
-    ncwrite(filenameNC,'Latitude',bulkparams.lat(idx_bulk)); 
-    ncwriteatt(filenameNC,'Latitude','long_name','latitude');  
-    ncwriteatt(filenameNC,'Latitude','units','deg');
-        
-    ncwrite(filenameNC,'Longitude',bulkparams.lon(idx_bulk)); 
-    ncwriteatt(filenameNC,'Longitude','long_name','longitude');  
-    ncwriteatt(filenameNC,'Longitude','units','deg');
-    
-    ncwrite(filenameNC,'QualityFlag',qfbulk(idx_bulk,3)); 
-    ncwriteatt(filenameNC,'QualityFlag','long_name','quality flag: 0 = good data, 1 = problem with wave height or period, 2 = problem with wave height and period');  
-    ncwriteatt(filenameNC,'QualityFlag','units','-');
-    
