@@ -1,16 +1,5 @@
 %%  Process Sofar Spotter Data (delayed mode)
-% This script processes Sofar Spotter data stored on the SD card (i.e. processes data after retrieval of buoy). 
-% This requires the Sofar parser script (Python), accessible here: https://www.sofarocean.com/posts/parsing-script
-% 
-% The parser script will process all available data files (_FLT, _LOC, _SYS) available in a folder, however, due to computer memory issues, 
-% this code chunks the data files into temporary folders and then concatenates results at the end. 
-% 
-% Final output files include: 
-%     -bulkparameters.csv : CSV file containing wave parameters (Hs, Tp, Dp, etc.)
-%     -displacements.csv: CSV file containin the raw displacements
-%
-% Example usage
-%     MC to fill when finished
+
 %     
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
@@ -33,7 +22,11 @@
 %     M. Cuttler     | 05 Oct 2020 | 2.1                     | Incorporate
 %                                                                          first QARTOD QA/QC tests - Time series bulk wave parameters
 %                                                                          max/min/acceptable range (test 19, required)
-%
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 09 Oct 2020 | 3.0                     | re-organise code structure. 
+%                                                                        | THIS CODE IS NOW THE 'RUN' CODE, USE THIS TO SET BASIC PARAMETERS FOR FILEPATHS, 
+%                                                                        | QC LIMITS, ETC
+%                                                                        | SEE FUNCTIONS WITHIN THIS CODE FOR ACTUALLY DATA PROCESSING
 % 
 
 %% set initial paths for Spotter data to process and parser script
@@ -67,9 +60,11 @@ homepath = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter';
 
 %% process raw Spotter data
 
-%set number of unique time poins to use for efficient processing
+%set number of unique time poins to use for efficient processing (depends
+%on computer specifications) 
 chunk = 10; 
 
+%process delayed mode (from buoy memory card)
 [bulkparams, displacements, locations] = process_SofarSpotter_delayed_mode(datapath, parserpath, chunk);
 
 %%  perform QA/QC   
@@ -80,25 +75,62 @@ disp('Performing QA/QC checks...');
 addpath([homepath '\qartod']); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  QARTOD TEST 15 - LT time series mean and standard deviation
 
-%quality checks on bulkparams - QARTOD TEST 19
-check_bulkparams.time = bulkparams.time; 
-check_bulkparams.WVHGT = bulkparams.hs; 
-
-%should these be mean or peak parameters? 
-check_bulkparams.WVPD = bulkparams.tp; 
-check_bulkparams.WVDIR = bulkparams.dp; 
-check_bulkparams.WVSP = bulkparams.pkspr; 
+check.time = bulkparams.time; 
+check.WVHGT = bulkparams.hs; 
+check.WVPD = bulkparams.tm; 
+check.WVDIR = bulkparams.dm; 
+check.WVSP = bulkparams.meanspr; 
 
 %    User defined test criteria
-check_bulkparams.MINWH = 0.05;
-check_bulkparams.MAXWH = 8;
-check_bulkparams.MINWP = 2; 
-check_bulkparams.MAXWP = 24;
-check_bulkparams.MINSV = 0.07; 
-check_bulkparams.MAXSV = 65.0; 
+check.STD = 2; 
 
-[bulkparams.qf] = qartod_bulkparams_range(check_bulkparams); 
+[bulkparams.qf15] = qartod_15_mean_std(check); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% QARTOD TEST 16 - LT time series flat line 
+
+%    User defined test criteria
+check.WHTOL = 0.05; 
+check.WPTOL = 0.5;
+check.WDTOL = 0.5; 
+check.WSPTOL = 0.5; 
+check.rep_fail = 24; 
+check.rep_suspect = 6; 
+
+%outputs a matrix that has rows = time, colums = wave height, wave period, wave direction, wave spreading
+[bulkparams.qf16] = qartod_16_flat_line(check); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% QARTOD TEST 17 - LT time series operational frequency range
+
+% NOT USED BECAUSE TESTING BULK PARAMETERS - 
+% DO NOT HAVE OPERATIONAL FREQUENCY RANGE INFORMATION
+
+% [bulkparams.qf17] = qartod_17_operational_frequency(check);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  QARTOD TEST 18 - LT Time series Low-Frequency Energy 
+
+% NOT USED BECAUSE TESTING BULK PARAMETERS - 
+% DO NOT HAVE OPERATIONAL FREQUENCY RANGE INFORMATION
+
+% [bulkparams.qf18] = qartod_18_low_frequency(check); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% QARTOD TEST 19 - LT time series bulk wave parameters max/min/acceptable
+% range
+
+%    User defined test criteria
+check.MINWH = 0.05;
+check.MAXWH = 8;
+check.MINWP = 2; 
+check.MAXWP = 24;
+check.MINSV = 0.07; 
+check.MAXSV = 65.0; 
+
+[bulkparams.qf19] = qartod_19_bulkparams_range(check); 
 
 
  %% now build monthly netCDF files 
@@ -108,15 +140,9 @@ cd(homepath);
 %bulkparams
 %text files for IMOS-compliant netCDF generation
 globfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter\glob_att_Spotter_timeSeries.txt';     
-varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter\spotter_wave_parameters_mapping.csv';
+varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\SofarSpotter\spotter_bulk_wave_parameters_mapping.csv';
 
 spotter_bulk_to_IMOSnc(bulkparams, outpathNC, spot_info, globfile, varsfile); 
-
-%displacements
-
-%gps data 
-
-
 
 
 %% plot quick figure

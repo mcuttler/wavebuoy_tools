@@ -1,12 +1,31 @@
 %% Process SofarSpotter delayed mode
 
-%MC to fill 
+% This script processes Sofar Spotter data stored on the SD card (i.e. processes data after retrieval of buoy). 
+% This requires the Sofar parser script (Python), accessible here: https://www.sofarocean.com/posts/parsing-script
+% 
+% The parser script will process all available data files (_FLT, _LOC, _SYS) available in a folder, however, due to computer memory issues, 
+% this code chunks the data files into temporary folders and then concatenates results at the end. 
+% 
+% Inputs: 
+%           datapath: string
+%               -location of data stored on spotter memory card (_FLT,
+%               _LOC, _SYS files)
+%           parserpath: string
+%               -location of sofar parser script
+%           chunk: double
+%               -number of individual time points to process at once (this
+%               is user-defined in the
+%               'run_process_SofarSpotter_delayed_mode.m' code
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
+% Code history
+% 
+%     Author          | Date             | Script Version     | Update
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 09 Oct 2020  | 1.0                    | initial code
+%     creation 
 
-
-
-
-
-
+% 
 
 %%
 
@@ -177,9 +196,11 @@ for j = 1:size(fidx,2)
     clear dumdata data 
 end
 
+%sample locations output data to get GPS locations for each bulkparameter
+%output 
 [bulkparams] = add_gps_to_bulkparams(bulkparams);
 
-end
+
 
 
 %% sub function for adding GPS locations to each bulk parameter observation 
@@ -212,6 +233,7 @@ for i = 1:size(bulkparams.time,1)
         bulkparams.lon(i,1) = nan; 
     end
        
+end
 end
 end
 

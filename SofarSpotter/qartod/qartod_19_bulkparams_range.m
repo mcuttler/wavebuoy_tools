@@ -50,7 +50,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [QCFlag] = qartod_bulkparams_range(in)
+function [QCFlag] = qartod_19_bulkparams_range(in)
 
 % intialize QC flag vector
 
