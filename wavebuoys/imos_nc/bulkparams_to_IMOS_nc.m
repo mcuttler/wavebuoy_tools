@@ -15,8 +15,19 @@
 
 %%
 
-function [] = spotter_bulk_to_IMOSnc(bulkparams, outpathNC, spot_info, globfile, varsfile); 
+function [] = bulkparams_to_IMOS_nc(bulkparams, outpathNC, buoy_info, globfile, varsfile); 
 
+
+if strcmp(buoy_info.type,'sofar')==1
+    outpathNC = [outpathNC '\SofarSpotter\ProcessedData_DelayedMode\nc'];     
+elseif strcmp(buoy_info.type,'datawell')==1
+     outpathNC = [outpathNC '\Datawell\ProcessedData_DelayedMode\nc'];         
+end
+
+if ~exist(outpathNC)
+    mkdir(outpathNC)
+end
+        
 %determine min and max months
 t = datevec(bulkparams.time); 
 tdata = unique(t(:,1:2),'rows'); 
@@ -26,16 +37,15 @@ for i = 1:size(tdata,1)
     tstart = datenum(tdata(i,1), tdata(i,2),1); 
     tend = datenum(tdata(i,1), tdata(i,2)+1, 1); 
     
-    disp(['Saving ' datestr(tstart,'mmm yyyy')]); 
+    disp(['Saving bulkparams ' datestr(tstart,'mmm yyyy')]); 
     
     %output for BULK PARAMETERS     
     idx_bulk = []; 
-    idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend);                 
-    filenameNC = [outpathNC '\' spot_info.SpotterID '_' spot_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc'];     
+    idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend); 
     
+    filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc'];             
     
-    
-    
+            
     %create output netCDF4 file     
     ncid = netcdf.create(filenameNC,'NETCDF4'); 
     netcdf.close(ncid); 
@@ -57,12 +67,20 @@ for i = 1:size(tdata,1)
         attname = attname(idx); 
         attvalue = globatts{1,2}{ii}; 
         
-        netcdf.putAtt(ncid,varid, attname, attvalue);  
+        netcdf.putAtt(ncid,varid, attname, attvalue);          
         
         if ii == size(globatts{1,1},1);
             netcdf.putAtt(ncid,varid, 'deployment_depth', '-30 m'); 
-            netcdf.putAtt(ncid,varid, 'deployment_latitude', num2str(nanmean(bulkparams.lat))); 
-            netcdf.putAtt(ncid,varid, 'deployment_longitude', num2str(nanmean(bulkparams.lon))); 
+            netcdf.putAtt(ncid,varid, 'deployment_latitude', buoy_info.DeployLat); 
+            netcdf.putAtt(ncid,varid, 'deployment_longitude', buoy_info.DeployLon); 
+            
+            if strcmp(buoy_info.name, 'sofar')
+                netcdf.putAtt(ncid,varid, 'instrument_maker', 'Sofar Spotter'); 
+            elseif strcmp(buoy_info.name, 'datawell')
+                netcdf.putAtt(ncid,varid, 'instrument_maker', 'Datawell');  
+            end
+            netcdf.putAtt(ncid,varid, 'deployment_longitude', buoy_info.version);
+            
         end
         
     end
@@ -112,6 +130,9 @@ for i = 1:size(tdata,1)
         if strcmp(varinfo{1,1}{ii,1},'temp')
             %modify this for spotter v2
             netcdf.putVar(ncid, varid, ones(size(bulkparams.time(idx_bulk))).*nan); 
+        elseif strcmp(varinfo{1,1}{ii,1},'time')
+            imos_time = bulkparams.time(idx_bulk) - datenum(1950,1,1,0,0,0); 
+            netcdf.putVar(ncid, varid, imos_time); 
         else
             netcdf.putVar(ncid, varid, bulkparams.(varinfo{1,1}{ii,1})(idx_bulk));
         end

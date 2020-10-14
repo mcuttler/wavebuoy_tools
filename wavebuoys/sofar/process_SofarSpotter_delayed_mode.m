@@ -29,7 +29,7 @@
 
 %%
 
-function [bulkparams, displacements, locations] = process_SofarSpotter_delayed_mode(datapath, parserpath, chunk); 
+function [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk); 
 
 dum = dir(datapath); 
 %remove initial entries as filler
@@ -52,7 +52,8 @@ bulkparams = struct('time',[], 'hs',[],'tm',[]','tp',[],'dm',[],'dp',[],'meanspr
 locations = struct('time',[],'lat',[],'lon',[]); 
 displacements = struct('time',[], 'x',[],'y',[],'z',[]); 
 spec = struct('time',[],'a1',[],'b1',[],'a2',[],'b2',[],'Sxx',[],'Syy',[],'Szz',[]); 
-
+sst = struct('time',[],'sst',[]); 
+%%
 for j = 1:size(fidx,2)
     if j==size(fidx,2)
         dlist = flist(fidx(j):end)'; 
@@ -73,7 +74,7 @@ for j = 1:size(fidx,2)
     %now move these files into temporary folder
     if j == 1
         mkdir([datapath '\tmp']); 
-        copyfile([parserpath '\parser_v1.10.0.py'], [datapath '\tmp\parser_v1.10.0.py'])        
+        copyfile([parserpath '\' parser], [datapath '\tmp\' parser])        
     end
     
     for jj = 1:size(idx,1)
@@ -90,7 +91,7 @@ for j = 1:size(fidx,2)
     %apparently Matlab will add a folder the path that causes errors when
     %running external executables from Matlab. To fix this, remove the
     %folder that it adds     
-    system('set path=%path:C:\Program Files\MATLAB\R2018b\bin\win64;=% & python parser_v1.10.0.py');   
+    system(['set path=%path:C:\Program Files\MATLAB\R2018b\bin\win64;=% & python ' parser]);   
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %append data from parser to single output file 
@@ -104,9 +105,15 @@ for j = 1:size(fidx,2)
         dirFlags = [subdir.isdir]; 
         for k = 1:size(dirFlags,2); 
             if dirFlags(k)>0
-                filenames = {'bulkparameters','location','displacement','a1','a2','b1','b2','Sxx','Syy','Szz'}; 
+                %check is sst exists
+                if exist([datapath '\tmp\sst.csv']); 
+                    filenames = {'bulkparameters','location','displacement','sst', 'a1','a2','b1','b2','Sxx','Syy','Szz'};                    
+                else
+                    filenames = {'bulkparameters','location','displacement', 'a1','a2','b1','b2','Sxx','Syy','Szz'};                     
+                end
+                
                 for kk = 1:length(filenames)
-                    if kk<4
+                    if strcmp(filenames{kk},'bulkparameters') | strcmp(filenames{kk},'location') | strcmp(filenames{kk},'displacement') | strcmp(filenames{kk},'sst')
                         dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv']); 
                         data = dumdata.data;             
                         if kk == 1
@@ -131,7 +138,7 @@ for j = 1:size(fidx,2)
                     else
                         dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'],',',1);
                         data = dumdata.data; 
-                        if kk==4                    
+                        if strpcmp(filenames{kk},'a1');                 
                             spec.freq = str2double(dumdata.textdata(9:end)); 
                             spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
                         end
@@ -143,13 +150,18 @@ for j = 1:size(fidx,2)
                 rmdir([datapath '\tmp\' subdir(k).name],'s');
             end
         end
-    else
-        filenames = {'bulkparameters','location','displacement','a1','a2','b1','b2','Sxx','Syy','Szz'};
+    else        
+        if exist([datapath '\tmp\sst.csv']);
+            filenames = {'bulkparameters','location','displacement','sst', 'a1','a2','b1','b2','Sxx','Syy','Szz'}; 
+        else
+            filenames = {'bulkparameters','location','displacement', 'a1','a2','b1','b2','Sxx','Syy','Szz'};
+        end
+        
         for kk = 1:length(filenames)
-            if kk<4
+            if strcmp(filenames{kk},'bulkparameters') | strcmp(filenames{kk},'location') | strcmp(filenames{kk},'displacement') | strcmp(filenames{kk},'sst')
                 dumdata = importdata([filenames{kk} '.csv']); 
                 data = dumdata.data;             
-                if kk == 1
+                if strcmp(filenames{kk},'bulkparameters'); 
                     bulkparams.time = [bulkparams.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
                     bulkparams.hs = [bulkparams.hs; data(:,8)];
                     bulkparams.tm = [bulkparams.tm; data(:,9)];
@@ -158,25 +170,29 @@ for j = 1:size(fidx,2)
                     bulkparams.dp = [bulkparams.dp; data(:,12)]; 
                     bulkparams.meanspr = [bulkparams.meanspr; data(:,13)];
                     bulkparams.pkspr = [bulkparams.pkspr; data(:,14)]; 
-                elseif kk == 2
+                elseif strcmp(filenames{kk},'location'); 
                     locations.time = [locations.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
                     locations.lat = [locations.lat; data(:,8)]; 
                     locations.lon = [locations.lon; data(:,9)];
-                elseif kk == 3
+                elseif strcmp(filenames{kk},'displacement'); 
                     displacements.time = [displacements.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
                     displacements.x = [displacements.x; data(:,8)];
                     displacements.y = [displacements.y; data(:,9)];
                     displacements.z = [displacements.z; data(:,10)]; 
+                elseif strcmp(filenames{kk},'sst'); 
+                    sst.time = [sst.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                    sst.sst = [sst.sst; data(:,8)];
                 end
             else
                 dumdata = importdata([filenames{kk} '.csv'],',',1);
                 data = dumdata.data; 
-                if kk==4                    
+                if strcmp(filenames{kk},'a1')                   
                     spec.freq = str2double(dumdata.textdata(9:end)); 
                     spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
                 end
                
-                eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; data(:,9:end)];']); 
+                eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; dumdata.data(:,9:end)];']);                            
+                
             end
         end                                                                                                                                                  
         
@@ -200,7 +216,15 @@ end
 %output 
 [bulkparams] = add_gps_to_bulkparams(bulkparams);
 
-
+%spec frequency will be longer than a1, etc, so just fill with nan 
+if length(spec.a1)~=length(spec.freq)
+    fields = fieldnames(spec); 
+    for j = 1:length(fields); 
+        if ~strcmp(fields{j},'time')
+            spec.(fields{j})(:,end:length(spec.freq)) = nan;
+        end
+    end
+end
 
 
 %% sub function for adding GPS locations to each bulk parameter observation 
@@ -235,5 +259,7 @@ for i = 1:size(bulkparams.time,1)
        
 end
 end
+
+
 end
 

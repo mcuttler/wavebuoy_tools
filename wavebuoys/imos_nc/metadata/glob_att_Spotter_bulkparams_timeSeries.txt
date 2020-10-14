@@ -21,5 +21,4 @@ citation                 = The citation to be used in publications using the dat
 geospatial_lat_units     = degrees_north
 geospatial_lon_units     = degrees_east
 subsetVariables          = station_id, longitude, latitude
-instrument_maker         = Sofar Spotter
-instrument_model         = Spotter v1
+
