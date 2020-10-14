@@ -137,10 +137,18 @@ elseif strcmp(buoy_info.type,'triaxys')
 end
 
 %% save as .mat file
-outpathMAT = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\';
-filenameMAT = [outpathMAT '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(bulkparams.time(1),'yyyymm') '_' datestr(bulkparams.time(end),'yyyymm')  '.mat'];         
 
-save(filenameMAT,'bulkparams','displacements','locations','spec','sst'); 
+outpathMAT = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data';
+filenameMAT = [outpathMAT '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(bulkparams.time(1),'yyyymm') '_' datestr(bulkparams.time(end),'yyyymm')  '.mat'];         
+vars = who; 
+idx=[];
+for jj = 1:length(vars); 
+    if  isstruct(eval(vars{jj}))
+        idx = [idx;jj];
+    end
+end        
+        
+save(filenameMAT,vars{idx}); 
 
     
 
