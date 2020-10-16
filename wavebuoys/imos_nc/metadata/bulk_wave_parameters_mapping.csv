@@ -1,15 +1,15 @@
-ORIGINAL_VARNAME,VARNAME,STANDARD_NAME,LONG_NAME,UNITS,COMMENT,ANCILLARY_VARIABLES,VALID_MIN,VALID_MAX,REFERENCE_DATUM,POSITIVE
-time,TIME,time,time,days since 1950-01-01 00:00:00 UTC,,,0,90000,,
-hs,WSSH,sea_surface_wave_spectral_significant_height,sea surface wave spectral significant height,m,Analysed by spectral method,,0,100,,
-tp,WPPE,sea_surface_wave_period_at_variance_spectral_density_maximum,,s,Analysed by spectral method. Period of the peak of the energy spectrum,,0,50,,
-tm,WPFM,sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment,,s,Analysed by spectral method. The first wave period is calculated as m0/m1 where m0 and m1 are the zeroth order and first order moments of the wave spectrum,,0,50,,
-dp,WPDI,sea_surface_wave_from_direction_at_variance_spectral_density_maximum,,degree,Analysed by spectral method,,0,360,magnetic north,clockwise
-dm,SSWMD,,sea surface wave mean direction,degree,Analysed by spectral method,,0,360,magnetic north,clockwise
-pkspr,WPDS,sea_surface_wave_directional_spread_at_variance_spectral_density_maximum,sea surface wave peak directional spread,degree,Analysed by spectral method,,0,360,,
-meanspr,WMDS,sea_surface_wave_directional_spread,sea surface wave mean directional spread,degree,Analysed by spectral method,,0,360,,
-temp,TEMP,sea_water_temperature,sea water temperature at sea surface,degree_Celsius,Sea water temperature measured by wave buoy at the seawater surface,,-2.5,40,buoy,
-qf15,QF15,quality flag,flag for QARTOD Test 15,-,Quality controls for bulk parameters followed QARTOD/IOOS standards. These included range test (QARTOD Test 15). Pass = 1; suspect = 3; fail = 4 ,,1,4,,
-qf16,QF16,quality flag,flag for QARTOD Test 16,-,Quality controls for bulk parameters followed QARTOD/IOOS standards. These included range test (QARTOD Test 16). Pass = 1; suspect = 3; fail = 4 ,,1,4,,
-qf19,QF19,quality flag,flag for QARTOD Test 19,-,Quality controls for bulk parameters followed QARTOD/IOOS standards. These included range test (QARTOD Test 19). Pass = 1; suspect = 3; fail = 4 ,,1,4,,
-lat,LATITUDE,latitude,latitude,"degree north, WGS84",,,-90,-90,,
-lon,LONGITUDE,longitude,longitude,"degree east, WGS84",,,-180,180,,
+ORIGINAL_VARNAME,VARNAME,STANDARD_NAME,LONG_NAME,UNITS,CALENDAR,AXIS,COMMENT,ANCILLARY_VARIABLES,VALID_MIN,VALID_MAX,REFERENCE_DATUM,MAGNETIC_DEC,POSITIVE,OBSERVATION_TYPE,COORDINATES
+time,TIME,time,time,days since 1950-01-01 00:00:00 UTC,gregorian,T,,,0,90000,,,,,
+hs,WSSH,sea_surface_wave_spectral_significant_height,sea surface wave spectral significant height,m,,,Analysed by spectral method,,0,100,,,,,TIME LATITUDE LONGITUDE
+tp,WPPE,sea_surface_wave_period_at_variance_spectral_density_maximum,,s,,,Analysed by spectral method. Period of the peak of the energy spectrum,,0,50,,,,,TIME LATITUDE LONGITUDE
+tm,WPFM,sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment,,s,,,Analysed by spectral method. The first wave period is calculated as m0/m1 where m0 and m1 are the zeroth order and first order moments of the wave spectrum,,0,50,,,,,TIME LATITUDE LONGITUDE
+dp,WPDI,sea_surface_wave_from_direction_at_variance_spectral_density_maximum,,degree,,,Analysed by spectral method. Direction (related to the magnetic north) from which the peak period waves are coming from.,,0,360,magnetic north,mag_dec,clockwise,,TIME LATITUDE LONGITUDE
+dm,SSWMD,,sea surface wave mean direction,degree,,,Analysed by spectral method. Direction (related to the magnetic north) from which the peak period waves are coming from.,,0,360,magnetic north,mag_dec,clockwise,,TIME LATITUDE LONGITUDE
+pkspr,WPDS,sea_surface_wave_directional_spread_at_variance_spectral_density_maximum,sea surface wave peak directional spread,degree,,,Analysed by spectral method,,0,360,magnetic north,mag_dec,clockwise,,TIME LATITUDE LONGITUDE
+meanspr,WMDS,sea_surface_wave_directional_spread,sea surface wave mean directional spread,degree,,,Analysed by spectral method,,0,360,magnetic north,mag_dec,clockwise,,TIME LATITUDE LONGITUDE
+temp,TEMP,sea_water_temperature,sea water temperature at sea surface,degree_Celsius,,,Sea water temperature measured by wave buoy at the seawater surface,,-2.5,40,,,,measured,
+qf15,QF15,quality flag,flag for QARTOD Test 15,,,,Quality controls for bulk parameters followed QARTOD/IOOS standards. These included range test (QARTOD Test 15). Pass = 1; suspect = 3; fail = 4 ,,1,4,,,,,
+qf16,QF16,quality flag,flag for QARTOD Test 16,,,,Quality controls for bulk parameters followed QARTOD/IOOS standards. These included range test (QARTOD Test 16). Pass = 1; suspect = 3; fail = 4 ,,1,4,,,,,
+qf19,QF19,quality flag,flag for QARTOD Test 19,,,,Quality controls for bulk parameters followed QARTOD/IOOS standards. These included range test (QARTOD Test 19). Pass = 1; suspect = 3; fail = 4 ,,1,4,,,,,
+lat,LATITUDE,latitude,latitude,degrees_north,,Y,,,-90,-90,WGS84 coordinate reference system,,,,
+lon,LONGITUDE,longitude,longitude,degrees_east,,X,,,-180,180,WGS84 coordinate reference system,,,,

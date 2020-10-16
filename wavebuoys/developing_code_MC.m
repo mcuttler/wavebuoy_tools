@@ -32,7 +32,7 @@ buoy_info.DeployLon = 117;
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 1.98; 
 globfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt';     
-varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';        
+varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping_test.csv';        
 outpathNC = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\';
 
 % 
@@ -62,7 +62,7 @@ i = 1;
     idx_bulk = []; 
     idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend); 
     
-    filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk3.nc'];             
+    filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk10.nc'];             
     
             
     %create output netCDF4 file     
@@ -118,8 +118,8 @@ i = 1;
     netcdf.close(ncid);
     
     %%
-    % define dimensions 
-    
+    % define dimensions \
+    ncid = netcdf.open(filenameNC,'WRITE'); 
     dimname = 'TIME';
     dimlength = size(bulkparams.time(idx_bulk),1);
     
@@ -136,39 +136,48 @@ i = 1;
     % [original name, varname, standard name, long name, units, comments, ancillary invo, valid min, valid max, reference, positive]
     
     fid = fopen(varsfile); 
-    varinfo = textscan(fid, '%s%s%s%s%s%s%s%f%f%s%s','delimiter',',','headerlines',1); 
+    varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s','delimiter',',','headerlines',1); 
     fclose(fid);      
     
-    attnames = {'standard_name', 'long_name', 'units', 'comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference', 'positive'}; 
+    attnames = {'standard_name', 'long_name', 'units', 'calendar','axis','comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference_datum','magnetic_dec', 'positive',...
+        'observation_type','coordinates','_FillValue'}; 
+    
     attinfo = varinfo(3:end); 
     
     [m,~] = size(varinfo{1,1}); 
     for ii = 1:m    
         %include STATION_ID 
         if ii ==1
-            netcdf.defVar(ncid, 'STATION_ID','string',[dimid_TIME dimid_str]); 
+            netcdf.defVar(ncid, 'STATION_ID','char',[dimid_TIME dimid_str]); 
             varid = netcdf.inqVarID(ncid,'STATION_ID');   
             
             netcdf.putAtt(ncid, varid, 'ioos_category','Identifier');
             netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');
             netcdf.putAtt(ncid, varid, 'long_name','station name');
             
+            %variable for STATION_ID --- ask IMOS
+%             st_id = []; 
+%             netcdf.putVar(ncid, varid, st_id); 
         end
         
         %create and define variable and attributes      
-        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'double', dimid_TIME); 
-        
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'double', dimid_TIME);        
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});   
+        netcdf.defVarFill(ncid,varid,false,-9999.9);
         
         %add attributes
         for j = 1:length(attinfo); 
-            if j==6|j==7
+            if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')
                 if ~isnan(attinfo{1,j}(ii))
                     netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii));
-                end
+                end            
             else
                 if ~isempty(attinfo{1,j}{ii})
-                    netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
+                    if strcmp(attnames{j},'magnetic_dec')
+                        netcdf.putAtt(ncid, varid, attnames{j}, buoy_info.MagDec)
+                    else
+                        netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
+                    end
                 end
             end
         end
