@@ -38,7 +38,7 @@
 %                                                                        | QC LIMITS, ETC
 %                                                                        | SEE FUNCTIONS WITHIN THIS CODE FOR ACTUAL DATA PROCESSING
 % ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 09 Oct 2020 | 3.0                     | re-organise code structure - aim to generalise across Datawell and Sofar buoys
+%     M. Cuttler     | 13 Oct 2020 | 3.0                     | re-organise code structure - aim to generalise across Datawell and Sofar buoys
 %                                                                        | 
 
 %% set initial paths for Spotter data to process and parser script
@@ -100,7 +100,7 @@ if strcmp(buoy_info.type,'sofar')==1
     %bulkparams
     %text files for IMOS-compliant netCDF generation
     globfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt';     
-    varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';    
+    varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';        
     bulkparams_to_IMOS_nc(bulkparams, outpathNC, buoy_info, globfile, varsfile); 
     
     %displacements

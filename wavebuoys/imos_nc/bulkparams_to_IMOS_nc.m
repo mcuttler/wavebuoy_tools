@@ -67,20 +67,30 @@ for i = 1:size(tdata,1)
         attname = attname(idx); 
         attvalue = globatts{1,2}{ii}; 
         
-        netcdf.putAtt(ncid,varid, attname, attvalue);          
-        
-        if ii == size(globatts{1,1},1);
-            netcdf.putAtt(ncid,varid, 'deployment_depth', '-30 m'); 
-            netcdf.putAtt(ncid,varid, 'deployment_latitude', buoy_info.DeployLat); 
-            netcdf.putAtt(ncid,varid, 'deployment_longitude', buoy_info.DeployLon); 
-            
-            if strcmp(buoy_info.name, 'sofar')
-                netcdf.putAtt(ncid,varid, 'instrument_maker', 'Sofar Spotter'); 
-            elseif strcmp(buoy_info.name, 'datawell')
-                netcdf.putAtt(ncid,varid, 'instrument_maker', 'Datawell');  
-            end
-            netcdf.putAtt(ncid,varid, 'deployment_longitude', buoy_info.version);
-            
+        if strcmp(attname, 'instrument_maker')
+            netcdf.putAtt(ncid,varid, attname, buoy_info.type);          
+        elseif strcmp(attname, 'instrument_model')
+            netcdf.putAtt(ncid,varid, attname, buoy_info.version);    
+        elseif strcmp(attname, 'site_code')
+            netcdf.putAtt(ncid,varid, attname, [buoy_info.name '_' buoy_info.DeployLoc]);
+        elseif strcmp(attname, 'site_name')
+            netcdf.putAtt(ncid,varid, attname, buoy_info.DeployLoc);
+        elseif strcmp(attname, 'water_depth')
+            netcdf.putAtt(ncid,varid, attname, buoy_info.DeployDepth);
+        elseif strcmp(attname, 'geospatial_lat_min')
+            netcdf.putAtt(ncid,varid, attname, nanmin(bulkparams.lat));
+        elseif strcmp(attname, 'geospatial_lon_min')
+            netcdf.putAtt(ncid,varid, attname, nanmin(bulkparams.lon));
+        elseif strcmp(attname, 'geospatial_lat_max')
+            netcdf.putAtt(ncid,varid, attname, nanmax(bulkparams.lat));
+        elseif strcmp(attname, 'geospatial_lon_max')
+            netcdf.putAtt(ncid,varid, attname, nanmin(bulkparams.lon));
+        elseif strcmp(attname, 'time_coverage_start')
+            netcdf.putAtt(ncid,varid, attname, [datestr(bulkparams.time(1),'yyyy-mm-dd HH:MM:SS') ' UTC']); 
+        elseif strcmp(attname, 'time_coverage_end')
+            netcdf.putAtt(ncid,varid, attname, [datestr(bulkparams.time(end),'yyyy-mm-dd HH:MM:SS') ' UTC']); 
+        elseif strcmp(attname, 'date_created')
+            netcdf.putAtt(ncid,varid, attname, [datestr(now-datenum(0,0,0,8,0,0),'yyyy-mm-dd HH:MM:SS') ' UTC']);                        
         end
         
     end
@@ -92,7 +102,12 @@ for i = 1:size(tdata,1)
     dimname = 'TIME';
     dimlength = size(bulkparams.time(idx_bulk),1);
     
-    dimid_TIME = netcdf.defDim(ncid, dimname, dimlength); 
+    dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
+    
+    dimname = 'station_id_strlen';
+    dimlength = 30; 
+    
+    dimid_str = netcdf.defDim(ncid, dimname, dimlength); 
     
     % write variables 
     
@@ -108,6 +123,16 @@ for i = 1:size(tdata,1)
     
     [m,~] = size(varinfo{1,1}); 
     for ii = 1:m    
+        if ii ==1
+            netcdf.defVar(ncid, 'STATION_ID','string',[dimid_TIME dimid_str]); 
+            varid = netcdf.inqVarID(ncid,'STATION_ID');   
+            
+            netcdf.putAtt(ncid, varid, 'ioos_category','Identifier');
+            netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');
+            netcdf.putAtt(ncid, varid, 'long_name','station name');
+            
+        end
+        
         %create and define variable and attributes      
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'double', dimid_TIME); 
         
