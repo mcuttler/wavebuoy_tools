@@ -78,19 +78,21 @@ for i = 1:size(tdata,1)
         elseif strcmp(attname, 'water_depth')
             netcdf.putAtt(ncid,varid, attname, buoy_info.DeployDepth);
         elseif strcmp(attname, 'geospatial_lat_min')
-            netcdf.putAtt(ncid,varid, attname, nanmin(bulkparams.lat));
+            netcdf.putAtt(ncid,varid, attname, num2str(nanmin(bulkparams.lat))); 
         elseif strcmp(attname, 'geospatial_lon_min')
-            netcdf.putAtt(ncid,varid, attname, nanmin(bulkparams.lon));
+            netcdf.putAtt(ncid,varid, attname, num2str(nanmin(bulkparams.lon))); 
         elseif strcmp(attname, 'geospatial_lat_max')
-            netcdf.putAtt(ncid,varid, attname, nanmax(bulkparams.lat));
+            netcdf.putAtt(ncid,varid, attname, num2str(nanmax(bulkparams.lat)));
         elseif strcmp(attname, 'geospatial_lon_max')
-            netcdf.putAtt(ncid,varid, attname, nanmin(bulkparams.lon));
+            netcdf.putAtt(ncid,varid, attname, num2str(nanmin(bulkparams.lon))); 
         elseif strcmp(attname, 'time_coverage_start')
             netcdf.putAtt(ncid,varid, attname, [datestr(bulkparams.time(1),'yyyy-mm-dd HH:MM:SS') ' UTC']); 
         elseif strcmp(attname, 'time_coverage_end')
             netcdf.putAtt(ncid,varid, attname, [datestr(bulkparams.time(end),'yyyy-mm-dd HH:MM:SS') ' UTC']); 
         elseif strcmp(attname, 'date_created')
-            netcdf.putAtt(ncid,varid, attname, [datestr(now-datenum(0,0,0,8,0,0),'yyyy-mm-dd HH:MM:SS') ' UTC']);                        
+            netcdf.putAtt(ncid,varid, attname, [datestr(now-datenum(0,0,0,8,0,0),'yyyy-mm-dd HH:MM:SS') ' UTC']);   
+        else
+            netcdf.putAtt(ncid,varid, attname, attvalue);
         end
         
     end
@@ -123,6 +125,7 @@ for i = 1:size(tdata,1)
     
     [m,~] = size(varinfo{1,1}); 
     for ii = 1:m    
+        %include STATION_ID 
         if ii ==1
             netcdf.defVar(ncid, 'STATION_ID','string',[dimid_TIME dimid_str]); 
             varid = netcdf.inqVarID(ncid,'STATION_ID');   

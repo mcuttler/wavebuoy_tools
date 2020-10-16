@@ -64,6 +64,8 @@ buoy_info.DeployLoc = 'Testing';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -35; 
 buoy_info.DeployLon = 117; 
+%use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
+buoy_info.MagDec = 1.98; 
 
 %inputs only for Datawell
 years = 2020; 
