@@ -99,9 +99,8 @@ for i = 1:size(tdata,1)
     
     
     %%
-    % define dimensions     
-    
-    ncid = netcdf.open(filenameNC,'WRITE'); 
+    % define dimensions         
+
     dimname = 'TIME';
     dimlength = size(bulkparams.time(idx_bulk),1);
     
@@ -117,8 +116,9 @@ for i = 1:size(tdata,1)
     fid = fopen(varsfile); 
     varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s','delimiter',',','headerlines',1); 
     fclose(fid);      
+    
     attnames = {'standard_name', 'long_name', 'units', 'calendar','axis','comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference_datum','magnetic_dec', 'positive',...
-        'observation_type','coordinates'}; 
+        'observation_type','coordinates','_FillValue'}; 
     
     attinfo = varinfo(3:end);     
     
@@ -126,7 +126,7 @@ for i = 1:size(tdata,1)
     for ii = 1:m    
         %include STATION_ID 
         if ii ==1
-            netcdf.defVar(ncid, 'STATION_ID','string',[dimid_TIME dimid_str]); 
+            netcdf.defVar(ncid, 'STATION_ID','char',[dimid_TIME dimid_str]); 
             varid = netcdf.inqVarID(ncid,'STATION_ID');   
             
             netcdf.putAtt(ncid, varid, 'ioos_category','Identifier');

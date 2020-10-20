@@ -16,6 +16,7 @@
 % DO NOT HAVE OPERATIONAL FREQUENCY RANGE INFORMATION
 
 % [bulkparams.qf18] = qartod_18_low_frequency(check); 
+%% this is a test to show CArlin
 
 %% test building netcdf
 % bulkparams_to_IMOS_nc(bulkparams, outpathNC, buoy_info, globfile, varsfile); 
@@ -32,7 +33,7 @@ buoy_info.DeployLon = 117;
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 1.98; 
 globfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt';     
-varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping_test.csv';        
+varsfile = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';        
 outpathNC = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\';
 
 % 
@@ -62,7 +63,7 @@ i = 1;
     idx_bulk = []; 
     idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend); 
     
-    filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk10.nc'];             
+    filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk1.nc'];             
     
             
     %create output netCDF4 file     
