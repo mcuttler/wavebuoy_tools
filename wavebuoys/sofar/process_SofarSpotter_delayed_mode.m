@@ -98,6 +98,9 @@ for j = 1:size(fidx,2)
     disp(['Adding data for chunk ' num2str(j) ' to data arrays'])    
 
     %for some instances parser generates subdirectories
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     need to fix this section
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%5
     if exist([datapath '\tmp\bulkparameters.csv'])==0
         %get list of subfolders
         subdir = dir([datapath '\tmp']); 
@@ -135,10 +138,10 @@ for j = 1:size(fidx,2)
                             displacements.y = [displacements.y; data(:,9)];
                             displacements.z = [displacements.z; data(:,10)]; 
                         end
-                    else
+                    elseif 
                         dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'],',',1);
                         data = dumdata.data; 
-                        if strpcmp(filenames{kk},'a1');                 
+                        if strcmp(filenames{kk},'a1');                 
                             spec.freq = str2double(dumdata.textdata(9:end)); 
                             spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
                         end
