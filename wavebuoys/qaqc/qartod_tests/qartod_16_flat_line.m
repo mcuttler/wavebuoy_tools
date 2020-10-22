@@ -47,7 +47,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [QCFlag] = qartod_16_flat_line(in)
+function [QCFlag_suspect, QCFlag_fail] = qartod_16_flat_line(in)
 %% initial check that length of data is long enough for this test
 if length(in.WVHGT)>=in.rep_suspect
     %% first check for 'suspect' values

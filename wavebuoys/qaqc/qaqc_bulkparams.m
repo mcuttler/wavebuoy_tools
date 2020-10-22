@@ -2,17 +2,19 @@
 
 
 function [bulkparams] = qaqc_bulkparams(bulkparams)
+%% QARTOD TESTS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  QARTOD TEST 15 - LT time series mean and standard deviation
 
 check.time = bulkparams.time; 
 check.WVHGT = bulkparams.hs; 
-check.WVPD = bulkparams.tm; 
-check.WVDIR = bulkparams.dm; 
-check.WVSP = bulkparams.meanspr; 
+check.WVPD = bulkparams.tp; 
+check.WVDIR = bulkparams.dp; 
+check.WVSP = bulkparams.pkspr; 
 
 %    User defined test criteria
 check.STD = 2; 
+check.window = 24; %hours for calculating mean + std
 
 [bulkparams.qf15] = qartod_15_mean_std(check); 
 
@@ -35,7 +37,7 @@ check.rep_suspect = 6;
 % range
 
 %    User defined test criteria
-check.MINWH = 0.05;
+check.MINWH = 0.25;
 check.MAXWH = 8;
 check.MINWP = 2; 
 check.MAXWP = 24;
@@ -43,4 +45,13 @@ check.MINSV = 0.07;
 check.MAXSV = 65.0; 
 
 [bulkparams.qf19] = qartod_19_bulkparams_range(check); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Other tests
+check.WVPD = bulkparams.tp; 
+check.maxT = 25; 
+check.diffHS = [0.5 1]; 
+
+[bulkparams.qf_lims] = qaqc_bulkparams_limits(check); 
+
 

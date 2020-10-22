@@ -47,12 +47,41 @@ function [QCFlag] = qartod_15_mean_std(in)
 
 QCFlag_tmp  = zeros(length(in.WVHGT),4);
 
-QCFlag_tmp(:,1) = check_std(in.WVHGT, in.STD);
-QCFlag_tmp(:,2) = check_std(in.WVPD, in.STD);
-QCFlag_tmp(:,3) = check_std(in.WVDIR, in.STD);
-QCFlag_tmp(:,4) = check_std(in.WVSP, in.STD);
-
-QCFlag = max(QCFlag_tmp,[],2); 
+dumt = datevec(in.time); 
+hh = unique(dumt(:,1:4),'rows'); 
+for ii = 1:size(hh,1)                   
+    if ii>in.window    
+        %find preceding window hours 
+        tend = datenum([hh(ii,:),0,0]); 
+        tstart = tend-datenum(0,0,0,window,0,0); 
+        
+        idx = find(in.time>=tstart&in.time<=tend); 
+        
+        %test each parameter 
+        if ~isempty(idx) & length(idx)>1
+            fields = {'in.WVHGT','in.WVPD','in.WVDIR','in.WVSP'};
+            for j = 1:length(fields)
+                eval(['dum =' fields{j} ';']); 
+                ddata = dum(idx); 
+                M = nanmean(ddata); 
+                Mhi = M+(in.STD*nanstd(ddata));
+                Mlow = M-(in.STD*nanstd(ddata)); 
+                
+                for jj = 1:length(idx) 
+                    if ddata(jj)>Mhi | ddata(jj)<Mlow
+                        QCFlag(idx(jj),j) = 3;
+                    end
+                end
+            end
+        else
+            %not assessed
+            QCFlag(idx(jj),:) = -1; 
+        end
+    else
+        %not assessed
+        QCFlag(ii,:) = -1; 
+    end
+end
 
 %% subfunction
 
