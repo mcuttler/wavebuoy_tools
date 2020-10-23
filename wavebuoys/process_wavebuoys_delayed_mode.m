@@ -90,6 +90,9 @@ if strcmp(buoy_info.type,'sofar')==1
     
     disp('Performing QA/QC checks...'); 
     
+    % double check parameter settings in '.\qaqc\qaqc_bulkparams.m' before
+    % proceeding
+    
     [bulkparams] = qaqc_bulkparams(bulkparams);
     
     %add in QA/QC for displacements when ready
