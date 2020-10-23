@@ -14,20 +14,22 @@ check.WVSP = bulkparams.pkspr;
 
 %    User defined test criteria
 check.STD = 2; 
-check.window = 24; %hours for calculating mean + std
+check.time_window = 24; %hours for calculating mean + std
+check.realtime = 0; %calculate mean + std over window where time point is central to window 
 
 [bulkparams.qf15] = qartod_15_mean_std(check); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % QARTOD TEST 16 - LT time series flat line 
 
-%    User defined test criteria
+%    User defined test criteria - absolute difference from preceding points
+%    to denote 'flatline' 
 check.WHTOL = 0.05; 
-check.WPTOL = 0.5;
+check.WPTOL = 0.05;
 check.WDTOL = 0.5; 
 check.WSPTOL = 0.5; 
-check.rep_fail = 24; 
-check.rep_suspect = 6; 
+check.rep_fail = 48; 
+check.rep_suspect = 24; 
 
 %outputs a matrix that has rows = time, colums = wave height, wave period, wave direction, wave spreading
 [bulkparams.qf16] = qartod_16_flat_line(check); 
@@ -39,7 +41,7 @@ check.rep_suspect = 6;
 %    User defined test criteria
 check.MINWH = 0.25;
 check.MAXWH = 8;
-check.MINWP = 2; 
+check.MINWP = 4; 
 check.MAXWP = 24;
 check.MINSV = 0.07; 
 check.MAXSV = 65.0; 
@@ -48,7 +50,7 @@ check.MAXSV = 65.0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Other tests
-check.WVPD = bulkparams.tp; 
+
 check.maxT = 25; 
 check.diffHS = [0.5 1]; 
 

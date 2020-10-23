@@ -90,7 +90,7 @@ if strcmp(buoy_info.type,'sofar')==1
     
     disp('Performing QA/QC checks...'); 
     
-    [bulkparams] = qartod_qaqc_bulkparams(bulkparams);
+    [bulkparams] = qaqc_bulkparams(bulkparams);
     
     %add in QA/QC for displacements when ready
     
@@ -152,6 +152,7 @@ end
         
 save(filenameMAT,vars{idx}); 
 
+%%
     
 
 

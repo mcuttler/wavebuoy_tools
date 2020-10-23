@@ -58,21 +58,8 @@ if length(in.WVHGT)>=in.rep_suspect
     %that flag
     for ii=in.rep_suspect:length(in.WVHGT)
         
-        if ii==in.rep_suspect
-            checkWVHGT = diff(in.WVHGT(1:ii));  
-            checkWVPD = diff(in.WVPD(1:ii)); 
-            checkWVDIR = diff(in.WVDIR(1:ii)); 
-            checkWVSP = diff(in.WVSP(1:ii));                              
-            
-            QCFlag_suspect(ii,1) = check_suspect(checkWVHGT, in.WHTOL); 
-            QCFlag_suspect(1:ii-1,1) = QCFlag_suspect(ii,1); 
-            QCFlag_suspect(ii,2) = check_suspect(checkWVPD, in.WPTOL); 
-            QCFlag_suspect(1:ii-1,2) = QCFlag_suspect(ii,2); 
-            QCFlag_suspect(ii,3) = check_suspect(checkWVDIR, in.WDTOL); 
-            QCFlag_suspect(1:ii-1,2) = QCFlag_suspect(ii,3); 
-            QCFlag_suspect(ii,4) = check_suspect(checkWVSP, in.WSPTOL);         
-            QCFlag_suspect(1:ii-1,2) = QCFlag_suspect(ii,4); 
-            
+        if ii<=in.rep_suspect
+            QCFlag_suspect(ii,:) = -1; 
         else
             
             checkWVHGT = diff(in.WVHGT(ii-in.rep_suspect:ii));
@@ -93,21 +80,9 @@ if length(in.WVHGT)>=in.rep_suspect
     %
     for ii=in.rep_fail:length(in.WVHGT)
         %check if first n values are 'equal' within tolerance
-         if ii==in.rep_fail
-            checkWVHGT = diff(in.WVHGT(1:ii)); 
-            checkWVPD = diff(in.WVPD(1:ii)); 
-            checkWVDIR = diff(in.WVDIR(1:ii)); 
-            checkWVSP = diff(in.WVSP(1:ii));       
-            
-            QCFlag_fail(ii,1) = check_fail(checkWVHGT, in.WHTOL); 
-            QCFlag_fail(1:ii,1) = QCFlag_fail(ii,1); 
-            QCFlag_fail(ii,2) = check_fail(checkWVPD, in.WPTOL); 
-            QCFlag_fail(1:ii,2) = QCFlag_fail(ii,2); 
-            QCFlag_fail(ii,3) = check_fail(checkWVDIR, in.WDTOL); 
-            QCFlag_fail(1:ii,3) = QCFlag_fail(ii,3); 
-            QCFlag_fail(ii,4) = check_fail(checkWVSP, in.WSPTOL); ;       
-            QCFlag_fail(1:ii,4) = QCFlag_fail(ii,4); 
-            
+         if ii<=in.rep_fail
+             %not assessed
+             QCFlag_fail(ii,:) = -1;            
         else
             checkWVHGT = diff(in.WVHGT(ii-in.rep_fail:ii));
             checkWVPD = diff(in.WVPD(ii-in.rep_fail:ii)); 

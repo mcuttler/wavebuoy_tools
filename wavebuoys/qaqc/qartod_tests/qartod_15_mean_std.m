@@ -42,49 +42,77 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [QCFlag] = qartod_15_mean_std(in)
-
-% intialize QC flag vector
-
-QCFlag_tmp  = zeros(length(in.WVHGT),4);
-
-dumt = datevec(in.time); 
-hh = unique(dumt(:,1:4),'rows'); 
-for ii = 1:size(hh,1)                   
-    if ii>in.window    
-        %find preceding window hours 
-        tend = datenum([hh(ii,:),0,0]); 
-        tstart = tend-datenum(0,0,0,window,0,0); 
-        
-        idx = find(in.time>=tstart&in.time<=tend); 
-        
-        %test each parameter 
-        if ~isempty(idx) & length(idx)>1
-            fields = {'in.WVHGT','in.WVPD','in.WVDIR','in.WVSP'};
-            for j = 1:length(fields)
-                eval(['dum =' fields{j} ';']); 
-                ddata = dum(idx); 
-                M = nanmean(ddata); 
-                Mhi = M+(in.STD*nanstd(ddata));
-                Mlow = M-(in.STD*nanstd(ddata)); 
-                
-                for jj = 1:length(idx) 
-                    if ddata(jj)>Mhi | ddata(jj)<Mlow
-                        QCFlag(idx(jj),j) = 3;
+%options to process data within window such that data point is central to
+%window (delayed mode) or so that window is preceding time frame (real
+%time) 
+if in.realtime == 1
+    for ii = 1:size(in.time,1)                   
+        if ii>in.time_window    
+            %find preceding window hours         
+            tstart = in.time(ii)-datenum(0,0,0,in.time_window,0,0); 
+            tend = in.time(ii); 
+            
+            idx = find(in.time>=tstart&in.time<=tend); 
+            
+            %test each parameter 
+            if ~isempty(idx) & length(idx)>=in.time_window
+                fields = {'WVHGT','WVPD','WVDIR','WVSP'};
+                for j = 1:length(fields)                
+                    dumdata = in.(fields{j});                      
+                    ddata = dumdata(idx); 
+                    M = nanmean(ddata); 
+                    Mhi = M+(in.STD*nanstd(ddata));
+                    Mlow = M-(in.STD*nanstd(ddata));
+                    
+                    if dumdata(ii)>Mhi | dumdata(ii)<Mlow
+                        QCFlag(ii,j) = 3;
                     end
+                    clear dumdata ddata M Mhi Mlow
                 end
+            else
+                %not assessed
+                QCFlag(ii,:) = -1; 
             end
         else
             %not assessed
-            QCFlag(idx(jj),:) = -1; 
+            QCFlag(ii,:) = -1; 
         end
-    else
-        %not assessed
-        QCFlag(ii,:) = -1; 
+    end
+else
+    for ii = 1:size(in.time,1)    
+        tnow = in.time(ii);
+        tstart = in.time(ii) - datenum(0,0,0,in.time_window, 0,0); 
+        tend = in.time(ii) + datenum(0,0,0,in.time_window, 0,0); 
+        
+        if tstart>= in.time(1) & tend<=in.time(end)
+            idx = find(in.time>=tstart & in.time<=tend);
+            
+            fields = {'WVHGT','WVPD','WVDIR','WVSP'};
+            for j = 1:length(fields)                
+                dumdata = in.(fields{j});                      
+                ddata = dumdata(idx); 
+                M = nanmean(ddata); 
+                Mhi = M+(in.STD*nanstd(ddata));
+                Mlow = M-(in.STD*nanstd(ddata));
+                
+                if dumdata(ii)>Mhi | dumdata(ii)<Mlow
+                    QCFlag(ii,j) = 3;
+                end
+                clear dumdata ddata M Mhi Mlow
+            end
+        else
+            %not assessed
+            QCFlag(ii,:) = -1; 
+        end
     end
 end
 
-%% subfunction
-
+        
+        
+        
+        
+    %% subfunction
+    
     function [qc] = check_std(var, std_lim)
         for i = 1:length(var)
             if var(i) > mean(var)+(std_lim*std(var)) | var(i) < mean(var)-(std_lim*std(var))
