@@ -8,12 +8,12 @@ function [bulkparams] = qaqc_bulkparams(bulkparams)
 
 check.time = bulkparams.time; 
 check.WVHGT = bulkparams.hs; 
-check.WVPD = bulkparams.tp; 
-check.WVDIR = bulkparams.dp; 
-check.WVSP = bulkparams.pkspr; 
+check.WVPD = bulkparams.tm; 
+check.WVDIR = bulkparams.dm; 
+check.WVSP = bulkparams.meanspr; 
 
 %    User defined test criteria
-check.STD = 2; 
+check.STD = 3; 
 check.time_window = 24; %hours for calculating mean + std
 check.realtime = 0; %calculate mean + std over window where time point is central to window 
 
@@ -25,7 +25,7 @@ check.realtime = 0; %calculate mean + std over window where time point is centra
 %    User defined test criteria - absolute difference from preceding points
 %    to denote 'flatline' 
 check.WHTOL = 0.05; 
-check.WPTOL = 0.05;
+check.WPTOL = 0.1;
 check.WDTOL = 0.5; 
 check.WSPTOL = 0.5; 
 check.rep_fail = 48; 
@@ -41,8 +41,8 @@ check.rep_suspect = 24;
 %    User defined test criteria
 check.MINWH = 0.25;
 check.MAXWH = 8;
-check.MINWP = 4; 
-check.MAXWP = 24;
+check.MINWP = 3; 
+check.MAXWP = 25;
 check.MINSV = 0.07; 
 check.MAXSV = 65.0; 
 
@@ -51,6 +51,8 @@ check.MAXSV = 65.0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Other tests
 
+%use peak period
+check.WVPD = bulkparams.tp; 
 check.maxT = 25; 
 check.diffHS = [0.5 1]; 
 
