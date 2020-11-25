@@ -45,14 +45,14 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+homepath = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory card
 %from Spotter is, or upper directory for Datawells
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Data_for_testing_Spotter_V1'; 
+datapath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Data_for_testing_Spotter_V1'; 
 %path of Sofar parser script
-parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.1'; 
+parserpath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.1'; 
 parser = 'parser_v1.11.1.py'; 
 
 
@@ -94,6 +94,7 @@ if strcmp(buoy_info.type,'sofar')==1
     % proceeding
     
     [bulkparams] = qaqc_bulkparams(bulkparams);
+    assess_qaqc_bulkparams(bulkparams)
     
     %add in QA/QC for displacements when ready
     
