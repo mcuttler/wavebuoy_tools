@@ -78,6 +78,18 @@ check_peak.MAXSV = 65.0;
 [bulkparams.qf19_peak] = qartod_19_bulkparams_range(check_peak); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% QARTOD TEST 20 - LT time series rate of change 
+
+%    User defined test criteria
+check_roc.time = bulkparams.time; 
+check_roc.data = bulkparams.hs; 
+check_roc.rate_of_change = 1; 
+
+[bulkparams.qf20] = qartod_20_rate_of_change(check_roc); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Other tests
 
 check_peak.maxT = 25; 
