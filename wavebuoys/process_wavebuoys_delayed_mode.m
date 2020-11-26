@@ -94,7 +94,7 @@ if strcmp(buoy_info.type,'sofar')==1
     % proceeding
     
     [bulkparams] = qaqc_bulkparams(bulkparams);
-    assess_qaqc_bulkparams(bulkparams)
+    assess_qaqc_bulkparams(bulkparams,1)
     
     %add in QA/QC for displacements when ready
     
