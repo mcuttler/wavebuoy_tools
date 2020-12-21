@@ -13,7 +13,7 @@ check_mean.WVDIR = bulkparams.dm;
 check_mean.WVSP = bulkparams.meanspr; 
 
 %    User defined test criteria
-check_mean.STD = 2; 
+check_mean.STD = 3; 
 check_mean.time_window = 12; %hours for calculating mean + std
 check_mean.realtime = 0; %calculate mean + std over window where time point is central to window 
 
@@ -24,7 +24,7 @@ check_peak.WVDIR = bulkparams.dp;
 check_peak.WVSP = bulkparams.pkspr; 
 
 %    User defined test criteria
-check_peak.STD = 2; 
+check_peak.STD = 3; 
 check_peak.time_window = 12; %hours for calculating mean + std
 check_peak.realtime = 0; %calculate mean + std over window where time point is central to window 
 
