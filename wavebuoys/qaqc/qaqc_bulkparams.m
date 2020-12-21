@@ -6,76 +6,69 @@ function [bulkparams] = qaqc_bulkparams(bulkparams)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  QARTOD TEST 15 - LT time series mean and standard deviation
 
-check_mean.time = bulkparams.time; 
-check_mean.WVHGT = bulkparams.hs; 
-check_mean.WVPD = bulkparams.tm; 
-check_mean.WVDIR = bulkparams.dm; 
-check_mean.WVSP = bulkparams.meanspr; 
-
 %    User defined test criteria
-check_mean.STD = 3; 
-check_mean.time_window = 12; %hours for calculating mean + std
-check_mean.realtime = 0; %calculate mean + std over window where time point is central to window 
+check.STD = 3; 
+check.time_window = 12; %hours for calculating mean + std
+check.time = bulkparams.time; 
 
-check_peak.time = bulkparams.time; 
-check_peak.WVHGT = bulkparams.hs; 
-check_peak.WVPD = bulkparams.tp; 
-check_peak.WVDIR = bulkparams.dp; 
-check_peak.WVSP = bulkparams.pkspr; 
+fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+outfields={'hs_15','tm_15','tp_15','dm_15','dp_15','meanspr_15','pkspr_15','temp_15'}; 
 
-%    User defined test criteria
-check_peak.STD = 3; 
-check_peak.time_window = 12; %hours for calculating mean + std
-check_peak.realtime = 0; %calculate mean + std over window where time point is central to window 
+for f = 1:length(fields)
+    if isfield(bulkparams, fields{f}); 
+        [bulkparams.(outfields{f})] = qartod_15_mean_std(check, bulkparams.(fields{f})); 
+    else
+        bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
+    end
+end
 
-[bulkparams.qf15_mean] = qartod_15_mean_std(check_mean); 
-[bulkparams.qf15_peak] = qartod_15_mean_std(check_peak); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % QARTOD TEST 16 - LT time series flat line 
 
 %    User defined test criteria - absolute difference from preceding points
 %    to denote 'flatline' 
-check_mean.WHTOL = 0.05; 
-check_mean.WPTOL = 0.1;
-check_mean.WDTOL = 0.5; 
-check_mean.WSPTOL = 0.5; 
-check_mean.rep_fail = 48; 
-check_mean.rep_suspect = 24; 
+check.WHTOL = 0.05; 
+check.WPTOL = 0.1;
+check.WDTOL = 0.5; 
+check.WSPTOL = 0.5; 
+check.TTOL = 0.01; 
+check.rep_fail = 48; 
+check.rep_suspect = 24; 
 
-check_peak.WHTOL = 0.05; 
-check_peak.WPTOL = 0.1;
-check_peak.WDTOL = 0.5; 
-check_peak.WSPTOL = 0.5; 
-check_peak.rep_fail = 48; 
-check_peak.rep_suspect = 24; 
+fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+tol = {'WHTOL','WPTOL','WPTOL', 'WDTOL','WDTOL','WSPTOL','WSPTOL','TTOL'}; 
+outfields={'hs_16','tm_16','tp_16','dm_16','dp_16','meanspr_16','pkspr_16','temp_16'}; 
 
-%outputs a matrix that has rows = time, colums = wave height, wave period, wave direction, wave spreading
-[bulkparams.qf16_mean] = qartod_16_flat_line(check_mean); 
-[bulkparams.qf16_peak] = qartod_16_flat_line(check_peak); 
+for f = 1:length(fields)
+    if isfield(bulkparams, fields{f}); 
+        [bulkparams.(outfields{f})] = qartod_16_flat_line(check, check.(tol{f}), bulkparams.(fields{f})); 
+    else
+        bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
+    end        
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % QARTOD TEST 19 - LT time series bulk wave parameters max/min/acceptable
 % range
-
+% in.WVHGT - timeseries wave height : WVHGT
+% in.WVPD - timeseries wave period : WVPD
+% in.WVDIR - timeseries wave direction : WVDIR
+% in.WVSP - timeseries wave spreading : WVSP
 %    User defined test criteria
-check_mean.MINWH = 0.25;
-check_mean.MAXWH = 8;
-check_mean.MINWP = 3; 
-check_mean.MAXWP = 25;
-check_mean.MINSV = 0.07; 
-check_mean.MAXSV = 65.0; 
+check.WVHGT = bulkparams.hs; 
+check.WVPD = bulkparams.tm; 
+check.WVDIR = bulkparams.dm; 
+check.WVSP = bulkparams.meanspr; 
 
-check_peak.MINWH = 0.25;
-check_peak.MAXWH = 8;
-check_peak.MINWP = 3; 
-check_peak.MAXWP = 25;
-check_peak.MINSV = 0.07; 
-check_peak.MAXSV = 65.0; 
+check.MINWH = 0.25;
+check.MAXWH = 8;
+check.MINWP = 3; 
+check.MAXWP = 25;
+check.MINSV = 0.07; 
+check.MAXSV = 65.0; 
 
-[bulkparams.qf19_mean] = qartod_19_bulkparams_range(check_mean); 
-
-[bulkparams.qf19_peak] = qartod_19_bulkparams_range(check_peak); 
+[bulkparams.qf_19] = qartod_19_bulkparams_range(check); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -83,18 +76,35 @@ check_peak.MAXSV = 65.0;
 % QARTOD TEST 20 - LT time series rate of change 
 
 %    User defined test criteria
-check_roc.time = bulkparams.time; 
-check_roc.data = bulkparams.hs; 
-check_roc.rate_of_change = 1; 
+check.WHROC= 1; 
+check.WPROC= 5; 
+check.WDROC= 20; 
+check.WSPROC= 25; 
+check.TROC = 2; 
 
-[bulkparams.qf20] = qartod_20_rate_of_change(check_roc); 
+fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+roc = {'WHROC','WPROC','WPROC', 'WDROC','WDROC','WSPROC','WSPROC','TROC'}; 
+outfields={'hs_20','tm_20','tp_20','dm_20','dp_20','meanspr_20','pkspr_20','temp_20'}; 
+
+for f = 1:length(fields)
+    if isfield(bulkparams, fields{f}); 
+        [bulkparams.(outfields{f})] = qartod_20_rate_of_change(check.(roc{f}), bulkparams.(fields{f})); 
+    else
+        bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
+    end  
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Other tests
+%% UWA QA/QC tests
 
-check_peak.maxT = 25; 
-check_peak.diffHS = [0.5 1]; 
+%UWA 'master flag' test
+check.rocHs =0.5; 
+check.HsLim = 10; 
+check.rocTp = 5; 
+check.TpLim = 25; 
 
-[bulkparams.qf_lims] = qaqc_bulkparams_limits(check_peak); 
+[bulkparams.qf_master] = qaqc_uwa_masterflag(check, bulkparams.hs, bulkparams.tp); 
+end
 
 

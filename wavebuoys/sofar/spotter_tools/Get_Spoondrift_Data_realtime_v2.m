@@ -7,14 +7,14 @@
 %M Cuttler
 
 %%
-function [Spotter] = Get_Spoondrift_Data_realtime(SpotterID,limit);
+function [Spotter] = Get_Spoondrift_Data_realtime_v2(SpotterID,limit);
 
 import matlab.net.*
 import matlab.net.http.*
 header = matlab.net.http.HeaderField('token','e0eb70b6d9e0b5e00450929139ea34','spotterId',SpotterID);
 r = RequestMessage('GET', header);
 uri = URI(['https://wavefleet.spoondriftspotter.co/api/wave-data?spotterId=' SpotterID...
-    '&includeWindData=true&limit=' num2str(limit)]);
+    '&includeSurfaceTempData=true&includeWindData=true&limit=' num2str(limit)]);
 resp = send(r,uri);
 status = resp.StatusCode;
 
@@ -33,6 +33,10 @@ for j = 1:size(resp.Body.Data.data.waves)
     Spotter.lon(j,1) = resp.Body.Data.data.waves(j).longitude;
 end
 
+for j = 1:size(resp.Body.Data.data.surfaceTemp)
+    Spotter.temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
+    Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+end
 
 for j = 1:size(resp.Body.Data.data.wind)
     Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;

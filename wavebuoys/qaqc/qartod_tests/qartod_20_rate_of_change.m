@@ -40,17 +40,17 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [QCFlag] = qartod_20_rate_of_change(in)
+function [QCFlag] = qartod_20_rate_of_change(roc,data)
 
 % intialize QC flag vector
 
-QCFlag  = zeros(length(in.data),1);
+QCFlag  = zeros(length(data),1);
  
-for ii=1:length(in.data)
+for ii=1:length(data)
     if ii == 1
-        QCFlag(ii) = -1; 
+        QCFlag(ii) = 2; 
     else
-        if abs(in.data(ii)-in.data(ii-1))>=in.rate_of_change        
+        if abs(data(ii)-data(ii-1))>=roc        
             QCFlag(ii)=4;
         else
             QCFlag(ii)=1; 

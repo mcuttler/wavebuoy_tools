@@ -21,7 +21,9 @@ function [] = bulkparams_to_IMOS_nc(bulkparams, outpathNC, buoy_info, globfile, 
 if strcmp(buoy_info.type,'sofar')==1
     outpathNC = [outpathNC '\SofarSpotter\ProcessedData_DelayedMode\nc'];     
 elseif strcmp(buoy_info.type,'datawell')==1
-     outpathNC = [outpathNC '\Datawell\ProcessedData_DelayedMode\nc'];         
+     outpathNC = [outpathNC '\Datawell\ProcessedData_DelayedMode\nc'];     
+elseif strcmp(buoy_info.type,'triaxys')==1
+     outpathNC = [outpathNC '\Triaxys\ProcessedData_DelayedMode\nc'];     
 end
 
 if ~exist(outpathNC)
@@ -43,8 +45,8 @@ for i = 1:size(tdata,1)
     idx_bulk = []; 
     idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend); 
     
-    filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc'];             
-    
+%     filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc'];             
+    filenameNC = ['D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Output_testing\' datestr(tstart,'yyyymm') '_bulk.nc'];     
             
     %create output netCDF4 file     
     ncid = netcdf.create(filenameNC,'NETCDF4'); 
@@ -96,11 +98,12 @@ for i = 1:size(tdata,1)
         end
         
     end
-    
+    netcdf.close(ncid); 
     
     %%
     % define dimensions         
-
+    
+    ncid = netcdf.open(filenameNC,'WRITE'); 
     dimname = 'TIME';
     dimlength = size(bulkparams.time(idx_bulk),1);
     
@@ -114,7 +117,7 @@ for i = 1:size(tdata,1)
     % write variables     
     
     fid = fopen(varsfile); 
-    varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s','delimiter',',','headerlines',1); 
+    varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
     fclose(fid);      
     
     attnames = {'standard_name', 'long_name', 'units', 'calendar','axis','comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference_datum','magnetic_dec', 'positive',...

@@ -44,67 +44,47 @@
 %     M. Cuttler     | 09 Oct 2020 | 1.0                      | Initial creation
 % --------------------------------------------------------------------------------------------------------------------------------
 %     M. Cuttler     | 09 Oct 2020 | 1.1                      | Modify so that code starts with first point that at 'suspect' or 'fail' limit and assumes all points up to that have the same flag
+%-----------------------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 21 Dec 2020 | 1.1                      | Modify so%     that runs for individual parameters and tolerance 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [QCFlag_suspect, QCFlag_fail] = qartod_16_flat_line(in)
+function [QCFlag] = qartod_16_flat_line(in, tol,data)
 %% initial check that length of data is long enough for this test
-if length(in.WVHGT)>=in.rep_suspect
-    %% first check for 'suspect' values
-    %check ea   QCFlag_suspect  = zeros(length(in.WVHGT),4);ch input variable and then at end keep highest QC flat
- 
-    
+
+if length(data)>=in.rep_suspect
+    % first check for 'suspect' values
+    QCFlag_suspect  = zeros(size(data,1),1); 
     %start at in.rep_suspect or in.rep_fail, assume all preceding points get
     %that flag
-    for ii=in.rep_suspect:length(in.WVHGT)
-        
+    for ii=in.rep_suspect:length(data)        
         if ii<=in.rep_suspect
-            QCFlag_suspect(ii,:) = -1; 
+            QCFlag_suspect(ii,:) = 2; 
         else
-            
-            checkWVHGT = diff(in.WVHGT(ii-in.rep_suspect:ii));
-            checkWVPD = diff(in.WVPD(ii-in.rep_suspect:ii)); 
-            checkWVDIR = diff(in.WVDIR(ii-in.rep_suspect:ii)); 
-            checkWVSP = diff(in.WVSP(ii-in.rep_suspect:ii));                                
-            
-            QCFlag_suspect(ii,1) = check_suspect(checkWVHGT, in.WHTOL); 
-            QCFlag_suspect(ii,2) = check_suspect(checkWVPD, in.WPTOL); 
-            QCFlag_suspect(ii,3) = check_suspect(checkWVDIR, in.WDTOL); 
-            QCFlag_suspect(ii,4) = check_suspect(checkWVSP, in.WSPTOL); 
-            
+            check_data = diff(data(ii-in.rep_suspect:ii));            
+            QCFlag_suspect(ii,1) = check_suspect(check_data, tol);             
         end
     end
     
     %% now check for fail values
-    QCFlag_fail  = zeros(length(in.WVHGT),4);
+    QCFlag_fail  = zeros(size(data,1),1); 
     %
-    for ii=in.rep_fail:length(in.WVHGT)
+    for ii=in.rep_fail:length(data)
         %check if first n values are 'equal' within tolerance
          if ii<=in.rep_fail
              %not assessed
-             QCFlag_fail(ii,:) = -1;            
+             QCFlag_fail(ii,:) = 2;            
         else
-            checkWVHGT = diff(in.WVHGT(ii-in.rep_fail:ii));
-            checkWVPD = diff(in.WVPD(ii-in.rep_fail:ii)); 
-            checkWVDIR = diff(in.WVDIR(ii-in.rep_fail:ii)); 
-            checkWVSP = diff(in.WVSP(ii-in.rep_fail:ii));                        
-            
-            QCFlag_fail(ii,1) = check_fail(checkWVHGT, in.WHTOL); 
-            QCFlag_fail(ii,2) = check_fail(checkWVPD, in.WPTOL); 
-            QCFlag_fail(ii,3) = check_fail(checkWVDIR, in.WDTOL); 
-            QCFlag_fail(ii,4) = check_fail(checkWVSP, in.WSPTOL);       
-            
+            check_data = diff(data(ii-in.rep_fail:ii));                                
+            QCFlag_fail(ii,1) = check_fail(check_data, tol);                
         end
     end
     
     %% now compare values for fail/suspect and keep higher one
-    for ii = 1:length(in.WVHGT)
-        for jj = 1:size(QCFlag_fail,2)
-            QCFlag_tmp(ii,jj) = compare_qcflag(QCFlag_suspect(ii,jj), QCFlag_fail(ii,jj)); 
-        end
-    end
+    for ii = 1:length(data)
+        QCFlag(ii,1) = compare_qcflag(QCFlag_suspect(ii,1), QCFlag_fail(ii,1)); 
+    end   
     
-    QCFlag = max(QCFlag_tmp,[],2);
 else
     disp('Dataset not long enough for FLATLINE TEST'); 
     QCFlag = ones(length(in.WVHGT),1).*nan;
