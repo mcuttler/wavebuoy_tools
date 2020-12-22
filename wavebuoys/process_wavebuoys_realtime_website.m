@@ -62,18 +62,26 @@ if strcmp(buoy_info.type,'sofar')==1
     
     %load in any existing data for this site and combine with new
     %measurements, then QAQC
-    check_archive_path(buoy_info.archive_path, SpotData);    
+    [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
     
-    [data] = load_archive_data(SpotData, archive_path);    
+    %check>0 means that directory already exists (and monthly file should
+    %exist); otherwise, this is the first data for this location 
+    if all(check)~=0        
+        [data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+        
+        %perform some QA/QC --- QARTOD 19 and QARTOD 20
+        
+        [data] = qaqc_bulkparams_realtime_website(data);
+        
+        %save data to different formats (hourly text files, monthly mat file
+        realtime_archive_text(data); 
+        realtime_archive_mat(data);                   
+    else
+        realtime_archive_mat(buoy_info, SpotData); 
+        realtime_website_text(data);         
+    end
     
-    %perform some QA/QC --- QARTOD 19 and QARTOD 20
-    
-    [data] = qaqc_bulkparams_realtime_website(data);
-
-    %save data to different formats (hourly text files, monthly mat file
-    realtime_archive_text(data); 
-    realtime_archive_mat(data);                   
-    
+        
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1

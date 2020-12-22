@@ -12,6 +12,7 @@ if size(ddv,1)==1
         data = dum.SpotData; 
     else
         disp('No monthly file exists');
+        data = SpotData; 
     end
 
 else   
@@ -21,6 +22,9 @@ else
         if exist(monthly_file)
             dum = load(monthly_file);
             data.(['data' num2str(i)]) = dum.SpotData; 
+        else
+            disp('No monthly file exists');
+            data.(['data' num2str(i)]) = SpotData; 
         end
     end
     

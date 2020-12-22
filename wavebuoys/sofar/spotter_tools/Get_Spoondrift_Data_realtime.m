@@ -43,7 +43,14 @@ if isfield(resp.Body.Data.data,'surfaceTemp')
         Spotter.temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
         Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
     end
+    
+    %temp only seems to record every hour, so duplicate measurements to
+    %maintain wave time stamps
+    Spotter.temp = [Spotter.temp; Spotter.temp]; 
+    Spotter.temp_time = [Spotter.temp_time; Spotter.temp_time]; 
 end
+
+%
 
 %check for wind data 
 if isfield(resp.Body.Data.data,'wind')

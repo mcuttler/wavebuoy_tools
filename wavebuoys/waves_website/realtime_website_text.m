@@ -10,14 +10,6 @@ year_path =[buoy_info.archive_path '\' buoy_info.name '\text_archive\' num2str(d
 month_path = [buoy_info.archive_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
 day_path = [buoy_info.archive_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d') '\' num2str(dv(3),'%02d')];
 
-if ~exist(day_path)
-    %check if month path exists
-    if ~exist(month_path)
-        %check year path
-        if ~exist(year_path)
-            mkdir(day_path); 
-        end
-        
             
         
         
