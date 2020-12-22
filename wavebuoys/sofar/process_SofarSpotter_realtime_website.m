@@ -22,14 +22,14 @@
 % 
 %     Author          | Date             | Script Version     | Update
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 09 Oct 2020  | 1.0                    | initial code
+%     M. Cuttler     | 22 Oct 2020  | 1.0                    | initial code
 %     creation 
 
 % 
 
 %%
 
-function [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk); 
+function [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_realtime_website(datapath, parserpath, parser, chunk); 
 
 dum = dir(datapath); 
 %remove initial entries as filler

@@ -19,61 +19,61 @@
 %     -------------------------------------------------------------------------------------------------------------------------
 %     M. Cuttler     | 26 Nov 2020 | 1.0                     | Initial creation
 % -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%     M. Cuttler     | 22 Dec 2020 | 1.0                     | Initial creation
 
-
-%% set initial paths for Spotter data to process and parser script
+%% set initial paths for wave buoy data to process and parser script
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
-addpath(genpath(homepath))
+buoycodes = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Hilarys'; 
-buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.serial = 'SPOT-0558'; %spotter serial number, or just Datawell 
+buoy_info.name = 'ExmouthGulf'; 
+buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
 buoy_info.DeployLoc = 'Testing';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -35; 
 buoy_info.DeployLon = 117; 
-buoy_info.archive_path = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\waves_website\CodeTesting\data_archive\NewSystem\'; 
+buoy_info.UpdateTime =  1; %hours
+buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.archive_path = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\waves_website\CodeTesting\data_archive\NewSystem';
+
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
-
-%inputs only for Datawell
-years = 2020; 
-months = 1:8; 
-
-
 
 %% process realtime mode data
 
 %Sofar Spotter (v1 and v2) 
-if strcmp(buoy_info.type,'sofar')==1
-    %set number of unique time poins to use for efficient processing (depends
-    %on computer specifications) 
-    limit = 2;     
-    [SpotData] = Get_Spoondrift_Data_realtime(buoy_info.serial, limit);     
+if strcmp(buoy_info.type,'sofar')==1        
+    
+    limit = buoy_info.UpdateTime*2; 
+    if strcmp(buoy_info.DataType,'parameters')
+        [SpotData] = Get_Spoondrift_Data_realtime(buoy_info.serial, limit);     
+    elseif strcmp(buoy_info.DataType,'spectral'); 
+        [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info.serial, limit);     
+    end                    
+    
+    for i = 1:size(SpotData.time,1)
+        SpotData.name{i,1} = buoy_info.name; 
+    end
     
     %load in any existing data for this site and combine with new
     %measurements, then QAQC
-    t1 = datenum(SpotData.time(1)); 
-    dv = datevec(t1); 
+    check_archive_path(buoy_info.archive_path, SpotData);    
     
+    [data] = load_archive_data(SpotData, archive_path);    
     
-
     %perform some QA/QC --- QARTOD 19 and QARTOD 20
     
-    [SpotData] = qaqc_bulkparams_realtime_website(SpotData);
+    [data] = qaqc_bulkparams_realtime_website(data);
 
     %save data to different formats (hourly text files, monthly mat file
-    realtime_archive_text(SpotData); 
-    realtime_archive_mat(SpotData); 
-              
+    realtime_archive_text(data); 
+    realtime_archive_mat(data);                   
     
-    
-    cd(homepath); 
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1

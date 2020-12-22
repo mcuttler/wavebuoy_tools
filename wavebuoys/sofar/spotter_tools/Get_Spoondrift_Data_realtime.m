@@ -14,32 +14,47 @@ import matlab.net.http.*
 header = matlab.net.http.HeaderField('token','e0eb70b6d9e0b5e00450929139ea34','spotterId',SpotterID);
 r = RequestMessage('GET', header);
 uri = URI(['https://wavefleet.spoondriftspotter.co/api/wave-data?spotterId=' SpotterID...
-    '&includeWindData=true&limit=' num2str(limit)]);
+    '&includeSurfaceTempData=true&includeWindData=true&limit=' num2str(limit)]);
 resp = send(r,uri);
 status = resp.StatusCode;
 
 disp(status);
 
-for j = 1:size(resp.Body.Data.data.waves)
-    Spotter.hsig(j,1) = resp.Body.Data.data.waves(j).significantWaveHeight;
-    Spotter.tp(j,1) = resp.Body.Data.data.waves(j).peakPeriod;
-    Spotter.tm(j,1) = resp.Body.Data.data.waves(j).meanPeriod;
-    Spotter.dp(j,1) = resp.Body.Data.data.waves(j).peakDirection;
-    Spotter.dpspr(j,1) = resp.Body.Data.data.waves(j).peakDirectionalSpread;
-    Spotter.dm(j,1) = resp.Body.Data.data.waves(j).meanDirection;
-    Spotter.dmspr(j,1) = resp.Body.Data.data.waves(j).meanDirectionalSpread;
-    Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
-    Spotter.lat(j,1) = resp.Body.Data.data.waves(j).latitude;
-    Spotter.lon(j,1) = resp.Body.Data.data.waves(j).longitude;
+%check for wave parameters
+if isfield(resp.Body.Data.data,'waves')
+    for j = 1:size(resp.Body.Data.data.waves)
+        Spotter.serialID{j,1} = SpotterID; 
+        Spotter.hsig(j,1) = resp.Body.Data.data.waves(j).significantWaveHeight;        
+        Spotter.tp(j,1) = resp.Body.Data.data.waves(j).peakPeriod;
+        Spotter.tm(j,1) = resp.Body.Data.data.waves(j).meanPeriod;
+        Spotter.dp(j,1) = resp.Body.Data.data.waves(j).peakDirection;
+        Spotter.dpspr(j,1) = resp.Body.Data.data.waves(j).peakDirectionalSpread;
+        Spotter.dm(j,1) = resp.Body.Data.data.waves(j).meanDirection;
+        Spotter.dmspr(j,1) = resp.Body.Data.data.waves(j).meanDirectionalSpread;
+        Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.lat(j,1) = resp.Body.Data.data.waves(j).latitude;
+        Spotter.lon(j,1) = resp.Body.Data.data.waves(j).longitude;
+    end
 end
 
-
-for j = 1:size(resp.Body.Data.data.wind)
-    Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;
-    Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;
-    Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
-    Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(j).seasurfaceId;
+%check for temperature data
+if isfield(resp.Body.Data.data,'surfaceTemp')
+    for j = 1:size(resp.Body.Data.data.surfaceTemp)
+        Spotter.temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
+        Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+    end
 end
+
+%check for wind data 
+if isfield(resp.Body.Data.data,'wind')
+    for j = 1:size(resp.Body.Data.data.wind)
+        Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;
+        Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;
+        Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(j).seasurfaceId;
+    end
+end
+
 end
 
 
