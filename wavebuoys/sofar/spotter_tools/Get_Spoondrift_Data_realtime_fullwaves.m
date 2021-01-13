@@ -11,41 +11,71 @@
 %M Cuttler
 
 %%
-function [Spotter] = Get_Spoondrift_Data_realtime_fullwaves(SpotterID);
+function [Spotter] = Get_Spoondrift_Data_realtime_fullwaves(SpotterID, limit);
 
 import matlab.net.*
 import matlab.net.http.*
 header = matlab.net.http.HeaderField('token','e0eb70b6d9e0b5e00450929139ea34','spotterId',SpotterID);
 r = RequestMessage('GET', header);
-uri = URI(['https://api.sofarocean.com/api/latest-data?spotterId=' SpotterID '&includeDirectionalMoments=true']);
+
+uri = URI(['https://api.sofarocean.com/api/wave-data?spotterId=' SpotterID...
+    '&includeSurfaceTempData=true&includeWindData=true&includeFrequencyData=true&includeDirectionalMoments=true&limit=' num2str(limit)]);
+
 resp = send(r,uri);
 status = resp.StatusCode;
 
 disp(status);
-%Buoy info
-Spotter.time = datenum(resp.Body.Data.data.waves.timestamp,'yyyy-mm-ddTHH:MM:SS');
-Spotter.lat = [resp.Body.Data.data.waves.latitude]';
-Spotter.lon = [resp.Body.Data.data.waves.longitude]';
 
-%Parametric variables
-Spotter.hsig = [resp.Body.Data.data.waves.significantWaveHeight]';
-Spotter.tp = [resp.Body.Data.data.waves.peakPeriod]';
-Spotter.tm = [resp.Body.Data.data.waves.meanPeriod]';
-Spotter.dp = [resp.Body.Data.data.waves.peakDirection]';
-Spotter.dpspr = [resp.Body.Data.data.waves.peakDirectionalSpread]';
-Spotter.dm = [resp.Body.Data.data.waves.meanDirection]';
-Spotter.dmspr = [resp.Body.Data.data.waves.meanDirectionalSpread]';
+if isfield(resp.Body.Data.data,'waves')
+    for j = 1:size(resp.Body.Data.data.waves)
+        Spotter.serialID{j,1} = SpotterID; 
+         Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.hsig(j,1) = resp.Body.Data.data.waves(j).significantWaveHeight;        
+        Spotter.tp(j,1) = resp.Body.Data.data.waves(j).peakPeriod;
+        Spotter.tm(j,1) = resp.Body.Data.data.waves(j).meanPeriod;
+        Spotter.dp(j,1) = resp.Body.Data.data.waves(j).peakDirection;
+        Spotter.dpspr(j,1) = resp.Body.Data.data.waves(j).peakDirectionalSpread;
+        Spotter.dm(j,1) = resp.Body.Data.data.waves(j).meanDirection;
+        Spotter.dmspr(j,1) = resp.Body.Data.data.waves(j).meanDirectionalSpread;       
+        Spotter.lat(j,1) = resp.Body.Data.data.waves(j).latitude;
+        Spotter.lon(j,1) = resp.Body.Data.data.waves(j).longitude;
+    end
+end
+
+%check for temperature data
+if isfield(resp.Body.Data.data,'surfaceTemp')
+    for j = 1:size(resp.Body.Data.data.surfaceTemp)
+        Spotter.temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
+        Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+    end    
+end
+
+%
+
+%check for wind data 
+if isfield(resp.Body.Data.data,'wind')
+    for j = 1:size(resp.Body.Data.data.wind)
+        Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;
+        Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;
+        Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(j).seasurfaceId;
+    end
+end
 
 %Spectral variables
-Spotter.a1 = resp.Body.Data.data.frequencyData.a1;
-Spotter.a2 = resp.Body.Data.data.frequencyData.a2;
-Spotter.b1 = resp.Body.Data.data.frequencyData.b1;
-Spotter.b2 = resp.Body.Data.data.frequencyData.b2;
-Spotter.varianceDensity = resp.Body.Data.data.frequencyData.varianceDensity;
-Spotter.frequency = resp.Body.Data.data.frequencyData.frequency;
-Spotter.df = resp.Body.Data.data.frequencyData.df;
-Spotter.directionalSpread = resp.Body.Data.data.frequencyData.directionalSpread;
-Spotter.direction = resp.Body.Data.data.frequencyData.direction;
+if isfield(resp.Body.Data.data,'frequencyData')
+    for j = 1:size(resp.Body.Data.data.frequencyData)
+        Spotter.a1 = resp.Body.Data.data.frequencyData.a1';
+        Spotter.a2 = resp.Body.Data.data.frequencyData.a2';
+        Spotter.b1 = resp.Body.Data.data.frequencyData.b1';
+        Spotter.b2 = resp.Body.Data.data.frequencyData.b2';
+        Spotter.varianceDensity = resp.Body.Data.data.frequencyData.varianceDensity';
+        Spotter.frequency = resp.Body.Data.data.frequencyData.frequency';
+        Spotter.df = resp.Body.Data.data.frequencyData.df';
+        Spotter.directionalSpread = resp.Body.Data.data.frequencyData.directionalSpread';
+        Spotter.direction = resp.Body.Data.data.frequencyData.direction';
+    end
+end
 
 end
 

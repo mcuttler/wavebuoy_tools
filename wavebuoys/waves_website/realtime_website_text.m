@@ -1,6 +1,6 @@
 %% archive buoy data to text file
 
-function [] = realtime_archive_text(buoy_info, data); 
+function [] = realtime_website_text(buoy_info, data); 
 
 %determine if path for current day exists
 t1 = datenum(data.time(1)); 

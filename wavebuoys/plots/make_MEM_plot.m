@@ -6,7 +6,7 @@
     %value) which causes dp and hs to be NaN
 %%
 
-function [] = make_MEM_plot(ndirec, freq, NE, hs, tp, dp, time, buoyname, pathMEMplot)
+function [] = make_MEM_plot(ndirec, freq, NE, hs, tp, dp, time, buoy_info)
 
         ndirec2 = [ndirec 360];
         NE_plot = [NE NE(:,1)];
@@ -50,22 +50,24 @@ function [] = make_MEM_plot(ndirec, freq, NE, hs, tp, dp, time, buoyname, pathME
         
 
         %store everything by year and month - save in folder corresponding to when data transmission (e.g. end of data acquisition) 
-        time2 = datevec(time+datenum(0,0,0,0,30,0));
+%         time2 = datevec(time+datenum(0,0,0,0,30,0));
+        time2 = datevec(time); 
         yr = num2str(time2(1));
         mo = num2str(time2(2),'%02d');
         %---------------------------------------------------------------------------
         %save MEMplot figure
-        if exist([pathMEMplot '\' yr])
-            if exist([pathMEMplot '\' yr '\' mo])
-                export_fig([pathMEMplot '\' yr '\' mo '\' buoyname '_MEMplot_' datestr(time,'yyyymmdd_HHMM') 'UTC'],'-jpg','-r200','-painters')
+        mempath = [buoy_info.archive_path '\' buoy_info.name '\mem_plot']; 
+        if exist([mempath '\' yr])
+            if exist([mempath '\' yr '\' mo])
+                export_fig([mempath '\' yr '\' mo '\' buoy_info.name '_MEMplot_' datestr(time,'yyyymmdd_HHMM') 'UTC'],'-jpg','-r200','-painters')
                 
             else
-                mkdir([pathMEMplot '\' yr '\' mo])
-                export_fig([pathMEMplot '\' yr '\' mo '\' buoyname '_MEMplot_' datestr(time,'yyyymmdd_HHMM') 'UTC'],'-jpg','-r200','-painters')
+                mkdir([mempath '\' yr '\' mo])
+                export_fig([mempath '\' yr '\' mo '\' buoy_info.name '_MEMplot_' datestr(time,'yyyymmdd_HHMM') 'UTC'],'-jpg','-r200','-painters')
             end
         else
-            mkdir([pathMEMplot '\' yr '\' mo])
-            export_fig([pathMEMplot '\' yr '\' mo '\' buoyname '_MEMplot_' datestr(time,'yyyymmdd_HHMM') 'UTC'],'-jpg','-r200','-painters')
+            mkdir([mempath '\' yr '\' mo])
+            export_fig([mempath '\' yr '\' mo '\' buoy_info.name '_MEMplot_' datestr(time,'yyyymmdd_HHMM') 'UTC'],'-jpg','-r200','-painters')
         end
         
         close(fid);

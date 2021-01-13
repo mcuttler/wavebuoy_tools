@@ -1,60 +1,54 @@
-%% code for running QA/QC on bulk parameters 
+%% code for running QA/QC on bulk parameters for website 
+%only relies on Hs and Tp as these data have clear spikes when GPS errors
+%occur for data 
+%also includes temperature qa/qc
 
+%Use qartod flags
+% 1 = pass
+% 2 = not assessed
+% 3 = suspect
+% 4 = fail; 
 
-function [bulkparams] = qaqc_bulkparams_realtime_website(bulkparams)
-%% QARTOD TESTS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [bulkparams] = qaqc_bulkparams_realtime_website(archive_data, new_data)
 
-
-check.time = bulkparams.time; 
-check.WVHGT = bulkparams.hs; 
-check.WVPD = bulkparams.tp; 
-check.WVDIR = bulkparams.dp; 
-check.WVSP = bulkparams.pkspr; 
-
-if isfield(bulkparams,'temp')
-    check.SST = bulkparams.temp; 
+%append new data and archived data
+fields = fieldnames(new_data); 
+for j = 1:size(fields,1)
+    bulkparams.(fields{j}) = [archive_data.(fields{j}); new_data.(fields{j})]; 
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% QARTOD TEST 19 - LT time series bulk wave parameters max/min/acceptable
-% range
+%bulkparams data 
+qaqc.time = bulkparams.time; 
+qaqc.WVHGT = bulkparams.hsig; 
+qaqc.WVPD = bulkparams.tp; 
+if isfield(bulkparams, 'temp_time')
+    qaqc.time_temp = bulkparams.temp_time; 
+    qaqc.SST = bulkparams.temp; 
+end
 
-%    User defined test criteria
-check.MINWH = 0.25;
-check.MAXWH = 8;
-check.MINWP = 3; 
-check.MAXWP = 25;
-check.MINSV = 0.07; 
-check.MAXSV = 65.0; 
+%settings for range test (QARTOD19) 
+qaqc.MINWH = 0.25;
+qaqc.MAXWH = 12;
+qaqc.MINWP = 3; 
+qaqc.MAXWP = 25;
+qaqc.MAXT = 45; 
+qaqc.MINT = 0; 
 
-check.MINWH = 0.25;
-check.MAXWH = 12;
-check.MINWP = 3; 
-check.MAXWP = 25;
-check.MINSV = 0.07; 
-check.MAXSV = 100.0; 
+%settings UWA 'master flag' test (combination of QARTOD19 and QARTOD20) -
+%requires 3 data points 
+qaqc.rocHs =0.5; 
+qaqc.HsLim = 10; 
+qaqc.rocTp = 8; 
+qaqc.TpLim = 25; 
+qaqc.rocSST = 1; 
 
-[bulkparams.qf19] = qartod_19_bulkparams_range(check); 
+if isfield(qaqc, 'time_temp')
+    [bulkparams.qf_waves, bulkparams.qf_sst] = qaqc_uwa_waves_website(qaqc); 
+else
+    [bulkparams.qf_waves, ~] = qaqc_uwa_waves_website(qaqc);
+end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% QARTOD TEST 20 - LT time series rate of change 
-
-%    User defined test criteria
-check_roc.time = bulkparams.time; 
-check_roc.data = bulkparams.hs; 
-check_roc.rate_of_change = 1; 
-
-[bulkparams.qf20] = qartod_20_rate_of_change(check_roc); 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Other tests
-
-% check.maxT = 25; 
-% check.diffHS = [0.5 1]; 
-% 
-% [bulkparams.qf_lims] = qaqc_bulkparams_limits(check); 
 
 
