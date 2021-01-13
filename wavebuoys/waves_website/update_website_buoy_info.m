@@ -34,7 +34,7 @@ end
 %re-write text file
 %create formatting strings
 
-fid = fopen([buoy_info.archive_path '\buoys_test.csv'],'w'); 
+fid = fopen([buoy_info.archive_path '\buoys.csv'],'w'); 
 
 for i = 1:size(web_data{1,1},1)
     for j = 1:size(web_data,2)
