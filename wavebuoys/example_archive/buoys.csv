@@ -1,0 +1,7 @@
+buoy_id,label,type,enabled,order,data,start_date,end_date,first_updated,last_updated
+1.000000,Torbay,Datawell,1.000000,1.000000,,1/07/2019,,,
+2.000000,Tantabiddi,Sofar,1.000000,2.000000,,,,,
+3.000000,Exmouth Gulf,Sofar,1.000000,3.000000,,,,,
+4.000000,Hilarys,Sofar,1.000000,4.000000,,,,,13/01/2021 08:04:31
+5.000000,Perth Canyon,Sofar,0.000000,1.000000,,1/02/2020,1/09/2020,,
+6.000000,KingGeorgeSound,Sofar,1.000000,5.000000,,16/12/2020,,12/16/2020,

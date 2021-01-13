@@ -34,15 +34,15 @@ addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0168'; %spotter serial number, or just Datawell 
-buoy_info.name = 'KingGeorgeSound'; 
+buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Hilarys'; 
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
 buoy_info.DeployLoc = 'Testing';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -35.079667; 
 buoy_info.DeployLon = 117.97900; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive';
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
@@ -108,10 +108,7 @@ if strcmp(buoy_info.type,'sofar')==1
     
         %code to update the buoy info master file for website to read 
         update_website_buoy_info(buoy_info, SpotData); 
-    end
-    
-
-    
+    end        
         
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
@@ -129,22 +126,7 @@ elseif strcmp(buoy_info.type,'triaxys')
     disp('No Triaxys code yet'); 
 end
 
-%% save as .mat file
-
-% outpathMAT = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data';
-% filenameMAT = [outpathMAT '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(bulkparams.time(1),'yyyymm') '_' datestr(bulkparams.time(end),'yyyymm')  '.mat'];         
-% vars = who; 
-% idx=[];
-% for jj = 1:length(vars); 
-%     if  isstruct(eval(vars{jj}))
-%         idx = [idx;jj];
-%     end
-% end        
-%         
-% save(filenameMAT,vars{idx}); 
-
 %%
-    
 
 
 
