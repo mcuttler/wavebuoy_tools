@@ -43,7 +43,7 @@ buoy_info.DeployLat = -35.079667;
 buoy_info.DeployLon = 117.97900; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\waves_website\CodeTesting\data_archive\NewSystem';
+buoy_info.archive_path = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive';
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
@@ -82,22 +82,35 @@ if strcmp(buoy_info.type,'sofar')==1
             %save data to different formats        
             realtime_archive_mat(buoy_info, data);                   
             realtime_archive_text(buoy_info, data, limit); 
+            %output MEM and SST plots 
+            if strcmp(buoy_info.DataType,'spectral')        
+                [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
+                make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
+                %     elseif strcmp(buoy_info.version, 'V2'); 
+                %         make_SST_plot()
+            end
+    
+            %code to update the buoy info master file for website to read 
+            update_website_buoy_info(buoy_info, data); 
         end
     else
         SpotData.qf_waves = ones(size(SpotData.time,1),1); 
         SpotData.qf_sst = ones(size(SpotData.time,1),1); 
         realtime_archive_mat(buoy_info, SpotData); 
-        realtime_archive_text(buoy_info, SpotData, limit);           
+        realtime_archive_text(buoy_info, SpotData, limit); 
+        %output MEM and SST plots 
+        if strcmp(buoy_info.DataType,'spectral')        
+            [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
+            make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
+            %     elseif strcmp(buoy_info.version, 'V2'); 
+            %         make_SST_plot()
+        end
+    
+        %code to update the buoy info master file for website to read 
+        update_website_buoy_info(buoy_info, SpotData); 
     end
     
-    %output MEM and SST plots 
-    if strcmp(buoy_info.DataType,'spectral')        
-        [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-        make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
-%     elseif strcmp(buoy_info.version, 'V2'); 
-%         make_SST_plot()
-    end
-    
+
     
         
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
