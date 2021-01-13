@@ -3,36 +3,50 @@
 function [] = update_website_buoy_info(buoy_info, data); 
 
 %read in existing data
-[num,txt,~] = xlsread([buoy_info.archive_path '\buoys.csv']); 
+fid = fopen([buoy_info.archive_path '\buoys.csv'],'r'); 
+fmt = '%s%s%s%s%s%s%s%s%s%s'; 
+web_data = textscan(fid, fmt, 'Delimiter',','); 
+fclose(fid);     
 
 %find column for 'last update'
-last_update = find(strcmp(txt(1,:),'last_updated')==1); 
-buoy = find(strcmp(txt(:,2),buoy_info.name)==1);
+for i = 1:size(web_data,2)
+    if strcmp(web_data{1,i}{1},'last_updated')
+        last_update = i; 
+    end
+end
+
+for i = 1:size(web_data{1,2},1)    
+    if strcmp(web_data{1,2}{i},buoy_info.name)
+        buoy = i;
+    end
+end       
 
 %update with last_updated
-txt{buoy,last_update} = datestr(data.time(end),'dd/mm/yyyy HH:MM:SS');
+web_data{1,last_update}{buoy} =  datestr(data.time(end),'dd/mm/yyyy HH:MM:SS');
+
 %update with first_updated if not included
-if isempty(txt{buoy, last_update-1})
+if isempty(web_data{1, last_update-1}{buoy})
     first_time = search_buoy_archive(buoy_info); 
-    txt{buoy,last_update-1} = first_time; 
+    web_data{1,last_update-1}{buoy} = first_time; 
 end
 
 
 %re-write text file
 %create formatting strings
 
-fid = fopen([buoy_info.archive_path '\buoys.csv'],'w'); 
-for i = 1:size(txt,1)
-    for j = 1:size(txt,2)
+fid = fopen([buoy_info.archive_path '\buoys_test.csv'],'w'); 
+
+for i = 1:size(web_data{1,1},1)
+    for j = 1:size(web_data,2)
         if i == 1
             fmt = {'%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s\n'}; 
-            fprintf(fid, fmt{j},txt{i,j});
+            fprintf(fid, fmt{j},web_data{1,j}{i});
         else
             fmt = {'%f,','%s,','%s,','%f,','%f,','%s,','%s,','%s,','%s,','%s\n'}; 
             if j == 1|j==4|j==5
-                fprintf(fid, fmt{j},num(i-1,j));
+                fprintf(fid, fmt{j},str2num(web_data{1,j}{i}));
             else
-                fprintf(fid, fmt{j},txt{i,j});
+                fprintf(fid, fmt{j}, web_data{1,j}{i}); 
             end
         end
     end
