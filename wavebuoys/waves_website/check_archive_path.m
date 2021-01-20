@@ -4,9 +4,9 @@
 
 
 %%
-function [check] = check_archive_path(datapath,buoy_info, SpotData); 
+function [check] = check_archive_path(datapath,buoy_info, data); 
 check = [];
-dv = datevec(SpotData.time); 
+dv = datevec(data.time); 
 
 %check to see if the time points are same month or different months
 if dv(1,1)==dv(end,1) %same year

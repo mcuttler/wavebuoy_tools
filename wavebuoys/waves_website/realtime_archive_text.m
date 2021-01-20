@@ -22,21 +22,14 @@ for ii = 1:length(num)
     dataout.time = posixtime(datetime(dv)); 
     dataout.sitename = buoy_info.name; 
     dataout.buoy_id = buoy_info.serial; 
-    dataout.hs = data.hsig(num(ii)); 
-    dataout.tp = data.tp(num(ii)); 
-    dataout.tm = data.tm(num(ii)); 
-    dataout.dp = data.dp(num(ii)); 
-    dataout.dpspr = data.dpspr(num(ii)); 
-    dataout.dm = data.dm(num(ii)); 
-    dataout.dmspr = data.dmspr(num(ii)); 
-    dataout.qf_waves = data.qf_waves(num(ii)); 
-    dataout.wind_speed = data.wind_speed(num(ii)); 
-    dataout.wind_dir = data.wind_dir(num(ii)); 
-    dataout.blank1 = -9999;
-    dataout.blank2 = -9999;
-    dataout.blank3 = -9999;
-    dataout.blank4 = -9999;
-    dataout.blank5 = -9999;
+    fields = {'hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','wind_speed','wind_dir','curr_mag','curr_dir','blank1','blank2','blank3'};
+    for jj = 1:length(fields)
+        if isfield(data,fields{jj})
+            dataout.(fields{jj}) = data.(fields{jj})(num(ii));
+        else
+            dataout.(fields{jj}) = -9999; 
+        end
+    end        
     
     if isfield(data, 'temp_time')
         tidx = find(data.temp_time==data.time(num(ii))); 
@@ -69,18 +62,19 @@ for ii = 1:length(num)
     %         13. qf_sst, 
     %         14. wind_speed
     %         15. wind_direction,
-    %         16. blank,
-    %         17. blank,
+    %         16. current_magnitude,
+    %         17. current_direction,
     %         18. blank,
     %         19. blank,
     %         20. blank                  
+    
     if ~exist(archive_path)
         mkdir(archive_path); 
         day_file = [archive_path '\' buoy_info.name '_' num2str(dv(1)) num2str(dv(2),'%02d') num2str(dv(3),'%02d') '.csv'];     
         fid = fopen(day_file,'a'); 
-        fprintf(fid,'Time (UTC), Site, BuoyID, Hs (m), Tp (s), Tm (s), Dp (deg), DpSpr (deg), Dm (deg), DmSpr (deg), QF_waves, SST (degC), QF_sst, WindSpeed (m/s), WindDirec (deg), blank, blank, blank, blank, blank \n');                 
+        fprintf(fid,'Time (UTC), Site, BuoyID, Hsig (m), Tp (s), Tm (s), Dp (deg), DpSpr (deg), Dm (deg), DmSpr (deg), QF_waves, SST (degC), QF_sst, WindSpeed (m/s), WindDirec (deg), CurrmentMag (m/s), CurrentDir (deg), blank, blank, blank \n');                 
         fmt = {'%f,','%s,', '%s,', '%f,', '%f,', '%f,', '%f,','%f,', '%f,', '%f,', '%f,', '%f,' ,'%f,', '%f,','%f,','%f,','%f,','%f,','%f,','%f \n'};
-        fields = {'time','sitename','buoy_id','hs','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','wind_speed','wind_dir','blank1','blank2','blank3','blank4','blank5'}; 
+        fields = {'time','sitename','buoy_id','hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','wind_speed','wind_dir','curr_mag','curr_dir','blank1','blank2','blank3'}; 
         for j = 1:length(fields); 
             fprintf(fid, fmt{j}, dataout.(fields{j}));
         end
@@ -90,7 +84,7 @@ for ii = 1:length(num)
         if exist(day_file)
             fid = fopen(day_file,'a'); 
             fmt = {'%f,','%s,', '%s,', '%f,', '%f,', '%f,', '%f,','%f,', '%f,', '%f,', '%f,', '%f,' ,'%f,', '%f,','%f,','%f,','%f,','%f,','%f,','%f \n'};
-            fields = {'time','sitename','buoy_id','hs','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','wind_speed','wind_dir','blank1','blank2','blank3','blank4','blank5'}; 
+            fields = {'time','sitename','buoy_id','hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','wind_speed','wind_dir','curr_mag','curr_dir','blank1','blank2','blank3'}; 
             for j = 1:length(fields); 
                 fprintf(fid, fmt{j}, dataout.(fields{j}));
             end
@@ -99,7 +93,7 @@ for ii = 1:length(num)
             fid = fopen(day_file,'a');
             fprintf(fid,'Time (UTC), Site, BuoyID, Hs (m), Tp (s), Tm (s), Dp (deg), DpSpr (deg), Dm (deg), DmSpr (deg), QF_waves, SST (degC), QF_sst, WindSpeed (m/s), WindDirec (deg), blank, blank, blank, blank, blank \n');                 
             fmt = {'%f,','%s,', '%s,', '%f,', '%f,', '%f,', '%f,','%f,', '%f,', '%f,', '%f,', '%f,' ,'%f,', '%f,','%f,','%f,','%f,','%f,','%f,','%f \n'};
-            fields = {'time','sitename','buoy_id','hs','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','wind_speed','wind_dir','blank1','blank2','blank3','blank4','blank5'}; 
+            fields = {'time','sitename','buoy_id','hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','wind_speed','wind_dir','curr_mag','curr_dir','blank1','blank2','blank3'}; 
             for j = 1:length(fields); 
                 fprintf(fid, fmt{j}, dataout.(fields{j}));
             end

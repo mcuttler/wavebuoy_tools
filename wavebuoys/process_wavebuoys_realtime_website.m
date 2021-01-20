@@ -19,10 +19,10 @@
 %     -------------------------------------------------------------------------------------------------------------------------
 %     M. Cuttler     | 26 Nov 2020 | 1.0                     | Initial creation
 % -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 22 Dec 2020 | 1.0                     | Update code
+%     M. Cuttler     | 22 Dec 2020 | 1.1                     | Update code
 %                                                                           for handling Spotter data
 %--------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 22 Dec 2020 | 1.0                     | Update code
+%     M. Cuttler     | 14 Jan 2021 | 1.2                     | Update code
 %                                                                           for handling Datawell data
 
 %% set initial paths for wave buoy data to process and parser script
@@ -33,17 +33,19 @@ buoycodes = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys';
 addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
-buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Hilarys'; 
-buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
-buoy_info.DeployLoc = 'Testing';
+buoy_info.type = 'datawell'; 
+buoy_info.serial = 'Datawell'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Torbay'; 
+buoy_info.datawell_name = 'Dev_site'; 
+buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
+buoy_info.DeployLoc = 'Torbay';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -35.079667; 
 buoy_info.DeployLon = 117.97900; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive';
+buoy_info.datawell_datapath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\waves_website\CodeTesting\waved'; %top level directory for Datawell CSVs
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
@@ -113,13 +115,31 @@ if strcmp(buoy_info.type,'sofar')==1
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
-    for yy = 1:length(years); 
-        for mm = 1:length(months);             
+    %pull in data
+    data.time = datenum(now); 
+    data.tnow = datevec(data.time); 
+ 
+    data.file20 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF20}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
+    data.file21 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF21}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
+    data.file25 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF25}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
+    data.file28 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF28}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
+    data.file82 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF82}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];    
+    
+    %organise data from CSVs into structure
+    [dw_data] = organize_datawell_data(buoy_info, data); 
+    
+    %existing datawell code already does this --- probably easiest to just
+    %modify that code to produce waves and temp_curr structures, then do
+    %QAQC, then archive 
+    [check] = check_archive_path(buoy_info.archive_path, buoy_info, data);    
+    
+    [waves,temp_curr] = Process_Datawell_realtime_DevSite(file20, file21, file25, file28, file82,yr, mm);
+
+    
             
-%             [bulkparams, displacements, locations, spec, sst] = process_Datawell_delayed_mode();
+
             
-        end
-    end    
+
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Triaxys
 elseif strcmp(buoy_info.type,'triaxys')

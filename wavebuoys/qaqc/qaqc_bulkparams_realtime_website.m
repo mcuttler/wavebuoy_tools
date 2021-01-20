@@ -9,12 +9,16 @@
 % 3 = suspect
 % 4 = fail; 
 
-function [bulkparams] = qaqc_bulkparams_realtime_website(archive_data, new_data)
+function [bulkparams] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, new_data)
 
 %append new data and archived data
-fields = fieldnames(new_data); 
-for j = 1:size(fields,1)
-    bulkparams.(fields{j}) = [archive_data.(fields{j}); new_data.(fields{j})]; 
+if strcmp(buoy_info.type,'sofar')
+    fields = fieldnames(new_data); 
+    for j = 1:size(fields,1)
+        bulkparams.(fields{j}) = [archive_data.(fields{j}); new_data.(fields{j})]; 
+    end
+elseif strcmp(buoy_info.type,'datawell'); 
+    bulkparams = new_data; 
 end
 
 %bulkparams data 
