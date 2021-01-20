@@ -24,7 +24,7 @@ for ii = 1:m
     a2 = dumm2.*cos(theta2) - dumn2.*sin(theta2);
     b2 = dumm2.*sin(theta2) + dumn2.*cos(theta2);                       
     
-    % Computer frequency for direction wave rider (DWR) 4 - pg 25 in Datawell manual    
+    % Compute frequency for direction wave rider (DWR) 4 - pg 25 in Datawell manual    
     %f(k) = 0.025+0.005*k for 0<k<46   (0.025 to 0.25 Hz)
     %f(k) = -0.20+0.010*k for 46<k<79  (0.26 to 0.58 Hz)
     %f(k) = -0.98+0.020*k for 79<k<100 (0.6 to 1.00 Hz)
@@ -51,6 +51,7 @@ for ii = 1:m
     hs = spec_params(ii,1);
     tp = spec_params(ii,2);
     dp = rad2deg(spec_params(ii,3));
+    
     make_MEM_plot(ndirec, freq, NE(:,:,ii), hs, tp, dp, timewave, buoyname, pathMEMplot);
     
     %write 1D and 2D spectra to text

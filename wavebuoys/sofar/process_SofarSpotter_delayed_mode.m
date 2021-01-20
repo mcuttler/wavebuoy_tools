@@ -106,47 +106,47 @@ for j = 1:size(fidx,2)
         for k = 1:size(dirFlags,2); 
             if dirFlags(k)>0
                 %check is sst exists
-                if exist([datapath '\tmp\sst.csv']); 
+                if exist([datapath '\tmp\' subdir(k).name '\sst.csv']); 
                     filenames = {'bulkparameters','location','displacement','sst', 'a1','a2','b1','b2','Sxx','Syy','Szz'};                    
                 else
-                    filenames = {'bulkparameters','location','displacement', 'a1','a2','b1','b2','Sxx','Syy','Szz'};                     
-                end
+                    filenames = {'bulkparameters','location','displacement', 'a1','a2','b1','b2','Sxx','Syy','Szz'};
+                end                
                 
                 for kk = 1:length(filenames)
-                    if strcmp(filenames{kk},'bulkparameters') | strcmp(filenames{kk},'location') | strcmp(filenames{kk},'displacement') | strcmp(filenames{kk},'sst')
-                        dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv']); 
-                        data = dumdata.data;             
-                        if kk == 1
-                            bulkparams.time = [bulkparams.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                            bulkparams.hs = [bulkparams.hs; data(:,8)];
-                            bulkparams.tm = [bulkparams.tm; data(:,9)];
-                            bulkparams.tp = [bulkparams.tp; data(:,10)]; 
-                            bulkparams.dm = [bulkparams.dm; data(:,11)];
-                            bulkparams.dp = [bulkparams.dp; data(:,12)]; 
-                            bulkparams.meanspr = [bulkparams.meanspr; data(:,13)];
-                            bulkparams.pkspr = [bulkparams.pkspr; data(:,14)]; 
-                        elseif kk == 2
-                            locations.time = [locations.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                            locations.lat = [locations.lat; data(:,8)]; 
-                            locations.lon = [locations.lon; data(:,9)];
-                        elseif kk == 3
-                            displacements.time = [displacements.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                            displacements.x = [displacements.x; data(:,8)];
-                            displacements.y = [displacements.y; data(:,9)];
-                            displacements.z = [displacements.z; data(:,10)]; 
+                    if exist([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'])
+                        if strcmp(filenames{kk},'bulkparameters') | strcmp(filenames{kk},'location') | strcmp(filenames{kk},'displacement') | strcmp(filenames{kk},'sst')
+                            dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv']); 
+                            data = dumdata.data;             
+                            if kk == 1
+                                bulkparams.time = [bulkparams.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                                bulkparams.hs = [bulkparams.hs; data(:,8)];
+                                bulkparams.tm = [bulkparams.tm; data(:,9)];
+                                bulkparams.tp = [bulkparams.tp; data(:,10)]; 
+                                bulkparams.dm = [bulkparams.dm; data(:,11)];
+                                bulkparams.dp = [bulkparams.dp; data(:,12)]; 
+                                bulkparams.meanspr = [bulkparams.meanspr; data(:,13)];
+                                bulkparams.pkspr = [bulkparams.pkspr; data(:,14)]; 
+                            elseif kk == 2
+                                locations.time = [locations.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                                locations.lat = [locations.lat; data(:,8)]; 
+                                locations.lon = [locations.lon; data(:,9)];
+                            elseif kk == 3
+                                displacements.time = [displacements.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                                displacements.x = [displacements.x; data(:,8)];
+                                displacements.y = [displacements.y; data(:,9)];
+                                displacements.z = [displacements.z; data(:,10)]; 
+                            end
+                        else
+                            dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'],',',1);
+                            data = dumdata.data; 
+                            if strcmp(filenames{kk},'a1');                 
+                                spec.freq = str2double(dumdata.textdata(9:end)); 
+                                spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                            end
+                            eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; data(:,9:end)];']);
                         end
-                    else
-                        dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'],',',1);
-                        data = dumdata.data; 
-                        if strpcmp(filenames{kk},'a1');                 
-                            spec.freq = str2double(dumdata.textdata(9:end)); 
-                            spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                        end
-                        
-                        eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; data(:,9:end)];']);
                     end
-                end
-                
+                end                
                 rmdir([datapath '\tmp\' subdir(k).name],'s');
             end
         end
@@ -158,46 +158,48 @@ for j = 1:size(fidx,2)
         end
         
         for kk = 1:length(filenames)
-            if strcmp(filenames{kk},'bulkparameters') | strcmp(filenames{kk},'location') | strcmp(filenames{kk},'displacement') | strcmp(filenames{kk},'sst')
-                dumdata = importdata([filenames{kk} '.csv']); 
-                data = dumdata.data;             
-                if strcmp(filenames{kk},'bulkparameters'); 
-                    bulkparams.time = [bulkparams.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                    bulkparams.hs = [bulkparams.hs; data(:,8)];
-                    bulkparams.tm = [bulkparams.tm; data(:,9)];
-                    bulkparams.tp = [bulkparams.tp; data(:,10)]; 
-                    bulkparams.dm = [bulkparams.dm; data(:,11)];
-                    bulkparams.dp = [bulkparams.dp; data(:,12)]; 
-                    bulkparams.meanspr = [bulkparams.meanspr; data(:,13)];
-                    bulkparams.pkspr = [bulkparams.pkspr; data(:,14)]; 
-                elseif strcmp(filenames{kk},'location'); 
-                    locations.time = [locations.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                    locations.lat = [locations.lat; data(:,8)]; 
-                    locations.lon = [locations.lon; data(:,9)];
-                elseif strcmp(filenames{kk},'displacement'); 
-                    displacements.time = [displacements.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                    displacements.x = [displacements.x; data(:,8)];
-                    displacements.y = [displacements.y; data(:,9)];
-                    displacements.z = [displacements.z; data(:,10)]; 
-                elseif strcmp(filenames{kk},'sst'); 
-                    sst.time = [sst.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                    sst.sst = [sst.sst; data(:,8)];
+            if exist([datapath '\tmp\' filenames{kk} '.csv'])
+                if strcmp(filenames{kk},'bulkparameters') | strcmp(filenames{kk},'location') | strcmp(filenames{kk},'displacement') | strcmp(filenames{kk},'sst')
+                    dumdata = importdata([filenames{kk} '.csv']); 
+                    data = dumdata.data;             
+                    if strcmp(filenames{kk},'bulkparameters'); 
+                        bulkparams.time = [bulkparams.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                        bulkparams.hs = [bulkparams.hs; data(:,8)];
+                        bulkparams.tm = [bulkparams.tm; data(:,9)];
+                        bulkparams.tp = [bulkparams.tp; data(:,10)]; 
+                        bulkparams.dm = [bulkparams.dm; data(:,11)];
+                        bulkparams.dp = [bulkparams.dp; data(:,12)]; 
+                        bulkparams.meanspr = [bulkparams.meanspr; data(:,13)];
+                        bulkparams.pkspr = [bulkparams.pkspr; data(:,14)]; 
+                    elseif strcmp(filenames{kk},'location'); 
+                        locations.time = [locations.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                        locations.lat = [locations.lat; data(:,8)]; 
+                        locations.lon = [locations.lon; data(:,9)];
+                    elseif strcmp(filenames{kk},'displacement'); 
+                        displacements.time = [displacements.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                        displacements.x = [displacements.x; data(:,8)];
+                        displacements.y = [displacements.y; data(:,9)];
+                        displacements.z = [displacements.z; data(:,10)]; 
+                    elseif strcmp(filenames{kk},'sst'); 
+                        sst.time = [sst.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                        sst.sst = [sst.sst; data(:,8)];
+                    end
+                else
+                    dumdata = importdata([filenames{kk} '.csv'],',',1);
+                    data = dumdata.data; 
+                    if strcmp(filenames{kk},'a1')                   
+                        spec.freq = str2double(dumdata.textdata(9:end)); 
+                        spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                    end
+                    
+                    eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; dumdata.data(:,9:end)];']);
+                    
                 end
-            else
-                dumdata = importdata([filenames{kk} '.csv'],',',1);
-                data = dumdata.data; 
-                if strcmp(filenames{kk},'a1')                   
-                    spec.freq = str2double(dumdata.textdata(9:end)); 
-                    spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
-                end
-               
-                eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; dumdata.data(:,9:end)];']);                            
-                
             end
-        end                                                                                                                                                  
-        
+            
+        end
     end
-    disp(['Finished chunk ' num2str(j) ' out of ' num2str(size(fidx,2))]); 
+    disp(['Finished chunk ' num2str(j) ' out of ' num2str(size(fidx,2))]);
     clc
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

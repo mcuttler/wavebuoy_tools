@@ -46,6 +46,8 @@
 %                                                                           operation (pull inputs out of function loop), and incorporate into
 %                                                                           Process_SofarSpotty_delayed_mode code
 % --------------------------------------------------------------------------------------------------------------------------------  
+%    M. Cuttler      | 26 Nov 2020 | 1.2                      | Modify such
+%                                                                           that flag fail if wave period greater than max wave period
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,7 +67,7 @@ for ii=1:length(in.WVHGT)
    elseif in.WVPD(ii) < in.MINWP
        QCFlag(ii) = 3;
    elseif in.WVPD(ii) > in.MAXWP
-       QCFlag(ii) = 3;
+       QCFlag(ii) = 4;
    elseif in.WVDIR(ii) < 0
        QCFlag(ii) = 3;
    elseif in.WVDIR(ii) > 360
