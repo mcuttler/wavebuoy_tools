@@ -27,7 +27,8 @@ qaqc.WVHGT = bulkparams.hsig;
 qaqc.WVPD = bulkparams.tp; 
 if isfield(bulkparams, 'temp_time')
     qaqc.time_temp = bulkparams.temp_time; 
-    qaqc.SST = bulkparams.temp; 
+    qaqc.SST = bulkparams.surf_temp; 
+    qaqc.BOTT_TEMP = bulkparams.bott_temp; 
 end
 
 %settings for range test (QARTOD19) 
@@ -47,7 +48,7 @@ qaqc.TpLim = 25;
 qaqc.rocSST = 1; 
 
 if isfield(qaqc, 'time_temp')
-    [bulkparams.qf_waves, bulkparams.qf_sst] = qaqc_uwa_waves_website(qaqc); 
+    [bulkparams.qf_waves, bulkparams.qf_sst, bulkparams.qf_bott_temp] = qaqc_uwa_waves_website(qaqc); 
 else
     [bulkparams.qf_waves, ~] = qaqc_uwa_waves_website(qaqc);
 end

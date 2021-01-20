@@ -115,31 +115,70 @@ if strcmp(buoy_info.type,'sofar')==1
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
-    %pull in data
     data.time = datenum(now); 
     data.tnow = datevec(data.time); 
- 
+    
     data.file20 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF20}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
     data.file21 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF21}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
     data.file25 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF25}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
     data.file28 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF28}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
     data.file82 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF82}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];    
     
-    %organise data from CSVs into structure
-    [dw_data] = organize_datawell_data(buoy_info, data); 
+    %original code for Datawell buoys does all checking of directories and
+    %grabbing archived data
+    [dw_data, archive_data,check] = Process_Datawell_realtime_website(buoy_info, data, data.file20, data.file21, data.file25, data.file28, data.file82);
+    clear data; 
     
-    %existing datawell code already does this --- probably easiest to just
-    %modify that code to produce waves and temp_curr structures, then do
-    %QAQC, then archive 
-    [check] = check_archive_path(buoy_info.archive_path, buoy_info, data);    
+    %check that it's new data
     
-    [waves,temp_curr] = Process_Datawell_realtime_DevSite(file20, file21, file25, file28, file82,yr, mm);
-
-    
-            
-
-            
-
+    if all(check)~=0
+        if ~isempty(archive_data)
+            if size(dw_data.time,1)>size(archive_data.time,1)
+                %perform some QA/QC --- QARTOD 19 and QARTOD 20        
+                [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, dw_data);                        
+                
+                %save data to different formats        
+                realtime_archive_mat(buoy_info, data);      
+                limit = 1;         
+                realtime_archive_text(buoy_info, data, limit);             
+                
+                %output MEM and SST plots 
+                plot_idx = find(data.time>archive_data.time(end)); 
+                if strcmp(buoy_info.DataType,'spectral')                        
+                    for ii = 1:size(plot_idx,1); 
+                        [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
+                        make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
+                    end
+                    %             elseif strcmp(buoy_info.version, 'V2');
+                    %                 make_SST_plot(buoy_info, dw_data.temp_time, dw_data.time, plot_idx); 
+                end
+                
+                %code to update the buoy info master file for website to read
+                update_website_buoy_info(buoy_info, data); 
+            end
+        end
+    else
+        dw_data.qf_waves = ones(size(dw_data.time,1),1).*4;
+        dw_data.qf_sst = ones(size(dw_data.temp_time,1),1).*4; 
+        dw_data.qf_bott_temp =ones(size(dw_data.temp_time,1),1).*4; 
+        realtime_archive_mat(buoy_info, dw_data); 
+        limit = 1; 
+        realtime_archive_text(buoy_info, dw_data, limit); 
+        
+        %output MEM and SST plots 
+        if strcmp(buoy_info.DataType,'spectral')        
+            for ii = 1:size(dw_data.a1,1); 
+                [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
+                make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
+            end
+            %     elseif buoy_info.plot_SST==1;
+            %         plot_idx = 0; %plot all available time points         
+            %         make_SST_plot(buoy_info, dw_data.temp_time, dw_data.temp)
+        end
+        
+        %code to update the buoy info master file for website to read
+        update_website_buoy_info(buoy_info, dw_data); 
+    end
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Triaxys
 elseif strcmp(buoy_info.type,'triaxys')

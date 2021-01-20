@@ -171,7 +171,7 @@ else
         time82(i,1) = (str2num(data82.textdata{i,1}).*(1/60).*(1/60).*(1/24))+RefTime;
     end        
 
-    dw_vars = {'E','theta','s','m2','n2','time','a1','a2','b1','b2','freq','ndirec','hsig','tp','dp','dpspr', 'curr_mag','curr_dir','curr_mag_std','curr_dir_std','temp','w','w_std','temp_time'}; 
+    dw_vars = {'E','theta','s','m2','n2','time','a1','a2','b1','b2','freq','ndirec','hsig','tp','dp','dpspr', 'curr_mag','curr_dir','curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std'}; 
     for i = 1:length(dw_vars)
         data.(dw_vars{i}) = []; 
     end

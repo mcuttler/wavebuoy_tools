@@ -1,6 +1,6 @@
 %% quality control real time waves data for display on website 
 
-function [qf_waves, qf_sst] = qaqc_uwa_waves_website(qaqc); 
+function [qf_waves, qf_sst, qf_bott_temp] = qaqc_uwa_waves_website(qaqc); 
 
 %need at least 3 points to run 'UWA master code'
 % if size(qaqc.time,1)>=3
@@ -66,6 +66,26 @@ function [qf_waves, qf_sst] = qaqc_uwa_waves_website(qaqc);
         end
     end
     
+    %BOTT_TEMP
+    if isfield(qaqc,'time_temp')
+        for ii = 1:size(qaqc.time_temp,1)        
+            %range test
+            if qaqc.BOTT_TEMP(ii)<qaqc.MINT | qaqc.BOTT_TEMP(ii)>qaqc.MAXT 
+                qf_bott_temp_dum(ii,1) = 4;
+            else
+                qf_bott_temp_dum(ii,1)=1;
+            end
+            %rate of change test
+            if ii>1
+                if abs(diff(qaqc.BOTT_TEMP(ii-1:ii)))>qaqc.rocSST
+                    qf_bott_temp_dum(ii,2) = 4;
+                else
+                    qf_bott_temp_dum(ii,2) = 1;
+                end
+            end
+        end
+    end
+    
     %clean up and make output variables
     for ii = 1:size(qaqc.time,1)
         if any(qf_waves_dum(ii,:)>1)
@@ -85,6 +105,18 @@ function [qf_waves, qf_sst] = qaqc_uwa_waves_website(qaqc);
         end
     else
         qf_sst = nan; 
+    end
+    
+    if isfield(qaqc,'time_temp')
+        for ii = 1:size(qaqc.time_temp,1)
+            if any(qf_bott_temp_dum(ii,:)>1)
+                qf_bott_temp(ii,1) = 4; 
+            else
+                qf_bott_temp(ii,1) = 1;
+            end
+        end
+    else
+        qf_bott_temp = nan;
     end
     
 % end              

@@ -92,12 +92,14 @@ for ii = 1:m
     %7 - std (direction to (rad)
     data.curr_dir_std = [data.curr_dir_std;rad2deg(TC(ii,4))];
     %11 - water temp (records in K, convert to degC)
-    data.temp = [data.temp; TC(ii,8)-273.15];
+    data.surf_temp = [data.surf_temp; TC(ii,8)-273.15];
     %13 - vertical velocity (m/s)
     data.w = [data.w; TC(ii,10)];
     %14 - std of veritcal velocity (m/s)
     data.w_std = [data.w_std; TC(ii,11)];
     data.temp_time = [data.temp_time; temp_time(ii,1)];
+    %Datawell moorings do not have bottom temperature
+    data.bott_temp = [data.bott_temp; -9999]; 
 end
     
 end
