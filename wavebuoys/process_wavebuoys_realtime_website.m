@@ -33,15 +33,15 @@ buoycodes = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys';
 addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
-buoy_info.type = 'datawell'; 
-buoy_info.serial = 'Datawell'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Torbay'; 
-buoy_info.datawell_name = 'Dev_site'; 
-buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
-buoy_info.DeployLoc = 'Torbay';
+buoy_info.type = 'sofar'; 
+buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Hilarys'; 
+buoy_info.datawell_name = 'nan'; 
+buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.DeployLoc = 'Hilarys';
 buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -35.079667; 
-buoy_info.DeployLon = 117.97900; 
+buoy_info.DeployLat = -31.8516; 
+buoy_info.DeployLon = 115.6469; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive';
