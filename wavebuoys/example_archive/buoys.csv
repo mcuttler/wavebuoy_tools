@@ -1,6 +1,6 @@
 buoy_id,label,type,enabled,order,data,start_date,end_date,first_updated,last_updated
 1.000000,Torbay,Datawell,1.000000,1.000000,spectral-temp,1/07/2019,,11/01/2020,18/01/2021 06:30:00
-2.000000,Tantabiddi,Sofar,1.000000,2.000000,parameters-temp,,,,
+2.000000,Tantabiddi,Sofar,1.000000,2.000000,parameters-temp,,,20/01/2021,20/01/2021 02:03:19
 3.000000,ExmouthGulf,Sofar,1.000000,3.000000,parameters-temp,,,,
 4.000000,Hilarys,Sofar,1.000000,4.000000,parameters,,,,13/01/2021 8:04
 5.000000,Perth Canyon,Sofar,0.000000,1.000000,spectral,1/02/2020,1/09/2020,,

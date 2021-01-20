@@ -45,11 +45,20 @@ end
 %check for temperature data
 if isfield(resp.Body.Data.data,'surfaceTemp')
     for j = 1:size(resp.Body.Data.data.surfaceTemp)
-        Spotter.temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
+        Spotter.surf_temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
         Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
-    end    
+    end
+    %check for bottom temperature data
+    if isfield(resp.Body.Data.data,'bottomTemp')
+        for j = 1:size(resp.Body.Data.data.bottomTemp)
+            Spotter.bott_temp(j,1) = resp.Body.Data.data.bottomTemp(j).degrees;
+        end
+    else
+        for j = 1:size(resp.Body.Data.data.surfaceTemp)
+            Spotter.bott_temp(j,1)= -9999; 
+        end
+    end               
 end
-
 %
 
 %check for wind data 

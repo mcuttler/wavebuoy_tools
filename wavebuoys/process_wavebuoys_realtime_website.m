@@ -34,10 +34,10 @@ addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Hilarys'; 
+buoy_info.serial = 'SPOT-0558'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Tantabiddi'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
 buoy_info.DeployLoc = 'Hilarys';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -31.8516; 
@@ -96,10 +96,12 @@ if strcmp(buoy_info.type,'sofar')==1
             update_website_buoy_info(buoy_info, data); 
         end
     else
-        SpotData.qf_waves = ones(size(SpotData.time,1),1); 
-        SpotData.qf_sst = ones(size(SpotData.time,1),1); 
+        SpotData.qf_waves = ones(size(SpotData.time,1),1).*4; 
+        SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4; 
+        SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
         realtime_archive_mat(buoy_info, SpotData); 
         realtime_archive_text(buoy_info, SpotData, limit); 
+        
         %output MEM and SST plots 
         if strcmp(buoy_info.DataType,'spectral')        
             [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
