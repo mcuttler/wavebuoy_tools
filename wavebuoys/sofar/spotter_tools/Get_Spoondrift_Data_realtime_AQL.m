@@ -1,10 +1,6 @@
 %% Get Spoondrift Buoy Data
 
-% Accesses Spoondrift API to get most recent data from specified Spotter
-% SpotterID is string of Spotter name - i.e. 'SPOT-0093'
-
-%v1 Nov 2018
-%M Cuttler
+% Code for Aqualink Smart Moorings
 
 % AQL token: a1b3c0dbaa16bb21d5f0befcbcca51
 % Please don't use the latest-data endpoint
@@ -12,7 +8,9 @@
 
 
 %%
-function [Spotter] = Get_Spoondrift_Data_realtime(SpotterID,limit);
+function [Spotter] = Get_Spoondrift_Data_realtime_AQL(SpotterID,limit);
+%can we use the 'limit' to figure out the time range? 
+%wave data and temp/pressure data will require different endpoint URI
 
 import matlab.net.*
 import matlab.net.http.*
