@@ -34,11 +34,11 @@ addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0559'; %spotter serial number, or just Datawell 
-buoy_info.name = 'ExmouthGulf'; 
+buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Hilarys'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
-buoy_info.DeployLoc = 'ExmouthGulf';
+buoy_info.DeployLoc = 'Hilarys';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -31.8516; 
 buoy_info.DeployLon = 115.6469; 
