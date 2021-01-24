@@ -34,11 +34,11 @@ addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0558'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Tantabiddi'; 
+buoy_info.serial = 'SPOT-0559'; %spotter serial number, or just Datawell 
+buoy_info.name = 'ExmouthGulf'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
-buoy_info.DeployLoc = 'Hilarys';
+buoy_info.DeployLoc = 'ExmouthGulf';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -31.8516; 
 buoy_info.DeployLon = 115.6469; 
@@ -79,7 +79,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %check that it's new data
         if SpotData.time(1)>archive_data.time(end)
             %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-            [data] = qaqc_bulkparams_realtime_website(archive_data, SpotData);                        
+            [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
             
             %save data to different formats        
             realtime_archive_mat(buoy_info, data);                   

@@ -22,12 +22,12 @@ for i = 1:size(web_data{1,2},1)
 end       
 
 %update with last_updated
-web_data{1,last_update}{buoy} =  datestr(data.time(end),'dd/mm/yyyy HH:MM:SS');
+web_data{1,last_update}{buoy} =  num2str(posixtime(datetime(datevec(data.time(end))))); 
 
 %update with first_updated if not included
 if isempty(web_data{1, last_update-1}{buoy})
     first_time = search_buoy_archive(buoy_info); 
-    web_data{1,last_update-1}{buoy} = first_time; 
+    web_data{1,last_update-1}{buoy} = num2str(first_time); 
 end
 
 
@@ -42,8 +42,8 @@ for i = 1:size(web_data{1,1},1)
             fmt = {'%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s\n'}; 
             fprintf(fid, fmt{j},web_data{1,j}{i});
         else
-            fmt = {'%f,','%s,','%s,','%f,','%f,','%s,','%s,','%s,','%s,','%s\n'}; 
-            if j == 1|j==4|j==5
+            fmt = {'%f,','%s,','%s,','%f,','%f,','%s,','%f,','%f,','%f,','%f\n'}; 
+            if j == 1|j==4|j==5|j>6
                 fprintf(fid, fmt{j},str2num(web_data{1,j}{i}));
             else
                 fprintf(fid, fmt{j}, web_data{1,j}{i}); 
@@ -68,7 +68,7 @@ mos = dir([buoy_info.archive_path '\' buoy_info.name '\text_archive\' num2str(yr
 
 txt_files = dir([buoy_info.archive_path '\' buoy_info.name '\text_archive\' num2str(yrs(1).name) '\' num2str(mos(1).name)]); txt_files = txt_files(3:end); 
 
-first_time = datestr(datenum(txt_files(1).name(end-11:end-4),'yyyymmdd'),'dd/mm/yyyy'); 
+first_time = posixtime(datetime(datevec(datenum(txt_files(1).name(end-11:end-4),'yyyymmdd'))));
 end
     
 
