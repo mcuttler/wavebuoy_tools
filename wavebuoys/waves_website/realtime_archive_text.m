@@ -1,8 +1,7 @@
 %% archive buoy data to text file
 
 function [] = realtime_archive_text(buoy_info, data,limit); 
-
-%either add just recent data (limit) to file; or all time points
+% either add just recent data (limit) to file; or all time points
 if limit>0
     num = size(data.time,1)-(limit-1):size(data.time,1);     
 else

@@ -42,7 +42,7 @@ for i = 1:size(web_data{1,1},1)
             fmt = {'%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s\n'}; 
             fprintf(fid, fmt{j},web_data{1,j}{i});
         else
-            fmt = {'%f,','%s,','%s,','%f,','%f,','%s,','%f,','%f,','%f,','%f\n'}; 
+            fmt = {'%d,','%s,','%s,','%d,','%d,','%s,','%d,','%d,','%d,','%d\n'}; 
             if j == 1|j==4|j==5|j>6
                 fprintf(fid, fmt{j},str2num(web_data{1,j}{i}));
             else
