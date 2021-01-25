@@ -1,8 +1,10 @@
 buoy_id,label,type,enabled,order,data,start_date,end_date,first_updated,last_updated
-1,Torbay,Datawell,1,1,,1606780800,,1606780800,
-2,Tantabiddi,Sofar,1,2,,1606780800,,1606780800,1611453799
-3,ExmouthGulf,Sofar,1,3,,1606780800,,1606780800,1611455268
-4,Hilarys,Sofar,1,4,,1606780800,,1606780800,1611457471
-5,PerthCanyon,Sofar,0,1,,1606780800,1606780800,1606780800,
-6,KingGeorgeSound,Sofar,1,5,,1606780800,,1606780800,
-7,AQL_Testing,Sofar,1,7,,1606780800,,1606780800,1611549631
+1,Torbay,Datawell,1,1,waves-temp,1606780800,,1606780800,
+2,Tantabiddi,Sofar,1,2,waves-temp,1606780800,,1606780800,1611453799
+3,ExmouthGulf,Sofar,1,3,waves-temp,1606780800,,1606780800,1611455268
+4,Hilarys,Sofar,1,4,waves,1606780800,,1606780800,1611457471
+5,PerthCanyon,Sofar,0,0,waves,1606780800,1606780800,1606780800,
+6,KingGeorgeSound,Sofar,1,5,waves,1606780800,,1606780800,
+7,HilarysAQL,Sofar,1,6,waves-temp-bott_temp,1606780800,,1606780800,1611549631
+8,GoodrichBank,Sofar,1,7,waves-temp,1606780800,,1606780800,
+9,Dampier,Sofar,1,8,waves-temp,1606780800,,1606780800,
