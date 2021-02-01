@@ -46,7 +46,7 @@ for i = 1:size(tdata,1)
     idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend); 
     
 %     filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc'];             
-    filenameNC = ['D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Output_testing\' datestr(tstart,'yyyymm') '_bulk.nc'];     
+    filenameNC = ['D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Output_testing\' datestr(tstart,'yyyymm') '.nc'];     
             
     %create output netCDF4 file     
     ncid = netcdf.create(filenameNC,'NETCDF4'); 
@@ -88,11 +88,17 @@ for i = 1:size(tdata,1)
         elseif strcmp(attname, 'geospatial_lon_max')
             netcdf.putAtt(ncid,varid, attname, num2str(nanmin(bulkparams.lon))); 
         elseif strcmp(attname, 'time_coverage_start')
-            netcdf.putAtt(ncid,varid, attname, [datestr(bulkparams.time(1),'yyyy-mm-dd HH:MM:SS') ' UTC']); 
+            tdum = datestr(bulkparams.time(1),31); 
+            tdum(11) = 'T'; tdum(end+1)='Z';
+            netcdf.putAtt(ncid,varid, attname, tdum); 
         elseif strcmp(attname, 'time_coverage_end')
-            netcdf.putAtt(ncid,varid, attname, [datestr(bulkparams.time(end),'yyyy-mm-dd HH:MM:SS') ' UTC']); 
+            tdum = datestr(bulkparams.time(end),31); 
+            tdum(11) = 'T'; tdum(end+1)='Z';
+            netcdf.putAtt(ncid,varid, attname,tdum);             
         elseif strcmp(attname, 'date_created')
-            netcdf.putAtt(ncid,varid, attname, [datestr(now-datenum(0,0,0,8,0,0),'yyyy-mm-dd HH:MM:SS') ' UTC']);   
+            tdum = datestr(now - datenum(0,0,0,8,0,0)); 
+            tdum(11) = 'T'; tdum(end+1)='Z';
+            netcdf.putAtt(ncid,varid, attname,tdum);   
         else
             netcdf.putAtt(ncid,varid, attname, attvalue);
         end
@@ -117,11 +123,11 @@ for i = 1:size(tdata,1)
     % write variables     
     
     fid = fopen(varsfile); 
-    varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
+    varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s%f%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
     fclose(fid);      
     
     attnames = {'standard_name', 'long_name', 'units', 'calendar','axis','comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference_datum','magnetic_dec', 'positive',...
-        'observation_type','coordinates','_FillValue'}; 
+        'observation_type','coordinates','FillValue','flag_value','flag_meaning','reference'}; 
     
     attinfo = varinfo(3:end);     
     
@@ -143,12 +149,15 @@ for i = 1:size(tdata,1)
         
         %create and define variable and attributes      
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'double', dimid_TIME);        
-        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});   
-        netcdf.defVarFill(ncid,varid,false,-9999.9);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+   
+        netcdf.defVarFill(ncid,varid,false,-9999);
+
+%             
         
         %add attributes
         for j = 1:length(attinfo); 
-            if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')
+            if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')|strcmp(attnames{j},'FillValue')
                 if ~isnan(attinfo{1,j}(ii))
                     netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii));
                 end            

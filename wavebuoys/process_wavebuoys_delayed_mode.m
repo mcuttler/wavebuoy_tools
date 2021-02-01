@@ -84,8 +84,10 @@ if strcmp(buoy_info.type,'sofar')==1
     %process delayed mode (from buoy memory card)
     if strcmp(buoy_info.version, 'V2')
         [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);
+        %test V2 data --- add sst output to 'bulkparams' for qa/qc 
     else
          [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);
+         bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
     end
     
     disp('Performing QA/QC checks...'); 
@@ -96,29 +98,22 @@ if strcmp(buoy_info.type,'sofar')==1
     [bulkparams] = qaqc_bulkparams(bulkparams);
     
     %add exception value based on qf_master
-    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
-    flag = find(bulkparams.qf_master==4);   
-    for f = 1:length(fields)
-        if isfield(bulkparams, fields{f}); 
-            [bulkparams_nc] = qaqc_add_exception_value(bulkparams, fields, flag);     
-        else
-            bulkparams_nc.(fields{f}) = ones(size(bulkparams_nc.time,1),1).*nan; 
-        end
-    end
-    
-    
-    %combine QARTOD flags into 'subflag' variables for IMOS netcdf
-    %still need to add temperature to code 
-    outfields = {'qf_hs','qf_tm','qf_tp','qf_dm','qf_dp','qf_meanspr','qf_pkspr','qf_temp'}; 
-    tests = [15, 16, 19, 20];  
-    for f = 1:length(fields); 
-        [bulkparams_nc.(outfields{f})] = qaqc_combine_qartod_flags(bulkparams_nc,fields{f},tests);
-    end
+%     fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+%     flag = find(bulkparams.qf_master==4);   
+%     for f = 1:length(fields)
+%         if isfield(bulkparams, fields{f}); 
+%             [bulkparams_nc] = qaqc_add_exception_value(bulkparams, fields, flag);     
+%         else
+%             bulkparams_nc.(fields{f}) = ones(size(bulkparams_nc.time,1),1).*nan; 
+%         end
+%     end        
+
     
     %clean up for export
+    bulkparams_nc = bulkparams; 
     fields = fieldnames(bulkparams_nc); 
     for i = 1:length(fields); 
-        if strcmp(fields{i}(end-1:end),'15') | strcmp(fields{i}(end-1:end),'16') | strcmp(fields{i}(end-1:end),'20') | strcmp(fields{i},'qf_19')
+        if strcmp(fields{i}(end-1:end),'15') | strcmp(fields{i}(end-1:end),'16') | strcmp(fields{i}(end-1:end),'19') | strcmp(fields{i}(end-1:end),'20') | strcmp(fields{i}(end-1:end),'ke')
             bulkparams_nc = rmfield(bulkparams_nc, fields{i}); 
         end
     end    
@@ -126,7 +121,7 @@ if strcmp(buoy_info.type,'sofar')==1
     disp(['Saving data for ' buoy_info.name ' as netCDF']);             
     
     %path to save netCDF files for transfer to AODN
-    outpathNC = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data';
+    outpathNC = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Output_testing';
     
     %bulkparams
     %text files for IMOS-compliant netCDF generation

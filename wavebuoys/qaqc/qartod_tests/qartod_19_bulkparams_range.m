@@ -56,29 +56,38 @@ function [QCFlag] = qartod_19_bulkparams_range(in)
 
 % intialize QC flag vector
 
-QCFlag  = zeros(length(in.WVHGT),1);
+%first column is main result, second column is used for assigning subflag
+QCFlag  = zeros(length(in.WVHGT),2);
  
 for ii=1:length(in.WVHGT)
     
    if in.WVHGT(ii)>in.MAXWH
-       QCFlag(ii) = 4;
+       QCFlag(ii,1) = 4; 
+       QCFlag(ii,2) = 1;
    elseif in.WVHGT(ii)<in.MINWH
-       QCFlag(ii) = 4;
+       QCFlag(ii,1) = 4; 
+       QCFlag(ii,2) = 1;
    elseif in.WVPD(ii) < in.MINWP
-       QCFlag(ii) = 3;
+       QCFlag(ii,1) = 3; 
+       QCFlag(ii,2) = 2;
    elseif in.WVPD(ii) > in.MAXWP
-       QCFlag(ii) = 4;
+       QCFlag(ii,1) = 3; 
+       QCFlag(ii,2) = 2;
    elseif in.WVDIR(ii) < 0
-       QCFlag(ii) = 3;
+       QCFlag(ii,1) = 3; 
+       QCFlag(ii,2) = 3;
    elseif in.WVDIR(ii) > 360
-       QCFlag(ii) = 3;
+       QCFlag(ii,1) = 3; 
+       QCFlag(ii,2) = 3;
    elseif in.WVSP(ii)< in.MINSV
-       QCFlag(ii) = 3;
+       QCFlag(ii,1) = 3; 
+       QCFlag(ii,2) = 4;
    elseif in.WVSP(ii) > in.MAXSV
-       QCFlag(ii) = 3;
+       QCFlag(ii,1) = 3; 
+       QCFlag(ii,2) = 4;
    else
-       QCFlag(ii) = 1;
-              
+       QCFlag(ii,1) = 1; 
+       QCFlag(ii,2) = 0;              
    end
 end
 
