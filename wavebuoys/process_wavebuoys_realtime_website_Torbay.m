@@ -9,23 +9,23 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-% buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
-% addpath(genpath(buoycodes))
+buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
+addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
-buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Hilarys'; 
-buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.type = 'datawell'; 
+buoy_info.serial = 'Datawell'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Torbay'; 
+buoy_info.datawell_name = 'Dev_site'; 
+buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'Hilarys';
+buoy_info.DeployLoc = 'Torbay';
 buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -31.851983; 
-buoy_info.DeployLon = 115.646567; 
+buoy_info.DeployLat = -35.07044467; 
+buoy_info.DeployLon = 117.7756324; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
@@ -42,7 +42,7 @@ if strcmp(buoy_info.type,'sofar')==1
         [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;     
+            limit = buoy_info.UpdateTime*2;      
             [SpotData] = Get_Spoondrift_Data_realtime(buoy_info.serial, limit);   
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 
@@ -106,7 +106,7 @@ if strcmp(buoy_info.type,'sofar')==1
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
-    data.time = datenum(now); 
+    data.time = datenum(now);   
     data.tnow = datevec(data.time); 
     
     data.file20 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF20}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
@@ -138,7 +138,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 if strcmp(buoy_info.DataType,'spectral')                        
                     for ii = 1:size(plot_idx,1); 
                         [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
-                        make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
+                        make_MEM_plot(ndirec, data.frequency', NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
                     end
                 end
                 
@@ -157,8 +157,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
         %output MEM and SST plots 
         if strcmp(buoy_info.DataType,'spectral')        
             for ii = 1:size(dw_data.a1,1); 
-                [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
-                make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
+                [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(ii,:),data.a2(ii,:),data.b1(ii,:),data.b2(ii,:),data.E(ii,:),3);
+                make_MEM_plot(ndirec, data.frequency', NE, data.hsig(ii), data.tp(ii), data.dp(ii), data.time(ii), buoy_info)    
             end    
         end
         

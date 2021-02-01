@@ -14,18 +14,18 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Hilarys'; 
+buoy_info.serial = 'SPOT-0170'; %spotter serial number, or just Datawell 
+buoy_info.name = 'BremerCanyon_Drifting'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'Hilarys';
-buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -31.851983; 
-buoy_info.DeployLon = 115.646567; 
+buoy_info.DeployLoc = 'BremerCanyon';
+buoy_info.DeployDepth = 0; 
+buoy_info.DeployLat = 0; 
+buoy_info.DeployLon = 0; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
@@ -42,7 +42,7 @@ if strcmp(buoy_info.type,'sofar')==1
         [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;     
+            limit = buoy_info.UpdateTime*2;      
             [SpotData] = Get_Spoondrift_Data_realtime(buoy_info.serial, limit);   
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 
