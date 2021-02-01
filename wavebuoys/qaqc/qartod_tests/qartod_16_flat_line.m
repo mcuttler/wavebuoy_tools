@@ -57,7 +57,7 @@ if length(data)>=in.rep_suspect
     QCFlag_suspect  = zeros(size(data,1),1); 
     %start at in.rep_suspect or in.rep_fail, assume all preceding points get
     %that flag
-    for ii=in.rep_suspect:length(data)        
+    for ii=1:size(data,1)
         if ii<=in.rep_suspect
             QCFlag_suspect(ii,:) = 2; 
         else
@@ -69,7 +69,7 @@ if length(data)>=in.rep_suspect
     %% now check for fail values
     QCFlag_fail  = zeros(size(data,1),1); 
     %
-    for ii=in.rep_fail:length(data)
+    for ii=1:size(data,1); 
         %check if first n values are 'equal' within tolerance
          if ii<=in.rep_fail
              %not assessed
@@ -87,7 +87,7 @@ if length(data)>=in.rep_suspect
     
 else
     disp('Dataset not long enough for FLATLINE TEST'); 
-    QCFlag = ones(length(in.WVHGT),1).*nan;
+    QCFlag = ones(length(in.WVHGT),1).*2;
 end
 
 %% subfunctions
@@ -110,8 +110,10 @@ end
 
 function [keep_val] = compare_qcflag(qc_sus, qc_fail)
 
-    if qc_sus==qc_fail
-        keep_val = 1;
+    if qc_sus==2&&qc_fail==2
+        keep_val = 2;
+    elseif qc_sus==1&&qc_fail==1
+        keep_val=1; 
     elseif qc_sus<qc_fail
         keep_val = qc_fail;
     elseif qc_sus>qc_fail

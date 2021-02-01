@@ -1,29 +1,9 @@
 %%  Process wave buoys (real time) for display on wawaves.org
 
-%     Example usage for Sofar Spotter: 
-%                 buoy_info.type = 'sofar'; 
-%                 buoy_info.name = 'SPOT0171'; %spotter serial number, or deployment location for Datawell 
-%                 buoy_info.DeployLoc = 'Testing';
-%                 buoy_info.DeployDepth = 30; 
+%MC to update prior to merging into master branch
 
-%     Example usage for Datawell: 
-%                 buoy_info.type = 'datawell'; 
-%                 buoy_info.name = 'Datawell'; %spotter serial number, or deployment location for Datawell 
-%                 buoy_info.DeployLoc = 'Testing';
-%                 buoy_info.DeployDepth = 30; 
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
-% Code history
-% 
-%     Author          | Date             | Script Version     | Update
-%     -------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 26 Nov 2020 | 1.0                     | Initial creation
-% -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 22 Dec 2020 | 1.1                     | Update code
-%                                                                           for handling Spotter data
-%--------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 14 Jan 2021 | 1.2                     | Update code
-%                                                                           for handling Datawell data
+%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
+%UWA token: e0eb70b6d9e0b5e00450929139ea34
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -37,7 +17,9 @@ buoy_info.type = 'sofar';
 buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
 buoy_info.name = 'Hilarys'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
+buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
+buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Hilarys';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -31.8516; 
@@ -54,66 +36,73 @@ buoy_info.datawell_datapath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\waves
 
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
+    %check whether smart mooring or normal mooring
+    if strcmp(buoy_info.version,'smart_mooring')
+        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
+        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
+    else
+        if strcmp(buoy_info.DataType,'parameters')
+            limit = buoy_info.UpdateTime*2; 
+            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info.serial, limit);   
+            flag = 1; 
+        elseif strcmp(buoy_info.DataType,'spectral'); 
+            limit = buoy_info.UpdateTime; 
+            [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info.serial, limit);     
+            flag = 1; 
+        end                    
+    end    
     
-    if strcmp(buoy_info.DataType,'parameters')
-        limit = buoy_info.UpdateTime*2; 
-        [SpotData] = Get_Spoondrift_Data_realtime(buoy_info.serial, limit);     
-    elseif strcmp(buoy_info.DataType,'spectral'); 
-        limit = buoy_info.UpdateTime; 
-        [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info.serial, limit);     
-    end                    
-    
-    for i = 1:size(SpotData.time,1)
-        SpotData.name{i,1} = buoy_info.name; 
-    end
-    
-    %load in any existing data for this site and combine with new
-    %measurements, then QAQC
-    [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-    
-    %check>0 means that directory already exists (and monthly file should
-    %exist); otherwise, this is the first data for this location 
-    if all(check)~=0        
-        [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+    if flag == 1
+        for i = 1:size(SpotData.time,1)
+            SpotData.name{i,1} = buoy_info.name; 
+        end
         
-        %check that it's new data
-        if SpotData.time(1)>archive_data.time(end)
-            %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-            [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
+        %load in any existing data for this site and combine with new
+        %measurements, then QAQC
+        [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
+        
+        %check>0 means that directory already exists (and monthly file should
+        %exist); otherwise, this is the first data for this location 
+        if all(check)~=0        
+            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
             
-            %save data to different formats        
-            realtime_archive_mat(buoy_info, data);                   
-            realtime_archive_text(buoy_info, data, limit); 
+            %check that it's new data
+            if SpotData.time(1)>archive_data.time(end)
+                %perform some QA/QC --- QARTOD 19 and QARTOD 20        
+                [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
+                
+                %save data to different formats        
+                realtime_archive_mat(buoy_info, data);
+                realtime_archive_text(buoy_info, data, limit); 
+                %output MEM and SST plots 
+                if strcmp(buoy_info.DataType,'spectral')        
+                    [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
+                    make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
+                end
+                
+                %code to update the buoy info master file for website to read
+                update_website_buoy_info(buoy_info, data); 
+            end
+        else
+            SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
+            if isfield(SpotData,'temp_time')
+                SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4; 
+                SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
+                
+            end
+            realtime_archive_mat(buoy_info, SpotData);
+            realtime_archive_text(buoy_info, SpotData, limit); 
+            
             %output MEM and SST plots 
             if strcmp(buoy_info.DataType,'spectral')        
                 [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
                 make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
-                %     elseif strcmp(buoy_info.version, 'V2'); 
-                %         make_SST_plot()
             end
-    
-            %code to update the buoy info master file for website to read 
-            update_website_buoy_info(buoy_info, data); 
-        end
-    else
-        SpotData.qf_waves = ones(size(SpotData.time,1),1).*4; 
-        SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4; 
-        SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
-        realtime_archive_mat(buoy_info, SpotData); 
-        realtime_archive_text(buoy_info, SpotData, limit); 
-        
-        %output MEM and SST plots 
-        if strcmp(buoy_info.DataType,'spectral')        
-            [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-            make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
-            %     elseif strcmp(buoy_info.version, 'V2'); 
-            %         make_SST_plot()
-        end
-    
-        %code to update the buoy info master file for website to read 
-        update_website_buoy_info(buoy_info, SpotData); 
+            
+            %code to update the buoy info master file for website to read
+            update_website_buoy_info(buoy_info, SpotData); 
+        end        
     end        
-        
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
@@ -151,8 +140,6 @@ elseif strcmp(buoy_info.type,'datawell')==1
                         [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
                         make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
                     end
-                    %             elseif strcmp(buoy_info.version, 'V2');
-                    %                 make_SST_plot(buoy_info, dw_data.temp_time, dw_data.time, plot_idx); 
                 end
                 
                 %code to update the buoy info master file for website to read
@@ -172,10 +159,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
             for ii = 1:size(dw_data.a1,1); 
                 [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
                 make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
-            end
-            %     elseif buoy_info.plot_SST==1;
-            %         plot_idx = 0; %plot all available time points         
-            %         make_SST_plot(buoy_info, dw_data.temp_time, dw_data.temp)
+            end    
         end
         
         %code to update the buoy info master file for website to read

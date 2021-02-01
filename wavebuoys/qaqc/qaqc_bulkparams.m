@@ -33,8 +33,8 @@ check.WPTOL = 0.1;
 check.WDTOL = 0.5; 
 check.WSPTOL = 0.5; 
 check.TTOL = 0.01; 
-check.rep_fail = 48; 
-check.rep_suspect = 24; 
+check.rep_fail = 144; 
+check.rep_suspect = 48; 
 
 fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
 tol = {'WHTOL','WPTOL','WPTOL', 'WDTOL','WDTOL','WSPTOL','WSPTOL','TTOL'}; 
@@ -55,20 +55,35 @@ end
 % in.WVPD - timeseries wave period : WVPD
 % in.WVDIR - timeseries wave direction : WVDIR
 % in.WVSP - timeseries wave spreading : WVSP
+
 %    User defined test criteria
 check.WVHGT = bulkparams.hs; 
-check.WVPD = bulkparams.tm; 
-check.WVDIR = bulkparams.dm; 
-check.WVSP = bulkparams.meanspr; 
+check.WVPD = bulkparams.tp; 
+check.WVDIR = bulkparams.dp; 
+check.WVSP = bulkparams.pkspr; 
 
 check.MINWH = 0.25;
 check.MAXWH = 8;
 check.MINWP = 3; 
 check.MAXWP = 25;
 check.MINSV = 0.07; 
-check.MAXSV = 65.0; 
+check.MAXSV = 80.0; 
 
 [bulkparams.qf_19] = qartod_19_bulkparams_range(check); 
+
+%% simple temperature range test
+check.MINT = 5; 
+check.MAXT = 55; 
+
+for i = 1:size(bulkparams.time,1)
+    if bulkparams.temp(i,1)<check.MINT|bulkparams.temp(i,1)>check.MAXT
+        bulkparams.temp_19(i,1) = 4;
+    else
+        bulkparams.temp_19(i,1) = 1; 
+    end
+end
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -76,7 +91,7 @@ check.MAXSV = 65.0;
 % QARTOD TEST 20 - LT time series rate of change 
 
 %    User defined test criteria
-check.WHROC= 1; 
+check.WHROC= 0.5; 
 check.WPROC= 5; 
 check.WDROC= 20; 
 check.WSPROC= 25; 
@@ -98,13 +113,31 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% UWA QA/QC tests
 
-%UWA 'master flag' test
-check.rocHs =0.5; 
-check.HsLim = 10; 
-check.rocTp = 5; 
-check.TpLim = 25; 
+%UWA spike test 
 
-[bulkparams.qf_master] = qaqc_uwa_masterflag(check, bulkparams.hs, bulkparams.tp); 
+fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+roc = {'WHROC','WPROC','WPROC', 'WDROC','WDROC','WSPROC','WSPROC','TROC'}; 
+outfields={'hs_spike','tm_spike','tp_spike','dm_spike','dp_spike','meanspr_spike','pkspr_spike','temp_spike'}; 
+
+for f = 1:length(fields)
+    if isfield(bulkparams, fields{f}); 
+        [bulkparams.(outfields{f})] = qaqc_uwa_spike(check.time, bulkparams.(fields{f}), check.(roc{f})); 
+    else
+        bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
+    end  
+end
+
+%% assing primary and subflags
+
+fields = {'hs','tp','dp'};
+qaqc_tests = {'15','16','19','20','spike'}; 
+
+[bulkparams.qc_flag_wave, bulkparams.qc_subflag_wave] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests); 
+
+fields = {'temp'};
+qaqc_tests = {'15','16','19','20','spike'}; 
+[bulkparams.qc_flag_temp, bulkparams.qc_subflag_temp] = qaqc_temp_primary_and_subflag(bulkparams, fields, qaqc_tests); 
+
 end
 
 

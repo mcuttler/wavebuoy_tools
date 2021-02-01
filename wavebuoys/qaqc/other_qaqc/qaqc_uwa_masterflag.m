@@ -18,17 +18,20 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [QCFlag] = qaqc_uwa_masterflag(in, hs, tp)
-QCFlag =[]; 
-%first find spikes
+function [QCFlagWave, QCFlagTemp] = qaqc_uwa_masterflag(in, hs, tp,temp)
+%% wave data 
+QCFlagWave =[]; 
+
+%range test
 for i = 1:size(in.time,1)
-    if i == 1
-        QCFlag(i,1) = 4; 
-    elseif i == size(in.time,1)
-        QCFlag(i,1) = 4; 
-    elseif hs(i)>in.HsLim | tp(i)>in.TpLim
-        QCFlag(i,1) = 4; 
-    else        
+    if hs(i)>in.HsLim | hs(i)<in.tp(i)>in.TpLim
+        QCFlagWave(i,1) = 4; 
+    end
+end
+
+%spike test
+for i = 1:size(in.time,1)
+    if ielse
         dumHs = diff(hs(i-1:i+1)); 
         dumTp = diff(tp(i-1:i+1)); 
         
@@ -54,13 +57,44 @@ for i = 1:size(in.time,1)
         
         %add QC value 
         if checkTp==4|checkHs==4
-            QCFlag = [QCFlag; 4];
+            QCFlagWave = [QCFlagWave; 4];
         else
-            QCFlag = [QCFlag; 1]; 
+            QCFlagWave = [QCFlagWave; 1]; 
         end        
     end
 end
-                          
+                    
+%% temperature data
+QCFlagTemp =[]; 
+%first find spikes
+for i = 1:size(in.time,1)
+    if i == 1
+        QCFlagTemp(i,1) = 4; 
+    elseif i == size(in.time,1)
+        QCFlagTemp(i,1) = 4; 
+    elseif temp(i)>in.TLim | temp(i)>in.TLim
+        QCFlagTemp(i,1) = 4; 
+    else        
+        dumT = diff(temp(i-1:i+1)); 
+        
+        %check T spikes
+        if dumT(1)>0&dumT(2)<0&abs(dumT)>in.rocT
+            checkT = 4; 
+        %negative spike
+        elseif dumT(1)<0&dumT(2)>0&abs(dumT)>in.dumT
+            checkT = 4; 
+        else
+            checkT = 1;
+        end        
+      
+        %add QC value 
+        if checkT==4
+            QCFlagTemp = [QCFlagTemp; 4];
+        else
+            QCFlagTemp = [QCFlagTemp; 1]; 
+        end        
+    end
+end
 
 
 end
