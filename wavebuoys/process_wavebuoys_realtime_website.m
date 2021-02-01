@@ -14,18 +14,18 @@ addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0936'; %spotter serial number, or just Datawell 
-buoy_info.name = 'AQL_Testing'; 
+buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Hilarys'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'smart_mooring'; %or DWR4 for Datawell, for example
-buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
+buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Hilarys';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -31.8516; 
 buoy_info.DeployLon = 115.6469; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'parameters-temp'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive';
 buoy_info.datawell_datapath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\waves_website\CodeTesting\waved'; %top level directory for Datawell CSVs
 

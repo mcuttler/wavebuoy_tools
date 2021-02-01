@@ -23,9 +23,11 @@ else
     data = buoy_data; 
     for i = 1:size(ddv,1)
         dt = datevec(data.time); 
-        dt_temp = datevec(data.temp_time); 
         idx = find(dt(:,1)==ddv(i,1)&dt(:,2)==ddv(i,2)); 
-        idx_temp = find(dt_temp(:,1)==ddv(i,1)&dt_temp(:,2)==ddv(i,2)); 
+        if isfield(data,'temp_time'); 
+            dt_temp = datevec(data.temp_time);    
+            idx_temp = find(dt_temp(:,1)==ddv(i,1)&dt_temp(:,2)==ddv(i,2)); 
+        end
         fields = fieldnames(data); 
         for j = 1:length(fields)
             if strcmp(fields{j},'temp') | strcmp(fields{j},'temp_time') | strcmp(fields{j},'curr_mag') | strcmp(fields{j},'curr_dir') | strcmp(fields{j},'curr_mag_std') | strcmp(fields{j},'curr_dir_std') | strcmp(fields{j},'w') | strcmp(fields{j},'w_std')
