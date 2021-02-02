@@ -9,8 +9,8 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
-addpath(genpath(buoycodes))
+% buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
+% addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'datawell'; 
@@ -157,8 +157,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
         %output MEM and SST plots 
         if strcmp(buoy_info.DataType,'spectral')        
             for ii = 1:size(dw_data.a1,1); 
-                [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(ii,:),data.a2(ii,:),data.b1(ii,:),data.b2(ii,:),data.E(ii,:),3);
-                make_MEM_plot(ndirec, data.frequency', NE, data.hsig(ii), data.tp(ii), data.dp(ii), data.time(ii), buoy_info)    
+                [NS, NE, ndirec] = lygre_krogstad_MC(dw_data.a1(ii,:),dw_data.a2(ii,:),dw_data.b1(ii,:),dw_data.b2(ii,:),dw_data.E(ii,:),3);
+                make_MEM_plot(ndirec, dw_data.frequency', NE, dw_data.hsig(ii), dw_data.tp(ii), dw_data.dp(ii), dw_data.time(ii), buoy_info)    
             end    
         end
         
