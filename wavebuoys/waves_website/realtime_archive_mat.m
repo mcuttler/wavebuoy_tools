@@ -30,7 +30,7 @@ else
         end
         fields = fieldnames(data); 
         for j = 1:length(fields)
-            if strcmp(fields{j},'temp') | strcmp(fields{j},'temp_time') | strcmp(fields{j},'curr_mag') | strcmp(fields{j},'curr_dir') | strcmp(fields{j},'curr_mag_std') | strcmp(fields{j},'curr_dir_std') | strcmp(fields{j},'w') | strcmp(fields{j},'w_std')                
+            if strcmp(fields{j},'qf_bott_temp') |strcmp(fields{j},'qf_sst') |strcmp(fields{j},'surf_temp') | strcmp(fields{j},'bott_temp')|strcmp(fields{j},'temp_time') | strcmp(fields{j},'curr_mag') | strcmp(fields{j},'curr_dir') | strcmp(fields{j},'curr_mag_std') | strcmp(fields{j},'curr_dir_std') | strcmp(fields{j},'w') | strcmp(fields{j},'w_std')                
                 buoy_data.(fields{j})=data.(fields{j})(idx_temp,:); 
             else
                 if size(data.(fields{j}),1)>1
@@ -40,7 +40,7 @@ else
                 end
             end
         end
-        clear idx; 
+        clear idx idx_temp
         archive_path = [buoy_info.archive_path '\' buoy_info.name '\mat_archive\' num2str(ddv(i,1))];
         filename = [buoy_info.name '_' num2str(ddv(i,1)) num2str(ddv(i,2),'%02d') '.mat']; 
          if strcmp(buoy_info.type,'sofar')

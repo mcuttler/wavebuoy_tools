@@ -50,7 +50,7 @@ qaqc.rocSST = 1;
 if isfield(qaqc, 'time_temp')
     [bulkparams.qf_waves, bulkparams.qf_sst, bulkparams.qf_bott_temp] = qaqc_uwa_waves_website(qaqc); 
 else
-    [bulkparams.qf_waves, ~] = qaqc_uwa_waves_website(qaqc);
+    [bulkparams.qf_waves, ~, ~] = qaqc_uwa_waves_website(qaqc);
 end
 
 end
