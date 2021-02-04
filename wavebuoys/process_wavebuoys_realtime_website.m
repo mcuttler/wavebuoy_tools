@@ -9,7 +9,7 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
+buoycodes = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
@@ -26,7 +26,7 @@ buoy_info.DeployLat = -31.8516;
 buoy_info.DeployLon = 115.6469; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.archive_path = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
