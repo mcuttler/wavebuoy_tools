@@ -3,29 +3,44 @@
 function [] = update_website_buoy_info(buoy_info, data); 
 
 %read in existing data
-fid = fopen([buoy_info.archive_path '\buoys.csv'],'r'); 
-fmt = '%s%s%s%s%s%s%s%s%s%s'; 
-web_data = textscan(fid, fmt, 'Delimiter',','); 
-fclose(fid);     
+% fid = fopen([buoy_info.archive_path '\buoys.csv'],'r'); 
+% fmt = '%s%s%s%s%s%s%s%s%s%s'; 
+% web_data = textscan(fid, fmt, 'Delimiter',','); 
+% fclose(fid);     
+in_data = importdata([buoy_info.archive_path '\buoys.csv']); 
+dcol = size(in_data.textdata,2)-size(in_data.data,2); 
+for i = 1:size(in_data.textdata,1)
+    for j = 1:size(in_data.textdata,2)
+        if isempty(in_data.textdata{i,j})
+            web_data{i,j} = num2str(in_data.data(i-1,j-dcol)); 
+            write_idx(i,j) = 1; 
+        else
+            web_data{i,j} = in_data.textdata{i,j}; 
+            write_idx(i,j) = 0; 
+        end
+    end
+end            
 
 %find column for 'last update'
 for i = 1:size(web_data,2)
-    if strcmp(web_data{1,i}{1},'last_updated')
+    if strcmp(web_data{1,i},'last_updated')
         last_update = i; 
+    elseif strcmp(web_data{1,i},'label')
+        label = i; 
     end
 end
 
-for i = 1:size(web_data{1,2},1)    
-    if strcmp(web_data{1,2}{i},buoy_info.name)
+for i = 1:size(web_data,1)
+    if strcmp(web_data{i,label},buoy_info.name)
         buoy = i;
     end
 end       
 
 %update with last_updated
-web_data{1,last_update}{buoy} =  num2str(posixtime(datetime(datevec(data.time(end))))); 
+web_data{buoy,last_update} =  num2str(posixtime(datetime(datevec(data.time(end))))); 
 
 %update with first_updated if not included
-if isempty(web_data{1, last_update-1}{buoy})
+if isempty(web_data{buoy, last_update-1})
     first_time = search_buoy_archive(buoy_info); 
     web_data{1,last_update-1}{buoy} = num2str(first_time); 
 end
@@ -34,26 +49,52 @@ end
 %re-write text file
 %create formatting strings
 
-fid = fopen([buoy_info.archive_path '\buoys.csv'],'w'); 
+% title format
+for i = 1:size(web_data,2)
+    if i == size(web_data,2)
+        fmt1{1,i} = '%s \n'; 
+    else
+        fmt1{1,i} = '%s,';
+    end
+end
 
-for i = 1:size(web_data{1,1},1)
-    for j = 1:size(web_data,2)
-        if i == 1
-            fmt = {'%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s,','%s\n'}; 
-            fprintf(fid, fmt{j},web_data{1,j}{i});
+%data format
+for i = 1:size(web_data,2)    
+    if i == size(web_data,2)
+        if write_idx(2,i)>0
+            fmt2{1,i} = '%d \n'; 
         else
-            fmt = {'%d,','%s,','%s,','%d,','%d,','%s,','%d,','%d,','%d,','%d\n'}; 
-            if j == 1|j==4|j==5|j>6
-                fprintf(fid, fmt{j},str2num(web_data{1,j}{i}));
-            else
-                fprintf(fid, fmt{j}, web_data{1,j}{i}); 
-            end
+             fmt2{1,i} = '%s \n'; 
+        end
+    else
+         if write_idx(2,i)>0
+            fmt2{1,i} = '%d,'; 
+        else
+             fmt2{1,i} = '%s,'; 
         end
     end
 end
+
+fid = fopen([buoy_info.archive_path '\buoys.csv'],'w'); 
+
+for i = 1:size(web_data,1)
+    if i == 1
+        for j = 1:size(web_data,2)
+            fprintf(fid, fmt1{j}, web_data{i,j}); 
+        end        
+    else
+        for j = 1:size(web_data,2);
+            if strcmp(fmt2{j}(1:2), '%s')
+                fprintf(fid, fmt2{j}, web_data{i,j}); 
+            elseif strcmp(fmt2{j}(1:2),'%d')
+                fprintf(fid, fmt2{j}, str2num(web_data{i,j})); 
+            end               
+        end
+    end
+    
+end         
+
 fclose(fid);                                                      
-
-
 
 end
 
