@@ -23,6 +23,7 @@ instrument_maker         =
 instrument_model         =
 site_code                =
 site_name                =
+deployment_id            =
 water_depth              =
 water_depth_units        = meters
 geospatial_lat_min       = 

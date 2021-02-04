@@ -60,10 +60,12 @@ parser = 'parser_v1.11.1.py';
 buoy_info.type = 'sofar'; 
 buoy_info.name = 'SPOT0171'; %spotter serial number, or just Datawell 
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.site_code = 'Test01';
 buoy_info.DeployLoc = 'Testing';
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -35; 
 buoy_info.DeployLon = 117; 
+buoy_info.DeployID = 1; %deployment number at this site
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 1.98; 

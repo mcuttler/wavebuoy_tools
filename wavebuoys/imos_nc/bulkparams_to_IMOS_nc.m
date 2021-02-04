@@ -73,11 +73,13 @@ for i = 1:size(tdata,1)
         elseif strcmp(attname, 'instrument_model')
             netcdf.putAtt(ncid,varid, attname, buoy_info.version);    
         elseif strcmp(attname, 'site_code')
-            netcdf.putAtt(ncid,varid, attname, [buoy_info.name '_' buoy_info.DeployLoc]);
+            netcdf.putAtt(ncid,varid, attname, [buoy_info.site_code]);
         elseif strcmp(attname, 'site_name')
             netcdf.putAtt(ncid,varid, attname, buoy_info.DeployLoc);
         elseif strcmp(attname, 'water_depth')
             netcdf.putAtt(ncid,varid, attname, buoy_info.DeployDepth);
+        elseif strcmp(attname, 'deployment_id')
+            netcdf.putAtt(ncid,varid, attname, buoy_info.DeployID);
         elseif strcmp(attname, 'geospatial_lat_min')
             netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lat))); 
         elseif strcmp(attname, 'geospatial_lon_min')
