@@ -52,7 +52,7 @@ end
 % title format
 for i = 1:size(web_data,2)
     if i == size(web_data,2)
-        fmt1{1,i} = '%s \n'; 
+        fmt1{1,i} = '%s\n'; 
     else
         fmt1{1,i} = '%s,';
     end
@@ -62,9 +62,9 @@ end
 for i = 1:size(web_data,2)    
     if i == size(web_data,2)
         if write_idx(2,i)>0
-            fmt2{1,i} = '%d \n'; 
+            fmt2{1,i} = '%d\n'; 
         else
-             fmt2{1,i} = '%s \n'; 
+             fmt2{1,i} = '%s\n'; 
         end
     else
          if write_idx(2,i)>0
