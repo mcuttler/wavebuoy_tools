@@ -68,7 +68,11 @@ for i = 1:size(web_data,2)
         end
     else
          if write_idx(2,i)>0
-            fmt2{1,i} = '%d,'; 
+             if strcmp(web_data{1,i},'Latitude')|strcmp(web_data{1,i},'Longitude')
+                 fmt2{1,i} = '%0.4f,'; 
+             else
+                 fmt2{1,i} = '%d,';
+             end
         else
              fmt2{1,i} = '%s,'; 
         end
@@ -86,7 +90,7 @@ for i = 1:size(web_data,1)
         for j = 1:size(web_data,2);
             if strcmp(fmt2{j}(1:2), '%s')
                 fprintf(fid, fmt2{j}, web_data{i,j}); 
-            elseif strcmp(fmt2{j}(1:2),'%d')
+            elseif strcmp(fmt2{j}(1:2),'%d')|strcmp(fmt2{j}(1:2),'%0')
                 fprintf(fid, fmt2{j}, str2num(web_data{i,j})); 
             end               
         end
