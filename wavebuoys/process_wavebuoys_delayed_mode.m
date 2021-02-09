@@ -1,45 +1,8 @@
 %%  Process wave buoys (delayed mode)
 
-%     Example usage for Sofar Spotter: 
-%                 buoy_info.type = 'sofar'; 
-%                 buoy_info.name = 'SPOT0171'; %spotter serial number, or deployment location for Datawell 
-%                 buoy_info.DeployLoc = 'Testing';
-%                 buoy_info.DeployDepth = 30; 
-
-%     Example usage for Datawell: 
-%                 buoy_info.type = 'datawell'; 
-%                 buoy_info.name = 'Datawell'; %spotter serial number, or deployment location for Datawell 
-%                 buoy_info.DeployLoc = 'Testing';
-%                 buoy_info.DeployDepth = 30; 
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
-% Code history
-% 
-%     Author          | Date             | Script Version     | Update
-%     -------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 27 Aug 2020 | 1.0                     | Initial creation
-% -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 01 Sep 2020 | 1.1                     | Modified how files are appended to bulkparameters.csv 
-%                                                                           output to account for when python parser generates files in sub-directories. 
-% ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 03 Sep 2020 | 1.2                     | Included displacements.csv into the workflow and output 
-% ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 08 Sep 2020 | 2.0                     | Modify code
-%                                                                          such that all data is appended to Matlab structures and then sub-set
-%                                                                          into monthly files for more efficient storage (may still run into
-%                                                                          Matlab memory issues 
-% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 05 Oct 2020 | 2.1                     | Incorporate
-%                                                                          first QARTOD QA/QC tests - Time series bulk wave parameters
-%                                                                          max/min/acceptable range (test 19, required)
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 09 Oct 2020 | 3.0                     | re-organise code structure. 
-%                                                                        | THIS CODE IS NOW THE 'RUN' CODE, USE THIS TO SET BASIC PARAMETERS FOR FILEPATHS, 
-%                                                                        | QC LIMITS, ETC
-%                                                                        | SEE FUNCTIONS WITHIN THIS CODE FOR ACTUAL DATA PROCESSING
-% ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 13 Oct 2020 | 3.0                     | re-organise code structure - aim to generalise across Datawell and Sofar buoys
-%                                                                        | 
+%Process on-board (memory card) data from Sofar Spotter, Datawell, Triaxys
+%Conducts quality control based on QARTOD manual
+%Outputs monthly netCDF file following IMOS conventions 
 
 %% set initial paths for Spotter data to process and parser script
 clear; clc
@@ -70,9 +33,17 @@ buoy_info.timezone = 8; %signed integer for UTC offset
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 1.98; 
 
-%inputs only for Datawell
+%inputs only for Datawell folder structure
 years = 2020; 
 months = 1:8; 
+
+%inputs for IMOS filename structure
+buoy_info.archive_path = 
+buoy_info.facility_code = 'NTP-WAVE';
+buoy_info.data_code = 'TW'; %T for temperature, W for wave
+buoy_info.platform_type = 'WAVERIDER';
+buoy_info.file_version = 1; 
+buoy_info.product_time = 'timeseries'; 
 
 
 
