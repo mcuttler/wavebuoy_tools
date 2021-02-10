@@ -13,5 +13,17 @@
 
 % IMOS_NTP-WAVE_TW_20210205T141750Z_TOR01_WAVERIDER_FV01_timeseries_END-20210206T090015Z.nc
 
-function [imos_filename] = make_imos_filename(buoy_info)
+function [imos_filename] = make_imos_filename(buoy_info,outpathNC,tstart, tend)
+
+t1 = datestr(tstart,30);  t1(end+1) = 'Z'; 
+t2 = datestr(tend,30);  t2(end+1) = 'Z'; 
+
+imos_filename = [outpathNC '\IMOS_' buoy_info.facility_code '_' buoy_info.data_code '_' t1 '_' buoy_info.site_code '_'...
+    buoy_info.platform_type '_FV' num2str(buoy_info.file_version,'%02d') '_' buoy_info.product_type '_END-' t2 '.nc']; 
+
+
+    
+end
+
+
 

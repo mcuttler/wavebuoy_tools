@@ -2,29 +2,13 @@
 
 % Create an IMOS-compliant netCDF file for bulk parameters from Sofar Spotter
 %     
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
-% Code history
-% 
-%     Author          | Date             | Script Version     | Update
-% ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 06 Oct 2020  | 1.0                     | Initial creation
-% -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%
-% 
 
 %%
 
 function [] = bulkparams_to_IMOS_nc(bulkparams, outpathNC, buoy_info, globfile, varsfile); 
 
 
-if strcmp(buoy_info.type,'sofar')==1
-    outpathNC = [outpathNC '\SofarSpotter\ProcessedData_DelayedMode\nc'];     
-elseif strcmp(buoy_info.type,'datawell')==1
-     outpathNC = [outpathNC '\Datawell\ProcessedData_DelayedMode\nc'];     
-elseif strcmp(buoy_info.type,'triaxys')==1
-     outpathNC = [outpathNC '\Triaxys\ProcessedData_DelayedMode\nc'];     
-end
+outpathNC = [outpathNC '\nc\' buoy_info.DeployLoc];
 
 if ~exist(outpathNC)
     mkdir(outpathNC)
@@ -45,7 +29,7 @@ for i = 1:size(tdata,1)
     idx_bulk = []; 
     idx_bulk = find(bulkparams.time>=tstart&bulkparams.time<tend); 
     
-    filenameNC = [outpathNC '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(tstart,'yyyymm') '_bulk.nc'];     
+    filenameNC = make_imos_filename(buoy_info, outpathNC, bulkparams.time(idx_bulk(1)), bulkparams.time(idx_bulk(end)));        
             
     %create output netCDF4 file     
     ncid = netcdf.create(filenameNC,'NETCDF4'); 
@@ -145,12 +129,12 @@ for i = 1:size(tdata,1)
             netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');
             netcdf.putAtt(ncid, varid, 'long_name','station name');
             
-            %variable for STATION_ID --- ask IMOS            
-            if length(buoy_info.station_id)~=st_id_length
-                buoy_info.station_id(end+1:st_id_length) = ' '; 
+            %variable for STATION_ID     
+            if length(buoy_info.DeployLoc)~=st_id_length
+                buoy_info.DeployLoc(end+1:st_id_length) = ' '; 
             end
             
-            netcdf.putVar(ncid, varid, buoy_info.station_id);             
+            netcdf.putVar(ncid, varid, buoy_info.DeployLoc);             
         end
         
         %create and define variable and attributes      
@@ -196,9 +180,13 @@ for i = 1:size(tdata,1)
             imos_time = bulkparams.time(idx_bulk) - datenum(1950,1,1,0,0,0); 
             netcdf.putVar(ncid, varid, imos_time); 
         elseif strcmp(varinfo{1,1}{ii,1},'qc_flag_wave') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_wave')| strcmp(varinfo{1,1}{ii,1},'qc_flag_temp') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_temp')
-            netcdf.putVar(ncid, varid, int8(bulkparams.(varinfo{1,1}{ii,1})(idx_bulk))); 
+            if isfield(bulkparams, varinfo{1,1}{ii,1})
+                netcdf.putVar(ncid, varid, int8(bulkparams.(varinfo{1,1}{ii,1})(idx_bulk))); 
+            end
         else
-            netcdf.putVar(ncid, varid, bulkparams.(varinfo{1,1}{ii,1})(idx_bulk));
+            if isfield(bulkparams, varinfo{1,1}{ii,1})
+                netcdf.putVar(ncid, varid, bulkparams.(varinfo{1,1}{ii,1})(idx_bulk));
+            end
         end
         
     end

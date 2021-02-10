@@ -5,15 +5,15 @@
 %Outputs monthly netCDF file following IMOS conventions 
 
 %% set initial paths for Spotter data to process and parser script
-clear; clc
+% clear; clc
 
 %location of wavebuoy_tools repo
 homepath = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
-%general path to data files - either location where raw dump of memory card
-%from Spotter is, or upper directory for Datawells
+%general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
 datapath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Data_for_testing_Spotter_V1'; 
+
 %path of Sofar parser script
 parserpath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.1'; 
 parser = 'parser_v1.11.1.py'; 
@@ -23,12 +23,12 @@ parser = 'parser_v1.11.1.py';
 buoy_info.type = 'sofar'; 
 buoy_info.name = 'SPOT0171'; %spotter serial number, or just Datawell 
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
-buoy_info.site_code = 'Test01';
-buoy_info.DeployLoc = 'Testing';
+buoy_info.site_code = 'TEST01';
+buoy_info.DeployLoc = 'Testing01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -35; 
 buoy_info.DeployLon = 117; 
-buoy_info.DeployID = 1; %deployment number at this site
+buoy_info.DeployID = 'Testing0101'; %deployment number at this site
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 1.98; 
@@ -38,12 +38,12 @@ years = 2020;
 months = 1:8; 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 
+buoy_info.archive_path = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
 buoy_info.facility_code = 'NTP-WAVE';
-buoy_info.data_code = 'TW'; %T for temperature, W for wave
+buoy_info.data_code = 'W'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
 buoy_info.file_version = 1; 
-buoy_info.product_time = 'timeseries'; 
+buoy_info.product_type = 'timeseries'; 
 
 
 
@@ -89,34 +89,37 @@ if strcmp(buoy_info.type,'sofar')==1
     for i = 1:length(fields); 
         if strcmp(fields{i}(end-1:end),'15') | strcmp(fields{i}(end-1:end),'16') | strcmp(fields{i}(end-1:end),'19') | strcmp(fields{i}(end-1:end),'20') | strcmp(fields{i}(end-1:end),'ke')
             bulkparams_nc = rmfield(bulkparams_nc, fields{i}); 
-        end
+        elseif strcmp(fields{i}(1:2),'te')
+            bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
+        elseif strcmp(fields{i}(end-1:end),'mp')
+            bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
+        end           
+        
     end    
         
     disp(['Saving data for ' buoy_info.name ' as netCDF']);             
     
-    %path to save netCDF files for transfer to AODN
-    outpathNC = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Output_testing';
-    
+     
     %bulkparams
     %text files for IMOS-compliant netCDF generation
     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt';     
     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';        
-    bulkparams_to_IMOS_nc(bulkparams_nc, outpathNC, buoy_info, globfile, varsfile); 
+    bulkparams_to_IMOS_nc(bulkparams_nc, buoy_info.archive_path, buoy_info, globfile, varsfile); 
     
     %displacements
-    globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_displacements_timeSeries.txt';     
-    varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\displacements_parameters_mapping.csv';    
-    displacements_to_IMOS_nc(displacements, outpathNC, buoy_info, globfile, varsfile); 
-    
-   %gps
-    globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_locations_timeSeries.txt';     
-    varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\locations_parameters_mapping.csv';    
-    locations_to_IMOS_nc(locations, outpathNC, buoy_info, globfile, varsfile); 
-
-    %spectral data
-    globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_spec_timeSeries.txt';     
-    varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\spec_parameters_mapping.csv';    
-    spec_to_IMOS_nc(spec, outpathNC, buoy_info, globfile, varsfile); 
+%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_displacements_timeSeries.txt';     
+%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\displacements_parameters_mapping.csv';    
+%     displacements_to_IMOS_nc(displacements, buoy_info.archive_path, buoy_info, globfile, varsfile); 
+%     
+%    %gps
+%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_locations_timeSeries.txt';     
+%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\locations_parameters_mapping.csv';    
+%     locations_to_IMOS_nc(locations, buoy_info.archive_path, buoy_info, globfile, varsfile); 
+% 
+%     %spectral data
+%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_spec_timeSeries.txt';     
+%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\spec_parameters_mapping.csv';    
+%     spec_to_IMOS_nc(spec, outpathNC, buoy_info, globfile, varsfile); 
     
     
     cd(homepath); 
