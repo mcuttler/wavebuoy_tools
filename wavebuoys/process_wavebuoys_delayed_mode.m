@@ -1,45 +1,8 @@
 %%  Process wave buoys (delayed mode)
 
-%     Example usage for Sofar Spotter: 
-%                 buoy_info.type = 'sofar'; 
-%                 buoy_info.name = 'SPOT0171'; %spotter serial number, or deployment location for Datawell 
-%                 buoy_info.DeployLoc = 'Testing';
-%                 buoy_info.DeployDepth = 30; 
-
-%     Example usage for Datawell: 
-%                 buoy_info.type = 'datawell'; 
-%                 buoy_info.name = 'Datawell'; %spotter serial number, or deployment location for Datawell 
-%                 buoy_info.DeployLoc = 'Testing';
-%                 buoy_info.DeployDepth = 30; 
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
-% Code history
-% 
-%     Author          | Date             | Script Version     | Update
-%     -------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 27 Aug 2020 | 1.0                     | Initial creation
-% -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 01 Sep 2020 | 1.1                     | Modified how files are appended to bulkparameters.csv 
-%                                                                           output to account for when python parser generates files in sub-directories. 
-% ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 03 Sep 2020 | 1.2                     | Included displacements.csv into the workflow and output 
-% ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 08 Sep 2020 | 2.0                     | Modify code
-%                                                                          such that all data is appended to Matlab structures and then sub-set
-%                                                                          into monthly files for more efficient storage (may still run into
-%                                                                          Matlab memory issues 
-% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 05 Oct 2020 | 2.1                     | Incorporate
-%                                                                          first QARTOD QA/QC tests - Time series bulk wave parameters
-%                                                                          max/min/acceptable range (test 19, required)
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 09 Oct 2020 | 3.0                     | re-organise code structure. 
-%                                                                        | THIS CODE IS NOW THE 'RUN' CODE, USE THIS TO SET BASIC PARAMETERS FOR FILEPATHS, 
-%                                                                        | QC LIMITS, ETC
-%                                                                        | SEE FUNCTIONS WITHIN THIS CODE FOR ACTUAL DATA PROCESSING
-% ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 13 Oct 2020 | 3.0                     | re-organise code structure - aim to generalise across Datawell and Sofar buoys
-%                                                                        | 
+%Process on-board (memory card) data from Sofar Spotter, Datawell, Triaxys
+%Conducts quality control based on QARTOD manual
+%Outputs monthly netCDF file following IMOS conventions 
 
 %% set initial paths for Spotter data to process and parser script
 clear; clc
@@ -48,9 +11,9 @@ clear; clc
 homepath = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
-%general path to data files - either location where raw dump of memory card
-%from Spotter is, or upper directory for Datawells
+%general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
 datapath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Data_for_testing_Spotter_V1'; 
+
 %path of Sofar parser script
 parserpath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.1'; 
 parser = 'parser_v1.11.1.py'; 
@@ -60,16 +23,27 @@ parser = 'parser_v1.11.1.py';
 buoy_info.type = 'sofar'; 
 buoy_info.name = 'SPOT0171'; %spotter serial number, or just Datawell 
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
-buoy_info.DeployLoc = 'Testing';
+buoy_info.site_code = 'TEST01';
+buoy_info.DeployLoc = 'Testing01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -35; 
 buoy_info.DeployLon = 117; 
+buoy_info.DeployID = 'Testing0101'; %deployment number at this site
+buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 1.98; 
 
-%inputs only for Datawell
+%inputs only for Datawell folder structure
 years = 2020; 
 months = 1:8; 
+
+%inputs for IMOS filename structure
+buoy_info.archive_path = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
+buoy_info.facility_code = 'NTP-WAVE';
+buoy_info.data_code = 'W'; %T for temperature, W for wave
+buoy_info.platform_type = 'WAVERIDER';
+buoy_info.file_version = 1; 
+buoy_info.product_type = 'timeseries'; 
 
 
 
@@ -115,34 +89,37 @@ if strcmp(buoy_info.type,'sofar')==1
     for i = 1:length(fields); 
         if strcmp(fields{i}(end-1:end),'15') | strcmp(fields{i}(end-1:end),'16') | strcmp(fields{i}(end-1:end),'19') | strcmp(fields{i}(end-1:end),'20') | strcmp(fields{i}(end-1:end),'ke')
             bulkparams_nc = rmfield(bulkparams_nc, fields{i}); 
-        end
+        elseif strcmp(fields{i}(1:2),'te')
+            bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
+        elseif strcmp(fields{i}(end-1:end),'mp')
+            bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
+        end           
+        
     end    
         
     disp(['Saving data for ' buoy_info.name ' as netCDF']);             
     
-    %path to save netCDF files for transfer to AODN
-    outpathNC = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Output_testing';
-    
+     
     %bulkparams
     %text files for IMOS-compliant netCDF generation
     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt';     
     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';        
-    bulkparams_to_IMOS_nc(bulkparams_nc, outpathNC, buoy_info, globfile, varsfile); 
+    bulkparams_to_IMOS_nc(bulkparams_nc, buoy_info.archive_path, buoy_info, globfile, varsfile); 
     
     %displacements
-    globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_displacements_timeSeries.txt';     
-    varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\displacements_parameters_mapping.csv';    
-    displacements_to_IMOS_nc(displacements, outpathNC, buoy_info, globfile, varsfile); 
-    
-   %gps
-    globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_locations_timeSeries.txt';     
-    varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\locations_parameters_mapping.csv';    
-    locations_to_IMOS_nc(locations, outpathNC, buoy_info, globfile, varsfile); 
-
-    %spectral data
-    globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_spec_timeSeries.txt';     
-    varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\spec_parameters_mapping.csv';    
-    spec_to_IMOS_nc(spec, outpathNC, buoy_info, globfile, varsfile); 
+%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_displacements_timeSeries.txt';     
+%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\displacements_parameters_mapping.csv';    
+%     displacements_to_IMOS_nc(displacements, buoy_info.archive_path, buoy_info, globfile, varsfile); 
+%     
+%    %gps
+%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_locations_timeSeries.txt';     
+%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\locations_parameters_mapping.csv';    
+%     locations_to_IMOS_nc(locations, buoy_info.archive_path, buoy_info, globfile, varsfile); 
+% 
+%     %spectral data
+%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_spec_timeSeries.txt';     
+%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\spec_parameters_mapping.csv';    
+%     spec_to_IMOS_nc(spec, outpathNC, buoy_info, globfile, varsfile); 
     
     
     cd(homepath); 
@@ -162,19 +139,6 @@ elseif strcmp(buoy_info.type,'triaxys')
     disp('No Triaxys code yet'); 
 end
 
-%% save as .mat file
-
-outpathMAT = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data';
-filenameMAT = [outpathMAT '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(bulkparams.time(1),'yyyymm') '_' datestr(bulkparams.time(end),'yyyymm')  '.mat'];         
-vars = who; 
-idx=[];
-for jj = 1:length(vars); 
-    if  isstruct(eval(vars{jj}))
-        idx = [idx;jj];
-    end
-end        
-        
-save(filenameMAT,vars{idx}); 
 
 %%
     

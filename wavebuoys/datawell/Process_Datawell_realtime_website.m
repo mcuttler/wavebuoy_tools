@@ -17,12 +17,18 @@ data82 = importdata(file82);
 
 pathMAT = [buoy_info.archive_path '\' buoy_info.name '\mat_archive']; 
 
-%% Check to see if monthly .mat already exist, if so, load it
-if exist([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2), '%02d') '.mat'],'file')
-    check = 1; 
-    load([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2),'%02d') '.mat']);
-    archive_data = dw_data; 
-    
+%% Check to see if directory exists 
+if exist(pathMAT)
+    if exist([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2), '%02d') '.mat'],'file')
+        check = 1; 
+        load([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2),'%02d') '.mat']);
+        archive_data = dw_data; 
+    else exist([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2)-1, '%02d') '.mat'],'file')        
+        check = 1; 
+        load([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2)-1,'%02d') '.mat']);
+        archive_data = dw_data; 
+    end               
+        
     RefTime = datenum(1970,01,01);
     time20 = (data20(:,1).*(1/60).*(1/60).*(1/24))+RefTime;
     time21 = (data21(:,1).*(1/60).*(1/60).*(1/24))+RefTime;
@@ -171,7 +177,7 @@ else
         time82(i,1) = (str2num(data82.textdata{i,1}).*(1/60).*(1/60).*(1/24))+RefTime;
     end        
 
-    dw_vars = {'E','theta','s','m2','n2','time','a1','a2','b1','b2','freq','ndirec','hsig','tp','dp','dpspr', 'curr_mag','curr_dir','curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std'}; 
+    dw_vars = {'E','theta','s','m2','n2','time','a1','a2','b1','b2','frequency','ndirec','hsig','tp','dp','dpspr', 'curr_mag','curr_dir','curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std'}; 
     for i = 1:length(dw_vars)
         data.(dw_vars{i}) = []; 
     end
