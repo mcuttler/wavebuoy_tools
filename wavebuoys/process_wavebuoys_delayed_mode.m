@@ -5,7 +5,7 @@
 %Outputs monthly netCDF file following IMOS conventions 
 
 %% set initial paths for Spotter data to process and parser script
-% clear; clc
+clear; clc
 
 %location of wavebuoy_tools repo
 homepath = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
@@ -139,19 +139,6 @@ elseif strcmp(buoy_info.type,'triaxys')
     disp('No Triaxys code yet'); 
 end
 
-%% save as .mat file
-
-outpathMAT = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data';
-filenameMAT = [outpathMAT '\' buoy_info.name '_' buoy_info.DeployLoc '_' datestr(bulkparams.time(1),'yyyymm') '_' datestr(bulkparams.time(end),'yyyymm')  '.mat'];         
-vars = who; 
-idx=[];
-for jj = 1:length(vars); 
-    if  isstruct(eval(vars{jj}))
-        idx = [idx;jj];
-    end
-end        
-        
-save(filenameMAT,vars{idx}); 
 
 %%
     
