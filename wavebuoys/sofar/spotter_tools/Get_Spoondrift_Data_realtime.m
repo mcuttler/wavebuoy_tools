@@ -32,7 +32,7 @@ disp(status);
 if isfield(resp.Body.Data.data,'waves')
     for j = 1:size(resp.Body.Data.data.waves)
         Spotter.serialID{j,1} = SpotterID; 
-         Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
         Spotter.hsig(j,1) = resp.Body.Data.data.waves(j).significantWaveHeight;        
         Spotter.tp(j,1) = resp.Body.Data.data.waves(j).peakPeriod;
         Spotter.tm(j,1) = resp.Body.Data.data.waves(j).meanPeriod;
