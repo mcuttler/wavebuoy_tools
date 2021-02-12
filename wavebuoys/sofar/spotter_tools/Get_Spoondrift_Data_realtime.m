@@ -32,7 +32,7 @@ disp(status);
 if isfield(resp.Body.Data.data,'waves')
     for j = 1:size(resp.Body.Data.data.waves)
         Spotter.serialID{j,1} = SpotterID; 
-         Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
         Spotter.hsig(j,1) = resp.Body.Data.data.waves(j).significantWaveHeight;        
         Spotter.tp(j,1) = resp.Body.Data.data.waves(j).peakPeriod;
         Spotter.tm(j,1) = resp.Body.Data.data.waves(j).meanPeriod;
@@ -83,7 +83,7 @@ end
 if m~=n  
     if n>m %missing waves
         data = Spotter; 
-        fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'};                 
+        fields = {'serialID','time','hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'};                 
         for j = 1:n
            dum = find(Spotter.time==Spotter.wind_time(j)); 
            if isempty(dum)
@@ -103,11 +103,13 @@ if m~=n
         
         for jj = 1:length(fields)
             Spotter.(fields{jj}) = data.(fields{jj}); 
-        end                         
+        end  
+        
+        
                 
     elseif m>n %missing wind
         data = Spotter; 
-        fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};      
+        fields = {'wind_time','wind_speed';'wind_dir';'wind_seasurfaceId'};      
         for j = 1:m
             dum = find(Spotter.wind_time==Spotter.time(j)); 
             if isempty(dum)                
@@ -125,7 +127,8 @@ if m~=n
         
         for jj = 1:length(fields)
             Spotter.(fields{jj}) = data.(fields{jj}); 
-        end      
+        end    
+        
     end
 end
 
