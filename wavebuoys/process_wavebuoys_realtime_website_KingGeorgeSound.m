@@ -73,6 +73,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
+                realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, limit); 
                 %output MEM and SST plots 
                 if strcmp(buoy_info.DataType,'spectral')        
@@ -91,6 +92,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
             end
             realtime_archive_mat(buoy_info, SpotData);
+            realtime_backup_mat(buoy_info, SpotData);
             realtime_archive_text(buoy_info, SpotData, limit); 
             
             %output MEM and SST plots 
@@ -129,7 +131,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, dw_data);                        
                 
                 %save data to different formats        
-                realtime_archive_mat(buoy_info, data);      
+                realtime_archive_mat(buoy_info, data);   
+                realtime_backup_mat(buoy_info, data);
                 limit = 1;         
                 realtime_archive_text(buoy_info, data, limit);             
                 
@@ -151,6 +154,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
         dw_data.qf_sst = ones(size(dw_data.temp_time,1),1).*4; 
         dw_data.qf_bott_temp =ones(size(dw_data.temp_time,1),1).*4; 
         realtime_archive_mat(buoy_info, dw_data); 
+        realtime_backup_mat(buoy_info, dw_data);
         limit = 1; 
         realtime_archive_text(buoy_info, dw_data, limit); 
         
