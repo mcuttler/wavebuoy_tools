@@ -177,6 +177,7 @@ elseif strcmp(buoy_info.type,'triaxys')
 end
 
 %%
+quit
 
 
 

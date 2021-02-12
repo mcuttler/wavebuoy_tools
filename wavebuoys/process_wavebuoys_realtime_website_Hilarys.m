@@ -9,8 +9,8 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-% buoycodes = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
-% addpath(genpath(buoycodes))
+buoycodes = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
@@ -177,7 +177,7 @@ elseif strcmp(buoy_info.type,'triaxys')
 end
 
 %%
-
+quit
 
 
 
