@@ -27,6 +27,7 @@ buoy_info.DeployLon = 113.808517;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
+buoy_info.backup_path = 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination

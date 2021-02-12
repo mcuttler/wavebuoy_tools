@@ -27,6 +27,7 @@ buoy_info.DeployLon = 0;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
+buoy_info.backup_path = '
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
@@ -43,11 +44,11 @@ if strcmp(buoy_info.type,'sofar')==1
     else
         if strcmp(buoy_info.DataType,'parameters')
             limit = buoy_info.UpdateTime*2;      
-            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info.serial, limit);   
+            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 
             limit = buoy_info.UpdateTime; 
-            [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info.serial, limit);     
+            [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);     
             flag = 1; 
         end                    
     end    
