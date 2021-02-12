@@ -44,11 +44,12 @@ if strcmp(buoy_info.type,'sofar')==1
     else
         if strcmp(buoy_info.DataType,'parameters')
             limit = buoy_info.UpdateTime*2;      
-            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info.serial, limit);   
+            limit = 500; 
+            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 
             limit = buoy_info.UpdateTime; 
-            [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info.serial, limit);     
+            [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);     
             flag = 1; 
         end                    
     end    
