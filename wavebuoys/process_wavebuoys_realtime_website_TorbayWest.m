@@ -14,16 +14,16 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0929'; %spotter serial number, or just Datawell 
-buoy_info.name = 'CoralBay'; 
+buoy_info.serial = 'SPOT-0757'; %spotter serial number, or just Datawell 
+buoy_info.name = 'TorbayWest'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
-buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
+buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'CoralBay';
-buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -23.144233; 
-buoy_info.DeployLon = 113.740267; 
+buoy_info.DeployLoc = 'TorbayWest';
+buoy_info.DeployDepth = 30; 
+buoy_info.DeployLat = -35.0695; 
+buoy_info.DeployLon = 117.7707; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
@@ -132,8 +132,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, dw_data);                        
                 
                 %save data to different formats        
-                realtime_archive_mat(buoy_info, data);
-%                 realtime_backup_mat(buoy_info, data);
+                realtime_archive_mat(buoy_info, data);     
+%                 realtime_backup_mat(buoy_info, data);  
                 limit = 1;         
                 realtime_archive_text(buoy_info, data, limit);             
                 
@@ -155,7 +155,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
         dw_data.qf_sst = ones(size(dw_data.temp_time,1),1).*4; 
         dw_data.qf_bott_temp =ones(size(dw_data.temp_time,1),1).*4; 
         realtime_archive_mat(buoy_info, dw_data); 
-%         realtime_backup_mat(buoy_info, dw_data);
+%         realtime_archive_mat(buoy_info, dw_data);  
         limit = 1; 
         realtime_archive_text(buoy_info, dw_data, limit); 
         
@@ -177,7 +177,7 @@ elseif strcmp(buoy_info.type,'triaxys')
 end
 
 %%
-% quit
+quit
 
 
 

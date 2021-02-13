@@ -14,9 +14,9 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'datawell'; 
-buoy_info.serial = 'Datawell'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'Datawell-74103';  
 buoy_info.name = 'Torbay'; 
-buoy_info.datawell_name = 'Dev_site'; 
+buoy_info.datawell_name = 'Dev_Site2'; 
 buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 

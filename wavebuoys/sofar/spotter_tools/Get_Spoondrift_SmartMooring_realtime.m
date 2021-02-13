@@ -77,20 +77,20 @@ if m~=n
         for j = 1:n
            dum = find(Spotter.time==Spotter.wind_time(j)); 
            if isempty(dum)
-                data.serialID{j,1} = SpotterID; 
+                data.serialID{j,1} = buoy_info.serial; 
                 data.time(j,1) = Spotter.wind_time(j); 
                 for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = nan;
                 end
            else
-               data.serialID{j,1} = SpotterID;  
+               data.serialID{j,1} = buoy_info.serial;  
                data.time(j,1) = Spotter.wind_time(j);
                for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
                end
            end
         end
-        
+        fields = {'time';'serialID';'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'}; 
         for jj = 1:length(fields)
             Spotter.(fields{jj}) = data.(fields{jj}); 
         end                         
@@ -112,7 +112,7 @@ if m~=n
                 end
             end
         end
-        
+        fields = {'wind_time';'wind_speed';'wind_dir';'wind_seasurfaceId'}; 
         for jj = 1:length(fields)
             Spotter.(fields{jj}) = data.(fields{jj}); 
         end      

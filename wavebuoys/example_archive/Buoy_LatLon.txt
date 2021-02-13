@@ -1,8 +1,0 @@
-Exmouth Gulf - Spot0559 - -21.835883, 114.279767
-Dampier - Spot0561 - -20.478150, 116.517100
-Hilarys - Spot0093 - -31.851983, 115.646567
-Tantabiddi - Spot0558 - -21.895067, 113.926817
-Goodrich Bank - Spot0551 - -10.416983, 130.000567
-KingGeorgeSound - Spot0168 - -35.079750, 117.979450
-Torbay - Datawell - -35.07044467, 117.7756324
-

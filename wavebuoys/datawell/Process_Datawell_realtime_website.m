@@ -51,16 +51,16 @@ if exist(pathMAT)
     
     %Get newest data from file, and check that everything is same
     %timestamps
-    idx20 = find(time20>dw_data.time(end));
-    idx21 = find(time21>dw_data.time(end));
-    idx25 = find(time25>dw_data.time(end));
-    idx28 = find(time28>dw_data.time(end));        
+    idx20 = find(time20>archive_data.time(end));
+    idx21 = find(time21>archive_data.time(end));
+    idx25 = find(time25>archive_data.time(end));
+    idx28 = find(time28>archive_data.time(end));        
     
     [m,~] = size(data82.data);
     for i = 1:m
         time82(i,1) = (str2num(data82.textdata{i,1}).*(1/60).*(1/60).*(1/24))+RefTime;
     end
-    idx82 = find(time82>dw_data.temp_time(end));
+    idx82 = find(time82>archive_data.temp_time(end));
     
     if ~isempty(idx20)&&~isempty(idx21)&&~isempty(idx28)&&~isempty(idx25)&&~isempty(idx82)
         
@@ -109,7 +109,7 @@ if exist(pathMAT)
         
         time82 = time82(idx82); 
         temp_data = data82.data(idx82,:); 
-        data = process_datawell_realtime_wave_temp_current(E, theta, s, m2, n2, spec_params, time20, temp_data, time82, dw_data);     
+        data = process_datawell_realtime_wave_temp_current(buoy_info, E, theta, s, m2, n2, spec_params, time20, temp_data, time82, dw_data);     
     else
         %no new data
         data = archive_data;         
@@ -177,13 +177,13 @@ else
         time82(i,1) = (str2num(data82.textdata{i,1}).*(1/60).*(1/60).*(1/24))+RefTime;
     end        
 
-    dw_vars = {'E','theta','s','m2','n2','time','a1','a2','b1','b2','frequency','ndirec','hsig','tp','dp','dpspr', 'curr_mag','curr_dir','curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std'}; 
+    dw_vars = {'serialID','E','theta','s','m2','n2','time','a1','a2','b1','b2','frequency','ndirec','hsig','tp','dp','dpspr', 'curr_mag','curr_dir','curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std'}; 
     for i = 1:length(dw_vars)
         data.(dw_vars{i}) = []; 
     end
     
     
-    data = process_datawell_realtime_wave_temp_current(E, theta, s, m2, n2, spec_params, time20, data82.data, time82, data);     
+    data = process_datawell_realtime_wave_temp_current(buoy_info, E, theta, s, m2, n2, spec_params, time20, data82.data, time82, data);     
     
 end        
 

@@ -8,7 +8,7 @@
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
 
-%location of wavebuoy_tools repo
+% %location of wavebuoy_tools repo
 % buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
 % addpath(genpath(buoycodes))
 
