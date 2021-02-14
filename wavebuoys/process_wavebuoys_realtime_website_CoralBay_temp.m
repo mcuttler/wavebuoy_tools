@@ -35,164 +35,167 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %% process realtime mode data
 
-%Sofar Spotter (v1 and v2) 
-if strcmp(buoy_info.type,'sofar')==1            
-    %check whether smart mooring or normal mooring
-    if strcmp(buoy_info.version,'smart_mooring')
-        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
-    else
-        if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;     
-            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
-            flag = 1; 
-        elseif strcmp(buoy_info.DataType,'spectral'); 
-            limit = buoy_info.UpdateTime; 
-            [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);     
-            flag = 1; 
-        end                    
-    end    
-    
-    if flag == 1
-        for i = 1:size(SpotData.time,1)
-            SpotData.name{i,1} = buoy_info.name; 
-        end
-        
-        %load in any existing data for this site and combine with new
-        %measurements, then QAQC
-        [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-        
-        %check>0 means that directory already exists (and monthly file should
-        %exist); otherwise, this is the first data for this location 
-        if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
-            
-            %check that it's new data
-            if SpotData.time(1)>archive_data.time(end)
-                %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-                [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
-                
-                %save data to different formats        
-                realtime_archive_mat(buoy_info, data);
-%                 realtime_backup_mat(buoy_info, data);
-                realtime_archive_text(buoy_info, data, limit); 
-                %output MEM and SST plots 
-                if strcmp(buoy_info.DataType,'spectral')        
-                    [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-                    make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
-                end
-                
-                %code to update the buoy info master file for website to read
-                update_website_buoy_info(buoy_info, data); 
-            end
-        else
-            SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
-            if isfield(SpotData,'temp_time')
-                SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4; 
-                SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
-                
-            end
-            realtime_archive_mat(buoy_info, SpotData);
-%             realtime_backup_mat(buoy_info, SpotData);
-            realtime_archive_text(buoy_info, SpotData, limit); 
-            
-            %output MEM and SST plots 
-            if strcmp(buoy_info.DataType,'spectral')        
-                [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-                make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
-            end
-            
-            %code to update the buoy info master file for website to read
-            update_website_buoy_info(buoy_info, SpotData); 
-        end        
-    end        
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- %Datawell DWR4 
-elseif strcmp(buoy_info.type,'datawell')==1
-    data.time = datenum(now); 
-    data.tnow = datevec(data.time); 
-    
-    data.file20 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF20}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
-    data.file21 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF21}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
-    data.file25 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF25}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
-    data.file28 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF28}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
-    data.file82 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF82}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];    
-    
-    %original code for Datawell buoys does all checking of directories and
-    %grabbing archived data
-    [dw_data, archive_data,check] = Process_Datawell_realtime_website(buoy_info, data, data.file20, data.file21, data.file25, data.file28, data.file82);
-    clear data; 
-    
-    %check that it's new data
-    
-    if all(check)~=0
-        if ~isempty(archive_data)
-            if size(dw_data.time,1)>size(archive_data.time,1)
-                %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-                [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, dw_data);                        
-                
-                %save data to different formats        
-                realtime_archive_mat(buoy_info, data);
-%                 realtime_backup_mat(buoy_info, data);
-                limit = 1;         
-                realtime_archive_text(buoy_info, data, limit);             
-                
-                %output MEM and SST plots 
-                plot_idx = find(data.time>archive_data.time(end)); 
-                if strcmp(buoy_info.DataType,'spectral')                        
-                    for ii = 1:size(plot_idx,1); 
-                        [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
-                        make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
-                    end
-                end
-                
-                %code to update the buoy info master file for website to read
-                update_website_buoy_info(buoy_info, data); 
-            end
-        end
-    else
-        dw_data.qf_waves = ones(size(dw_data.time,1),1).*4;
-        dw_data.qf_sst = ones(size(dw_data.temp_time,1),1).*4; 
-        dw_data.qf_bott_temp =ones(size(dw_data.temp_time,1),1).*4; 
-        realtime_archive_mat(buoy_info, dw_data); 
-%         realtime_backup_mat(buoy_info, dw_data);
-        limit = 1; 
-        realtime_archive_text(buoy_info, dw_data, limit); 
-        
-        %output MEM and SST plots 
-        if strcmp(buoy_info.DataType,'spectral')        
-            for ii = 1:size(dw_data.a1,1); 
-                [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
-                make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
-            end    
-        end
-        
-        %code to update the buoy info master file for website to read
-        update_website_buoy_info(buoy_info, dw_data); 
+limit = 100; 
+         
+%grab data
+import matlab.net.*
+import matlab.net.http.*
+header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
+r = RequestMessage('GET', header);
+%wave data
+uri_waves= URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial...
+    '&includeSurfaceTempData=true&includeWindData=true&limit=' num2str(limit)]);
+resp_waves = send(r,uri_waves);
+status = resp_waves.StatusCode;
+disp([status]);     
+
+
+tstart = datestr(datenum(resp_waves.Body.Data.data.waves(1).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
+tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
+startDate = [tstart 'Z']; 
+endDate = [tend 'Z']; 
+
+uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]); 
+resp_sensor = send(r,uri_sensor);
+status = resp_sensor.StatusCode;
+if ~isempty(resp_sensor.Body.Data.data)
+    disp([status]); 
+else
+    disp(['No sensor data for that time period']); 
+end
+
+
+%% WAVES AND WIND
+%check for wave parameters
+if isfield(resp_waves.Body.Data.data,'waves')
+    for j = 1:size(resp_waves.Body.Data.data.waves)
+        Spotter.serialID{j,1} = buoy_info.serial; 
+        Spotter.time(j,1) = datenum(resp_waves.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.hsig(j,1) = resp_waves.Body.Data.data.waves(j).significantWaveHeight;        
+        Spotter.tp(j,1) = resp_waves.Body.Data.data.waves(j).peakPeriod;
+        Spotter.tm(j,1) = resp_waves.Body.Data.data.waves(j).meanPeriod;
+        Spotter.dp(j,1) = resp_waves.Body.Data.data.waves(j).peakDirection;
+        Spotter.dpspr(j,1) = resp_waves.Body.Data.data.waves(j).peakDirectionalSpread;
+        Spotter.dm(j,1) = resp_waves.Body.Data.data.waves(j).meanDirection;
+        Spotter.dmspr(j,1) = resp_waves.Body.Data.data.waves(j).meanDirectionalSpread;       
+        Spotter.lat(j,1) = resp_waves.Body.Data.data.waves(j).latitude;
+        Spotter.lon(j,1) = resp_waves.Body.Data.data.waves(j).longitude;
     end
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Triaxys
-elseif strcmp(buoy_info.type,'triaxys')
-    disp('No Triaxys code yet'); 
+end
+
+
+%check for wind data 
+if isfield(resp_waves.Body.Data.data,'wind')
+    for j = 1:size(resp_waves.Body.Data.data.wind)
+        Spotter.wind_speed(j,1) = resp_waves.Body.Data.data.wind(j).speed;
+        Spotter.wind_dir(j,1) = resp_waves.Body.Data.data.wind(j).direction;
+        Spotter.wind_time(j,1) = datenum(resp_waves.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.wind_seasurfaceId(j,1) = resp_waves.Body.Data.data.wind(j).seasurfaceId;
+    end
+end
+
+%check that wind and waves have same time, duplicate temp for the hour so
+%it matches timestamps of wind and waves
+[m,~] = size(Spotter.time); 
+[n,~] = size(Spotter.wind_time); 
+if m~=n  
+    if n>m %missing waves
+        data = Spotter; 
+        fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'};                 
+        for j = 1:n
+           dum = find(Spotter.time==Spotter.wind_time(j)); 
+           if isempty(dum)
+                data.serialID{j,1} = buoy_info.serial; 
+                data.time(j,1) = Spotter.wind_time(j); 
+                for jj = 1:length(fields)
+                    data.(fields{jj})(j,1) = nan;
+                end
+           else
+               data.serialID{j,1} = buoy_info.serial;  
+               data.time(j,1) = Spotter.wind_time(j);
+               for jj = 1:length(fields)
+                    data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
+               end
+           end
+        end
+        fields = {'time';'serialID';'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'}; 
+        for jj = 1:length(fields)
+            Spotter.(fields{jj}) = data.(fields{jj}); 
+        end                         
+                
+    elseif m>n %missing wind
+        data = Spotter; 
+        fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};      
+        for j = 1:m
+            dum = find(Spotter.wind_time==Spotter.time(j)); 
+            if isempty(dum)                
+                data.wind_time(j,1) = Spotter.time(j); 
+                for jj = 1:length(fields)
+                    data.(fields{jj})(j,1) = nan;
+                end
+            else
+               data.wind_time(j,1) = Spotter.time(j); 
+                for jj = 1:length(fields)
+                    data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
+                end
+            end
+        end
+        fields = {'wind_time';'wind_speed';'wind_dir';'wind_seasurfaceId'}; 
+        for jj = 1:length(fields)
+            Spotter.(fields{jj}) = data.(fields{jj}); 
+        end      
+    end
+end
+%% TEMPERATURE
+%check for temperature data
+%assume surface and bottom sensor   
+Spotter.temp_time = []; 
+Spotter.surf_temp = []; 
+Spotter.bott_temp =[]; 
+if ~isempty(resp_sensor.Body.Data.data)    
+    for j = 1:size(resp_sensor.Body.Data.data,1)
+        if resp_sensor.Body.Data.data(j).sensorPosition==1
+            Spotter.surf_temp = [Spotter.surf_temp; resp_sensor.Body.Data.data(j).value]; 
+            Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
+        elseif resp_sensor.Body.Data.data(j).sensorPosition==2           
+            Spotter.bott_temp = [Spotter.bott_temp; resp_sensor.Body.Data.data(j).value]; 
+        end
+    end
 end
 
 %%
-% quit
+%load in any existing data for this site and combine with new
+%measurements, then QAQC
+[check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
 
-
-
-
-
-
-
-
-
+%check>0 means that directory already exists (and monthly file should
+%exist); otherwise, this is the first data for this location 
+if all(check)~=0        
+    [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+    
+    %check that it's new data
+    if SpotData.time(1)>archive_data.time(end)
         
-
+        %perform some QA/QC --- QARTOD 19 and QARTOD 20        
+        [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
         
+        %save data to different formats        
+        realtime_archive_mat(buoy_info, data);
+        realtime_archive_text(buoy_info, data, limit);         
+        %code to update the buoy info master file for website to read
+        update_website_buoy_info(buoy_info, data); 
+    end
+else
+    SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
+    if isfield(SpotData,'temp_time')
+        SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4; 
+        SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
         
-       
-
-
-
+    end
+    realtime_archive_mat(buoy_info, SpotData);
+    realtime_archive_text(buoy_info, SpotData, limit); 
+    
+    %code to update the buoy info master file for website to read
+    update_website_buoy_info(buoy_info, SpotData); 
+end
 
