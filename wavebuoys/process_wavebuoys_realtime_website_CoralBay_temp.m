@@ -35,7 +35,7 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %% process realtime mode data
 
-limit = 100; 
+limit = 10; 
          
 %grab data
 import matlab.net.*
@@ -166,6 +166,8 @@ end
 %%
 %load in any existing data for this site and combine with new
 %measurements, then QAQC
+SpotData = Spotter; 
+
 [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
 
 %check>0 means that directory already exists (and monthly file should
@@ -173,29 +175,27 @@ end
 if all(check)~=0        
     [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
     
-    %check that it's new data
-    if SpotData.time(1)>archive_data.time(end)
-        
-        %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-        [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
+    %find that it's new data
+    idxw = find(SpotData.time>archive_data.time(end)); 
+    idxt = find(SpotData.temp_time>archive_data.temp_time(end));
+    if ~isempty(idxw)&&~isempty(idxt)
+        fields = fieldnames(SpotData); 
+        for jj = 1:length(fields)
+            if strcmp(fields{jj},'temp_time') | strcmp(fields{jj},'surf_temp') | strcmp(fields{jj},'bott_temp')
+                SpotData.(fields{jj})= SpotData.(fields{jj})(idxt); 
+            else
+                SpotData.(fields{jj})=SpotData.(fields{jj})(idxw);
+            end
+        end
+        %perform some QA/QC --- QARTOD 19 and QARTOD 20
+        [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);  
         
         %save data to different formats        
         realtime_archive_mat(buoy_info, data);
-        realtime_archive_text(buoy_info, data, limit);         
-        %code to update the buoy info master file for website to read
+        realtime_archive_text(buoy_info, data, 2);         
         update_website_buoy_info(buoy_info, data); 
     end
-else
-    SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
-    if isfield(SpotData,'temp_time')
-        SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4; 
-        SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
-        
-    end
-    realtime_archive_mat(buoy_info, SpotData);
-    realtime_archive_text(buoy_info, SpotData, limit); 
-    
-    %code to update the buoy info master file for website to read
-    update_website_buoy_info(buoy_info, SpotData); 
 end
 
+%% 
+quit
