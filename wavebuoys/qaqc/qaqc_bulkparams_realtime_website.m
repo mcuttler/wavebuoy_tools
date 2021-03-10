@@ -14,9 +14,17 @@ function [bulkparams] = qaqc_bulkparams_realtime_website(buoy_info, archive_data
 %append new data and archived data
 if strcmp(buoy_info.type,'sofar')
     fields = fieldnames(new_data); 
-    for j = 1:size(fields,1)
-        bulkparams.(fields{j}) = [archive_data.(fields{j}); new_data.(fields{j})]; 
+    fields_archive = fieldnames(archive_data); 
+    fields_int = intersect(fields, fields_archive);
+    for j = 1:size(fields_int,1)
+        bulkparams.(fields_int{j}) = [archive_data.(fields_int{j}); new_data.(fields_int{j})]; 
     end
+    %now include any missing fields from archive data
+    for j = 1:size(fields_archive)
+        if ~isfield(bulkparams, fields_archive{j})
+            bulkparams.(fields_archive{j}) = archive_data.(fields_archive{j}); 
+        end
+    end    
 elseif strcmp(buoy_info.type,'datawell'); 
     bulkparams = new_data; 
 end

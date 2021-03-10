@@ -22,16 +22,18 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Torbay';
 buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -35.07044467; 
-buoy_info.DeployLon = 117.7756324; 
+buoy_info.DeployLat = -35.069717; 
+buoy_info.DeployLon = 117.772767; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = 'P:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Data\UWA\realtime_archive';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
-%use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-% buoy_info.MagDec = 1.98; 
+%data for search radius and alert
+buoy_info.time_cutoff = 3; %hours
+buoy_info.search_rad = 190; %meters for watch circle radius 
+
 
 %% process realtime mode data
 
@@ -109,6 +111,9 @@ if strcmp(buoy_info.type,'sofar')==1
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
+    %check buoy position and send email if out of search radius
+    [warning] = buoy_search_radius_and_alert(buoy_info);     
+    
     data.time = datenum(now);   
     data.tnow = datevec(data.time); 
     
@@ -123,8 +128,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
     [dw_data, archive_data,check] = Process_Datawell_realtime_website(buoy_info, data, data.file20, data.file21, data.file25, data.file28, data.file82);
     clear data; 
     
-    %check that it's new data
-    
+    %check that it's new data    
     if all(check)~=0
         if ~isempty(archive_data)
             if size(dw_data.time,1)>size(archive_data.time,1)

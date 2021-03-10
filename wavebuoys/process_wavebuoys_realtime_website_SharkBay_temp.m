@@ -14,13 +14,13 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1159'; %spotter serial number, or just Datawell 
-buoy_info.name = 'ClerkeLagoon'; 
+buoy_info.serial = 'SPOT-0938'; %spotter serial number, or just Datawell 
+buoy_info.name = 'SharkBay'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'ClerkeLagoon';
+buoy_info.DeployLoc = 'SharkBay';
 buoy_info.DeployDepth = 20; 
 buoy_info.DeployLat = -23.144233; 
 buoy_info.DeployLon = 113.740267; 
@@ -35,7 +35,7 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %% process realtime mode data
 
-limit = 25; 
+limit = 10; 
          
 %grab data
 import matlab.net.*
