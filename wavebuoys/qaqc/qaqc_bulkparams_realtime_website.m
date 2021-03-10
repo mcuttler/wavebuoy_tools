@@ -40,9 +40,9 @@ if isfield(bulkparams, 'temp_time')
 end
 
 %settings for range test (QARTOD19) 
-qaqc.MINWH = 0.25;
+qaqc.MINWH = 0.01;
 qaqc.MAXWH = 12;
-qaqc.MINWP = 3; 
+qaqc.MINWP = 1; 
 qaqc.MAXWP = 25;
 qaqc.MAXT = 45; 
 qaqc.MINT = 0; 

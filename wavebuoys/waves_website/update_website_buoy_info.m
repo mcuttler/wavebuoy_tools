@@ -21,15 +21,22 @@ for i = 1:size(in_data.textdata,1)
     end
 end            
 
-%find column for 'last update'
+%find column for 'last update', label, breadcrumb, lat, lon
 for i = 1:size(web_data,2)
     if strcmp(web_data{1,i},'last_updated')
         last_update = i; 
     elseif strcmp(web_data{1,i},'label')
         label = i; 
+    elseif strcmp(web_data{1,i},'drifting')
+        drifting = i; 
+    elseif strcmp(web_data{1,i},'Latitude')
+        lat = i; 
+    elseif strcmp(web_data{1,i},'Longitude')
+        lon = i; 
     end
 end
 
+%find row for buoy
 for i = 1:size(web_data,1)
     if strcmp(web_data{i,label},buoy_info.name)
         buoy = i;
@@ -45,6 +52,11 @@ if isempty(web_data{buoy, last_update-1})
     web_data{1,last_update-1}{buoy} = num2str(first_time); 
 end
 
+%update with breadcrumb for drifting buoy
+if str2num(web_data{buoy,drifting})>0
+    web_data{buoy,lat} = num2str(data.lat(end));
+    web_data{buoy,lon} = num2str(data.lon(end)); 
+end
 
 %re-write text file
 %create formatting strings

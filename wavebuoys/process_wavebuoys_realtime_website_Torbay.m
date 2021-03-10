@@ -138,7 +138,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data); 
 %                 realtime_backup_mat(buoy_info, data);
-                limit = 1;         
+                limit = 1;             
                 realtime_archive_text(buoy_info, data, limit);             
                 
                 %output MEM and SST plots 

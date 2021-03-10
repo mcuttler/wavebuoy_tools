@@ -22,8 +22,8 @@ buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'SharkBay';
 buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -25.420100; 
-buoy_info.DeployLon = 113.130500; 
+buoy_info.DeployLat = -25.418967; 
+buoy_info.DeployLon = 113.125383; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
@@ -74,7 +74,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
-                realtime_backup_mat(buoy_info, data);
+%                 realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, limit); 
                 %output MEM and SST plots 
                 if strcmp(buoy_info.DataType,'spectral')        
@@ -93,7 +93,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
             end
             realtime_archive_mat(buoy_info, SpotData);
-            realtime_backup_mat(buoy_info, SpotData);
+%             realtime_backup_mat(buoy_info, SpotData);
             realtime_archive_text(buoy_info, SpotData, limit); 
             
             %output MEM and SST plots 
