@@ -9,7 +9,7 @@
 
 
 %%
-function [Spotter,flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit);
+function [Spotter,flag] = Get_Spoondrift_SmartMooring_realtime_ClerkeReef(buoy_info, limit);
 
 import matlab.net.*
 import matlab.net.http.*
@@ -137,20 +137,22 @@ if ~isempty(resp_sensor.Body.Data.data)
 end
 
 %% check that mooring data has correc time stamps to continue
-t1 = datevec(Spotter.time(end)-datenum(0,0,0,1,40,0)); 
-t2 = datevec(Spotter.time(end)); 
-dv = datevec(Spotter.temp_time); 
-t1idx = find(dv(:,1)==t1(1)&dv(:,2)==t1(2)&dv(:,3)==t1(3)&dv(:,4)==t1(4)&dv(:,5)==t1(5)&dv(:,6)==t1(6)); 
-t2idx = find(dv(:,1)==t2(1)&dv(:,2)==t2(2)&dv(:,3)==t2(3)&dv(:,4)==t2(4)&dv(:,5)==t2(5)&dv(:,6)==t2(6)); 
+t1 = Spotter.time(end)-datenum(0,0,0,1,40,0); 
+t2 = Spotter.time(end); 
+t1idx = find(abs(Spotter.temp_time-t1)==min(abs(Spotter.temp_time-t1)));
+t2idx = find(abs(Spotter.temp_time-t2)==min(abs(Spotter.temp_time-t2)));
+min_diff = 1/(60*24); %less than 1min difference; 
 
 if ~isempty(t1idx)&~isempty(t2idx)
-    flag = 1; 
-    Spotter.temp_time = Spotter.temp_time(t1idx:t2idx); 
-    Spotter.surf_temp = Spotter.surf_temp(t1idx:t2idx); 
-    Spotter.bott_temp = Spotter.bott_temp(t1idx:t2idx);                             
-else
-    flag = 0; 
-end   
+    if (Spotter.temp_time(t1idx)-t1)<min_diff & (Spotter.temp_time(t2idx)-t2)<min_diff
+        flag = 1; 
+        Spotter.temp_time = Spotter.temp_time(t1idx:t2idx); 
+        Spotter.surf_temp = Spotter.surf_temp(t1idx:t2idx); 
+        Spotter.bott_temp = Spotter.bott_temp(t1idx:t2idx);                             
+    else
+        flag = 0;
+    end   
+end
     
 
 

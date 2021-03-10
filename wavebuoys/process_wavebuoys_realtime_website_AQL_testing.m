@@ -1,16 +1,43 @@
-%% Get Spoondrift Buoy Data
+%%  Process wave buoys (real time) for display on wawaves.org
 
-% Code for Sofar Smart Moorings - can be wave (parameters or spectral) +
-% temp sensors or pressure sensors
+%MC to update prior to merging into master branch
 
-% AQL token: a1b3c0dbaa16bb21d5f0befcbcca51
-% Please don't use the latest-data endpoint
-% Instead use the sensor-data endpoint rather than the wave-data endpoint
+%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
+%UWA token: e0eb70b6d9e0b5e00450929139ea34
 
+%% set initial paths for wave buoy data to process and parser script
+clear; clc
 
-%%
-function [Spotter,flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit);
+%location of wavebuoy_tools repo
+% buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
+% addpath(genpath(buoycodes))
 
+%buoy type and deployment info number and deployment info 
+buoy_info.type = 'sofar'; 
+buoy_info.serial = 'SPOT-1034'; %spotter serial number, or just Datawell 
+buoy_info.name = 'ClerkeLagoon'; 
+buoy_info.datawell_name = 'nan'; 
+buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
+buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
+buoy_info.utc_offset = 8; 
+buoy_info.DeployLoc = 'ClerkeLagoon';
+buoy_info.DeployDepth = 20; 
+buoy_info.DeployLat = -23.144233; 
+buoy_info.DeployLon = 113.740267; 
+buoy_info.UpdateTime =  1; %hours
+buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.archive_path = 'E:\wawaves';
+buoy_info.backup_path = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\waves_website\realtime_archive_backup';
+buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+
+%use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
+% buoy_info.MagDec = 1.98; 
+
+%% process realtime mode data
+
+limit = 100; 
+         
+%grab data
 import matlab.net.*
 import matlab.net.http.*
 header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
@@ -20,10 +47,10 @@ uri_waves= URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.
     '&includeSurfaceTempData=true&includeWindData=true&limit=' num2str(limit)]);
 resp_waves = send(r,uri_waves);
 status = resp_waves.StatusCode;
-disp([status]); 
+disp([status]);     
 
 
-tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,3,0,0),30); 
+tstart = datestr(datenum(resp_waves.Body.Data.data.waves(1).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
 tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
@@ -36,6 +63,7 @@ if ~isempty(resp_sensor.Body.Data.data)
 else
     disp(['No sensor data for that time period']); 
 end
+
 
 %% WAVES AND WIND
 %check for wave parameters
@@ -118,7 +146,6 @@ if m~=n
         end      
     end
 end
-
 %% TEMPERATURE
 %check for temperature data
 %assume surface and bottom sensor   
@@ -136,31 +163,39 @@ if ~isempty(resp_sensor.Body.Data.data)
     end
 end
 
-%% check that mooring data has correc time stamps to continue
-t1 = datevec(Spotter.time(end)-datenum(0,0,0,1,40,0)); 
-t2 = datevec(Spotter.time(end)); 
-dv = datevec(Spotter.temp_time); 
-t1idx = find(dv(:,1)==t1(1)&dv(:,2)==t1(2)&dv(:,3)==t1(3)&dv(:,4)==t1(4)&dv(:,5)==t1(5)&dv(:,6)==t1(6)); 
-t2idx = find(dv(:,1)==t2(1)&dv(:,2)==t2(2)&dv(:,3)==t2(3)&dv(:,4)==t2(4)&dv(:,5)==t2(5)&dv(:,6)==t2(6)); 
+%%
+%load in any existing data for this site and combine with new
+%measurements, then QAQC
+SpotData = Spotter; 
 
-if ~isempty(t1idx)&~isempty(t2idx)
-    flag = 1; 
-    Spotter.temp_time = Spotter.temp_time(t1idx:t2idx); 
-    Spotter.surf_temp = Spotter.surf_temp(t1idx:t2idx); 
-    Spotter.bott_temp = Spotter.bott_temp(t1idx:t2idx);                             
-else
-    flag = 0; 
-end   
-    
-
-
-end
-
-
-
-
-
-
-
-
-
+% % [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
+% % 
+% % %check>0 means that directory already exists (and monthly file should
+% % %exist); otherwise, this is the first data for this location 
+% % if all(check)~=0        
+% %     [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+% %     
+% %     %find that it's new data
+% %     idxw = find(SpotData.time>archive_data.time(end)); 
+% %     idxt = find(SpotData.temp_time>archive_data.temp_time(end));
+% %     if ~isempty(idxw)&&~isempty(idxt)
+% %         fields = fieldnames(SpotData); 
+% %         for jj = 1:length(fields)
+% %             if strcmp(fields{jj},'temp_time') | strcmp(fields{jj},'surf_temp') | strcmp(fields{jj},'bott_temp')
+% %                 SpotData.(fields{jj})= SpotData.(fields{jj})(idxt); 
+% %             else
+% %                 SpotData.(fields{jj})=SpotData.(fields{jj})(idxw);
+% %             end
+% %         end
+% %         %perform some QA/QC --- QARTOD 19 and QARTOD 20
+% %         [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);  
+% %         
+% %         %save data to different formats        
+% %         realtime_archive_mat(buoy_info, data);
+% %         realtime_archive_text(buoy_info, data, 2);         
+% %         update_website_buoy_info(buoy_info, data); 
+% %     end
+% % end
+% % 
+% % %% 
+% % quit
