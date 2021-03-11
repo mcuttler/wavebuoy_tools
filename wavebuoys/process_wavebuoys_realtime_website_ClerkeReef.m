@@ -40,7 +40,7 @@ if strcmp(buoy_info.type,'sofar')==1
     %check whether smart mooring or normal mooring
     if strcmp(buoy_info.version,'smart_mooring')
         limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime_ClerkeReef(buoy_info, limit); 
+        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
             limit = buoy_info.UpdateTime*2;     

@@ -31,8 +31,17 @@ for ii = 1:length(num)
         end
     end        
     
-    if isfield(data, 'temp_time')
+    if isfield(data, 'temp_time')       
         tidx = find(data.temp_time==data.time(num(ii))); 
+        if isempty(tidx)
+            tidx1 = find(abs(data.temp_time-data.time(num(ii)))==min(abs(data.temp_time-data.time(num(ii)))));
+            if tidx1<5/(60*24)
+                tidx = tidx1;
+            else
+                tidx = [];
+            end
+        end
+                
         if isempty(tidx)            
             dataout.sst = -9999; 
             dataout.qf_sst = 4; 
