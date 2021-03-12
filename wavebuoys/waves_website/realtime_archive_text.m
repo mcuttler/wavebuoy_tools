@@ -35,6 +35,9 @@ for ii = 1:length(num)
         tidx = find(data.temp_time==data.time(num(ii))); 
         if isempty(tidx)
             tidx1 = find(abs(data.temp_time-data.time(num(ii)))==min(abs(data.temp_time-data.time(num(ii)))));
+            if length(tidx1)>1
+                tidx1 = tidx(1); 
+            end            
             if tidx1<15/(60*24)
                 tidx = tidx1;
             else

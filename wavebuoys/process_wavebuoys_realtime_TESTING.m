@@ -12,23 +12,23 @@ clear; clc
 % buoycodes = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 % addpath(genpath(buoycodes))
 
-%buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1034'; %spotter serial number, or just Datawell 
-buoy_info.name = 'ClerkeReef'; 
+buoy_info.serial = 'SPOT-0938'; %spotter serial number, or just Datawell 
+buoy_info.name = 'SharkBay'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'ClerkeReef';
+buoy_info.DeployLoc = 'SharkBay';
 buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -28.851383; 
-buoy_info.DeployLon = 113.808517; 
+buoy_info.DeployLat = -25.418967; 
+buoy_info.DeployLon = 113.125383; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\waves_website\realtime_archive_backup';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
