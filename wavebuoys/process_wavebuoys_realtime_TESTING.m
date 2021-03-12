@@ -9,8 +9,8 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-buoycodes = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
-addpath(genpath(buoycodes))
+% buoycodes = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+% addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
@@ -26,7 +26,7 @@ buoy_info.DeployLat = -28.851383;
 buoy_info.DeployLon = 113.808517; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive';
+buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\waves_website\realtime_archive_backup';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
@@ -65,10 +65,10 @@ if strcmp(buoy_info.type,'sofar')==1
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
-            
-            %check that it's new data
-            if SpotData.time(1)>archive_data.time(end)
+            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                                                  
+                        
+            %check that it's new data 
+            if SpotData.time(1)>archive_data.time(end)                                        
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
                 

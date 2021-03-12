@@ -166,33 +166,24 @@ end
 
 
 %% check that mooring data has correc time stamps to continue
-% t1 = datevec(Spotter.time(end)-datenum(0,0,0,1,40,0)); 
-% t2 = datevec(Spotter.time(end)); 
-% dv = datevec(Spotter.temp_time); 
-% t1idx = find(dv(:,1)==t1(1)&dv(:,2)==t1(2)&dv(:,3)==t1(3)&dv(:,4)==t1(4)&dv(:,5)==t1(5)&dv(:,6)==t1(6)); 
-% t2idx = find(dv(:,1)==t2(1)&dv(:,2)==t2(2)&dv(:,3)==t2(3)&dv(:,4)==t2(4)&dv(:,5)==t2(5)&dv(:,6)==t2(6)); 
-%     
-% if ~isempty(t1idx)&~isempty(t2idx)
-%     flag = 1; 
-%     Spotter.temp_time = Spotter.temp_time(t1idx:t2idx); 
-%     Spotter.surf_temp = Spotter.surf_temp(t1idx:t2idx); 
-%     Spotter.bott_temp = Spotter.bott_temp(t1idx:t2idx);                             
-% else
-%     t1idx = find(abs(Spotter.temp_time-datenum(t1))==min(abs(Spotter.temp_time-datenum(t1))));
-%     t2idx = find(abs(Spotter.temp_time-datenum(t2))==min(abs(Spotter.temp_time-datenum(t2))));
-%     min_diff = 10/(60*24); 
-%     if (Spotter.temp_time(t1idx)-datenum(t1))<min_diff & (Spotter.temp_time(t2idx)-datenum(t2))<min_diff &t1idx~=t2idx
-%         flag = 1; 
-%         Spotter.temp_time = Spotter.temp_time(t1idx:t2idx); 
-%         Spotter.surf_temp = Spotter.surf_temp(t1idx:t2idx); 
-%         Spotter.bott_temp = Spotter.bott_temp(t1idx:t2idx);                             
-%     else
-%         flag = 0;
-%     end   
-%   
-% end   
-%     
-flag = 1; 
+%load in archived data and only keep data that is new
+ [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, Spotter);    
+ idx_wave = find(Spotter.time>archive_data.time(end)); 
+ idx_temp = find(Spotter.temp_time>archive_data.temp_time(end)); 
+ 
+ if ~isempty(idx_wave)&~isempty(idx_temp)         
+     flag = 1; 
+     fields = fieldnames(Spotter);
+     for j = 1:length(fields)
+         if strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')|strcmp(fields{j},'temp_time')
+             Spotter.(fields{j})= Spotter.(fields{j})(idx_temp); 
+         else
+             Spotter.(fields{j}) = Spotter.(fields{j})(idx_wave);
+         end
+     end
+ else
+     flag = 0; 
+ end
 
 end
 
