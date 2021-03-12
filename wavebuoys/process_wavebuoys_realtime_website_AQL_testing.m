@@ -15,15 +15,15 @@ clear; clc
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
 buoy_info.serial = 'SPOT-1034'; %spotter serial number, or just Datawell 
-buoy_info.name = 'ClerkeLagoon'; 
+buoy_info.name = 'ClerkeReef'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'ClerkeLagoon';
-buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -23.144233; 
-buoy_info.DeployLon = 113.740267; 
+buoy_info.DeployLoc = 'ClerkeReef';
+buoy_info.DeployDepth = 26; 
+buoy_info.DeployLat = -17.30585; 
+buoy_info.DeployLon = 119.31218; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
@@ -35,7 +35,7 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %% process realtime mode data
 
-limit = 100; 
+limit = 300; 
          
 %grab data
 import matlab.net.*
@@ -168,34 +168,34 @@ end
 %measurements, then QAQC
 SpotData = Spotter; 
 
-% % [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
+[check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
 % % 
-% % %check>0 means that directory already exists (and monthly file should
-% % %exist); otherwise, this is the first data for this location 
-% % if all(check)~=0        
-% %     [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
-% %     
-% %     %find that it's new data
-% %     idxw = find(SpotData.time>archive_data.time(end)); 
-% %     idxt = find(SpotData.temp_time>archive_data.temp_time(end));
-% %     if ~isempty(idxw)&&~isempty(idxt)
-% %         fields = fieldnames(SpotData); 
-% %         for jj = 1:length(fields)
-% %             if strcmp(fields{jj},'temp_time') | strcmp(fields{jj},'surf_temp') | strcmp(fields{jj},'bott_temp')
-% %                 SpotData.(fields{jj})= SpotData.(fields{jj})(idxt); 
-% %             else
-% %                 SpotData.(fields{jj})=SpotData.(fields{jj})(idxw);
-% %             end
-% %         end
-% %         %perform some QA/QC --- QARTOD 19 and QARTOD 20
-% %         [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);  
-% %         
-% %         %save data to different formats        
-% %         realtime_archive_mat(buoy_info, data);
-% %         realtime_archive_text(buoy_info, data, 2);         
-% %         update_website_buoy_info(buoy_info, data); 
-% %     end
-% % end
+%check>0 means that directory already exists (and monthly file should
+%exist); otherwise, this is the first data for this location 
+if all(check)~=0        
+    [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+    
+    %find that it's new data
+    idxw = find(SpotData.time>archive_data.time(end)); 
+    idxt = find(SpotData.temp_time>archive_data.temp_time(end));
+    if ~isempty(idxw)&&~isempty(idxt)
+        fields = fieldnames(SpotData); 
+        for jj = 1:length(fields)
+            if strcmp(fields{jj},'temp_time') | strcmp(fields{jj},'surf_temp') | strcmp(fields{jj},'bott_temp')
+                SpotData.(fields{jj})= SpotData.(fields{jj})(idxt); 
+            else
+                SpotData.(fields{jj})=SpotData.(fields{jj})(idxw);
+            end
+        end
+        %perform some QA/QC --- QARTOD 19 and QARTOD 20
+        [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);  
+        
+        %save data to different formats        
+        realtime_archive_mat(buoy_info, data);
+        realtime_archive_text(buoy_info, data, 2);         
+        update_website_buoy_info(buoy_info, data); 
+    end
+end
 % % 
 % % %% 
 % % quit

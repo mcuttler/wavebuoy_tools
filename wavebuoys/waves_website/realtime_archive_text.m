@@ -8,7 +8,7 @@ else
     num = [1:size(data.time)]; 
 end
 
-%%
+%% check that wind and waves are same size
 %loop through each time point
 for ii = 1:length(num)
     dv = datevec(data.time(num(ii)));         

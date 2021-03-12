@@ -53,7 +53,7 @@ qaqc.rocHs =0.5;
 qaqc.HsLim = 10; 
 qaqc.rocTp = 8; 
 qaqc.TpLim = 25; 
-qaqc.rocSST = 1; 
+qaqc.rocSST = 2; 
 
 if isfield(qaqc, 'time_temp')
     [bulkparams.qf_waves, bulkparams.qf_sst, bulkparams.qf_bott_temp] = qaqc_uwa_waves_website(qaqc); 

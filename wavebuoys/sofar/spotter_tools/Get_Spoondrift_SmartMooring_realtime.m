@@ -125,16 +125,45 @@ end
 Spotter.temp_time = []; 
 Spotter.surf_temp = []; 
 Spotter.bott_temp =[]; 
+Spotter.bott_temp_time = []; 
 if ~isempty(resp_sensor.Body.Data.data)    
     for j = 1:size(resp_sensor.Body.Data.data,1)
         if resp_sensor.Body.Data.data(j).sensorPosition==1
             Spotter.surf_temp = [Spotter.surf_temp; resp_sensor.Body.Data.data(j).value]; 
             Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
-        elseif resp_sensor.Body.Data.data(j).sensorPosition==2           
+        elseif resp_sensor.Body.Data.data(j).sensorPosition==2 
+            Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
             Spotter.bott_temp = [Spotter.bott_temp; resp_sensor.Body.Data.data(j).value]; 
         end
     end
 end
+
+%make sure bottom and surface timestamps are same
+if length(Spotter.temp_time)~=length(Spotter.bott_temp_time)
+    if length(Spotter.temp_time)>length(Spotter.bott_temp_time)
+        for j = 1:length(Spotter.temp_time)
+            try
+                Spotter.temp_time(j,1)==Spotter.bott_temp_time(j,1);
+            catch
+                Spotter.bott_temp(j,1)=nan; 
+            end
+        end
+        Spotter = rmfield(Spotter, 'bott_temp_time');     
+    elseif length(Spotter.temp_temp)<length(Spotter.bott_temp_time)
+        for j = 1:length(Spotter.bott_temp_time)
+             try
+                Spotter.bott_time(j,1)==Spotter.temp_time(j,1);
+            catch
+                Spotter.surf_temp(j,1)=nan; 
+             end
+        end
+        Spotter.temp_time = Spotter.bott_temp_time;         
+    end
+else
+    Spotter = rmfield(Spotter, 'bott_temp_time');     
+end
+        
+
 
 %% check that mooring data has correc time stamps to continue
 t1 = datevec(Spotter.time(end)-datenum(0,0,0,1,40,0)); 
@@ -152,7 +181,7 @@ else
     t1idx = find(abs(Spotter.temp_time-datenum(t1))==min(abs(Spotter.temp_time-datenum(t1))));
     t2idx = find(abs(Spotter.temp_time-datenum(t2))==min(abs(Spotter.temp_time-datenum(t2))));
     min_diff = 1/(60*24); 
-    if (Spotter.temp_time(t1idx)-datenum(t1))<min_diff & (Spotter.temp_time(t2idx)-datenum(t2))<min_diff
+    if (Spotter.temp_time(t1idx)-datenum(t1))<min_diff & (Spotter.temp_time(t2idx)-datenum(t2))<min_diff &t1idx~=t2idx
         flag = 1; 
         Spotter.temp_time = Spotter.temp_time(t1idx:t2idx); 
         Spotter.surf_temp = Spotter.surf_temp(t1idx:t2idx); 
