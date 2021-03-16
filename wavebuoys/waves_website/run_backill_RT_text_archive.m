@@ -26,8 +26,8 @@ modify_smart_mooring_archive;
 
 %%
 %run backfill
-
-site = buoy_info.name;  
+site = 'GoodrichBank'; 
+% site = buoy_info.name;  
 data_path = 'E:\wawaves'; 
 %remove text archive
 rmdir([data_path '\' site  '\text_archive'],'s'); 
