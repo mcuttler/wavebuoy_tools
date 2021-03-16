@@ -83,20 +83,22 @@ end
 if m~=n  
     if n>m %missing waves
         data = Spotter; 
-        fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'};                 
+        fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'}; 
+        for jj = 1:length(fields); 
+            data.(fields{jj}) = ones(size(Spotter.time,1),1).*nan; 
+        end
+        data.time = Spotter.wind_time; 
         for j = 1:n
            dum = find(Spotter.time==Spotter.wind_time(j)); 
            if isempty(dum)
-                data.serialID{j,1} = buoy_info.serial; 
-                data.time(j,1) = Spotter.wind_time(j); 
+                data.serialID{j,1} = buoy_info.serial;                 
                 for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = nan;
                 end
            else
-               data.serialID{j,1} = buoy_info.serial;  
-               data.time(j,1) = Spotter.wind_time(j);
+               data.serialID{j,1} = buoy_info.serial;                 
                for jj = 1:length(fields)
-                    data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
+                    data.(fields{jj})(j,1) = Spotter.(fields{jj})(dum,1);
                end
            end
         end
@@ -107,18 +109,20 @@ if m~=n
                 
     elseif m>n %missing wind
         data = Spotter; 
-        fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};      
+        fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};
+        for jj = 1:length(fields); 
+            data.(fields{jj}) = ones(size(Spotter.time,1),1).*nan; 
+        end
+        data.wind_time = Spotter.time; 
         for j = 1:m
             dum = find(Spotter.wind_time==Spotter.time(j)); 
-            if isempty(dum)                
-                data.wind_time(j,1) = Spotter.time(j); 
+            if isempty(dum)                                
                 for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = nan;
                 end
-            else
-               data.wind_time(j,1) = Spotter.time(j); 
+            else               
                 for jj = 1:length(fields)
-                    data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
+                    data.(fields{jj})(j,1) = Spotter.(fields{jj})(dum,1);
                 end
             end
         end

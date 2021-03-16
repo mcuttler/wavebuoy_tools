@@ -51,7 +51,7 @@ qaqc.MINT = 0;
 %requires 3 data points 
 qaqc.rocHs =0.5; 
 qaqc.HsLim = 10; 
-qaqc.rocTp = 8; 
+qaqc.rocTp = 10; 
 qaqc.TpLim = 25; 
 qaqc.rocSST = 2; 
 

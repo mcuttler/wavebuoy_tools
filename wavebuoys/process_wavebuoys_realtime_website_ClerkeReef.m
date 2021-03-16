@@ -66,7 +66,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
             [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
-            
+
             %check that it's new data
             if SpotData.time(1)>archive_data.time(end)
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        

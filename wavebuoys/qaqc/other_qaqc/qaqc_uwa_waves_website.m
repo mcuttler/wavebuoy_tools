@@ -31,7 +31,7 @@ function [qf_waves, qf_sst, qf_bott_temp] = qaqc_uwa_waves_website(qaqc);
     %wave parameters
     for ii = 1:size(qaqc.time,1)
         %range test
-        if qaqc.WVHGT(ii)<qaqc.MINWH | qaqc.WVHGT(ii)>qaqc.MAXWH | qaqc.WVPD(ii)<qaqc.MINWP | qaqc.WVPD(ii)>qaqc.MAXWP
+        if qaqc.WVHGT(ii)<qaqc.MINWH | qaqc.WVHGT(ii)>qaqc.MAXWH | qaqc.WVPD(ii)<qaqc.MINWP | qaqc.WVPD(ii)>qaqc.MAXWP |isnan(qaqc.WVPD(ii)) | isnan(qaqc.WVHGT(ii))
             qf_waves_dum(ii,1) = 4;
         else
             qf_waves_dum(ii,1) = 1; 
@@ -50,7 +50,7 @@ function [qf_waves, qf_sst, qf_bott_temp] = qaqc_uwa_waves_website(qaqc);
     if isfield(qaqc,'time_temp')
         for ii = 1:size(qaqc.time_temp,1)        
             %range test
-            if qaqc.SST(ii)<qaqc.MINT | qaqc.SST(ii)>qaqc.MAXT 
+            if qaqc.SST(ii)<qaqc.MINT | qaqc.SST(ii)>qaqc.MAXT |  isnan(qaqc.SST(ii))
                 qf_sst_dum(ii,1) = 4;
             else
                 qf_sst_dum(ii,1)=1;
@@ -70,7 +70,7 @@ function [qf_waves, qf_sst, qf_bott_temp] = qaqc_uwa_waves_website(qaqc);
     if isfield(qaqc,'time_temp')
         for ii = 1:size(qaqc.time_temp,1)        
             %range test
-            if qaqc.BOTT_TEMP(ii)<qaqc.MINT | qaqc.BOTT_TEMP(ii)>qaqc.MAXT 
+            if qaqc.BOTT_TEMP(ii)<qaqc.MINT | qaqc.BOTT_TEMP(ii)>qaqc.MAXT|isnan(qaqc.BOTT_TEMP(ii)); 
                 qf_bott_temp_dum(ii,1) = 4;
             else
                 qf_bott_temp_dum(ii,1)=1;
