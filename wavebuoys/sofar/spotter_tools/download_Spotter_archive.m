@@ -4,26 +4,27 @@ function [Spot_archive] = download_Spotter_archive(buoy_info, start_date, end_da
 %get monthly time vector from start/end dates
 t = datevec(start_date:end_date); 
 t = unique(t(:,1:2),'rows'); 
-t = datenum(t(:,1), t(:,2),1); 
 
 for i = 1:size(t,1)
-    t1 = datestr(
-import matlab.net.*
-import matlab.net.http.*
-header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
-r = RequestMessage('GET', header);
+    tstart = datestr(datenum(t(i,1), t(i,2), 1),30); 
+    tend = datestr(datenum(t(i,1), t(i,2), eomday(t(i,1), t(i,2)),23,59,59),30); 
+    startDate = [tstart 'Z']; 
+    endDate = [tend 'Z'];     
+    
+    import matlab.net.*
+    import matlab.net.http.*
+    header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
+    r = RequestMessage('GET', header);    
+    
+    uri = URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate...
+    '&includeSurfaceTempData=true&includeWindData=true&includeFrequencyData=true&includeDirectionalMoments=true&limit=500']); 
+    
+    resp = send(r,uri);
+    status = resp.StatusCode;
+end
 
 
-uri = URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial...
-    '&includeSurfaceTempData=true&includeWindData=true&limit=' num2str(limit)]);
+ 
 
-resp = send(r,uri);
-status = resp.StatusCode;
-
-tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,3,0,0),30); 
-tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
-startDate = [tstart 'Z']; 
-endDate = [tend 'Z']; 
-uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]);
 
 

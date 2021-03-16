@@ -20,11 +20,11 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 
 %%
-start_date = datenum(2020,01,01); 
-end_date = datenum(2021,03,01); 
+% start_date = datenum(2020,01,01); 
+% end_date = datenum(2021,03,01); 
 
 
-% [merged_data] = merge_existing_archives(buoy_info); 
+[merged_data] = merge_existing_archives(buoy_info); 
 
 %% quality control
 bulkparams = merged_data; 
