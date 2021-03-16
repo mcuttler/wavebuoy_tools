@@ -39,8 +39,63 @@ if strcmp(buoy_info.type,'sofar')
                 end
             end
         end
-    end              
-% Datawell    
+        %check that wind and waves are right size
+        [m,~] = size(original_data.time); 
+        [n,~] = size(original_data.wind_time); 
+        if m~=n  
+            if n>m %missing waves
+                data = original_data; 
+                fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'}; 
+                for jj = 1:length(fields); 
+                    data.(fields{jj}) = ones(size(original_data.time,1),1).*nan; 
+                end
+                data.time = original_data.wind_time;
+                for j = 1:n
+                    dum = find(original_data.time==original_data.wind_time(j)); 
+                    if isempty(dum)
+                        data.serialID{j,1} = buoy_info.serial;                 
+                        for jj = 1:length(fields)
+                            data.(fields{jj})(j,1) = nan;
+                        end
+                    else
+                        data.serialID{j,1} = buoy_info.serial;
+                        for jj = 1:length(fields)
+                            data.(fields{jj})(j,1) = original_data.(fields{jj})(dum,1);
+                        end
+                    end
+                end
+                fields = {'time';'serialID';'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'};
+                for jj = 1:length(fields)
+                    original_data.(fields{jj}) = data.(fields{jj}); 
+                end
+                
+            elseif m>n %missing wind
+                data = original_data; 
+                fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};
+                for jj = 1:length(fields); 
+                    data.(fields{jj}) = ones(size(original_data.time,1),1).*nan; 
+                end
+                data.wind_time = original_data.time;
+                for j = 1:m
+                    dum = find(original_data.wind_time==original_data.time(j)); 
+                    if isempty(dum)                                
+                        for jj = 1:length(fields)
+                            data.(fields{jj})(j,1) = nan;
+                        end
+                    else
+                        for jj = 1:length(fields)
+                            data.(fields{jj})(j,1) = original_data.(fields{jj})(dum,1);
+                        end
+                    end
+                end
+                fields = {'wind_time';'wind_speed';'wind_dir';'wind_seasurfaceId'};
+                for jj = 1:length(fields)
+                    original_data.(fields{jj}) = data.(fields{jj}); 
+                end
+            end
+        end
+    end
+    % Datawell
 elseif strcmp(buoy_info.type,'datawell')
     original_archive_path = 'E:\DatawellBuoys\TorbayInshore\MAT'; 
 end
