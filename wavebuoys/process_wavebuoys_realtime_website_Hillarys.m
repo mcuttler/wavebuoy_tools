@@ -9,26 +9,26 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-% buoycodes = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+% buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
 % addpath(genpath(buoycodes))
 
+%buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0938'; %spotter serial number, or just Datawell 
-buoy_info.name = 'SharkBay'; 
+buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Hillarys'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
-buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
+buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'SharkBay';
-buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -25.418967; 
-buoy_info.DeployLon = 113.125383; 
+buoy_info.DeployLoc = 'Hilarys';
+buoy_info.DeployDepth = 30; 
+buoy_info.DeployLat = -31.851983; 
+buoy_info.DeployLon = 115.646567; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
-buoy_info.backup_path = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\waves_website\realtime_archive_backup';
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
@@ -40,7 +40,7 @@ if strcmp(buoy_info.type,'sofar')==1
     %check whether smart mooring or normal mooring
     if strcmp(buoy_info.version,'smart_mooring')
         limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime_MC(buoy_info, limit); 
+        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
             limit = buoy_info.UpdateTime*2;     
@@ -65,16 +65,16 @@ if strcmp(buoy_info.type,'sofar')==1
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                                                  
-                        
-            %check that it's new data 
-            if SpotData.time(1)>archive_data.time(end)                                        
+            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+            
+            %check that it's new data
+            if SpotData.time(1)>archive_data.time(end)
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
                 
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
-%                 realtime_backup_mat(buoy_info, data);
+                realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, limit); 
                 %output MEM and SST plots 
                 if strcmp(buoy_info.DataType,'spectral')        
@@ -83,7 +83,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 end
                 
                 %code to update the buoy info master file for website to read
-                update_website_buoy_info(buoy_info, data); 
+%                 update_website_buoy_info(buoy_info, data); 
             end
         else
             SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
@@ -93,7 +93,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
             end
             realtime_archive_mat(buoy_info, SpotData);
-%             realtime_backup_mat(buoy_info, SpotData);
+            realtime_backup_mat(buoy_info, SpotData);
             realtime_archive_text(buoy_info, SpotData, limit); 
             
             %output MEM and SST plots 
@@ -103,7 +103,7 @@ if strcmp(buoy_info.type,'sofar')==1
             end
             
             %code to update the buoy info master file for website to read
-            update_website_buoy_info(buoy_info, SpotData); 
+%             update_website_buoy_info(buoy_info, SpotData); 
         end        
     end        
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -132,8 +132,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, dw_data);                        
                 
                 %save data to different formats        
-                realtime_archive_mat(buoy_info, data); 
-%                 realtime_backup_mat(buoy_info, data); 
+                realtime_archive_mat(buoy_info, data);     
+%                 realtime_backup_mat(buoy_info, data);  
                 limit = 1;         
                 realtime_archive_text(buoy_info, data, limit);             
                 
@@ -155,7 +155,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
         dw_data.qf_sst = ones(size(dw_data.temp_time,1),1).*4; 
         dw_data.qf_bott_temp =ones(size(dw_data.temp_time,1),1).*4; 
         realtime_archive_mat(buoy_info, dw_data); 
-%         realtime_backup_mat(buoy_info, dw_data); 
+%         realtime_archive_mat(buoy_info, dw_data);  
         limit = 1; 
         realtime_archive_text(buoy_info, dw_data, limit); 
         

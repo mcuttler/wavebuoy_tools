@@ -27,7 +27,7 @@ buoy_info.DeployLon = 119.630833;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
-buoy_info.backup_path = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\waves_website\realtime_archive_backup';
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination

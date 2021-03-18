@@ -27,7 +27,7 @@ buoy_info.DeployLon = 117.7735;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
-buoy_info.backup_path = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\waves_website\realtime_archive_backup';
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
@@ -74,7 +74,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
-%                 realtime_backup_mat(buoy_info, data);
+                realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, limit); 
                 %output MEM and SST plots 
                 if strcmp(buoy_info.DataType,'spectral')        
@@ -93,7 +93,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
             end
             realtime_archive_mat(buoy_info, SpotData);
-%             realtime_backup_mat(buoy_info, SpotData);
+            realtime_backup_mat(buoy_info, SpotData);
             realtime_archive_text(buoy_info, SpotData, limit); 
             
             %output MEM and SST plots 
