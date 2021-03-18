@@ -55,6 +55,7 @@ if strcmp(buoy_info.type,'sofar')
                                 original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.(fields{j})]; 
                             else
                                 original_data.(fields{j}) = [original_data.(fields{j}); nan]; 
+                            end
                         else
                             if strcmp(fields{j},'temp_time')|strcmp(fields{j},'wind_time')
                                 original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.time];
