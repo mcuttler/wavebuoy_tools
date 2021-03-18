@@ -14,7 +14,7 @@ buoy_info.DeployLat = -10.416983;
 buoy_info.DeployLon = 130.000567; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.archive_path = 'F:\wawaves';
 buoy_info.backup_path = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\waves_website\realtime_archive_backup';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
@@ -38,7 +38,7 @@ if isfield(bulkparams, 'temp_time')
 end
 
 %settings for range test (QARTOD19) 
-qaqc.MINWH = 0.01;
+qaqc.MINWH = 0.05;
 qaqc.MAXWH = 12;
 qaqc.MINWP = 1; 
 qaqc.MAXWP = 25;
@@ -59,22 +59,42 @@ else
     [bulkparams.qf_waves, ~, ~] = qaqc_uwa_waves_website(qaqc);
 end
 
-%%
-merged_data_qc = bulkparams; 
+%% update archive
+dataout = bulkparams; 
 
-dv = datevec(bulkparams.time); 
-tt = unique(dv(:,1:2),'rows'); 
-for jj = 1:size(tt,1)
-    idx = find(dv(:,1)==tt(jj,1)&dv(:,2)==tt(jj,2)); 
+dv_wave = datevec(dataout.time); 
+dv_temp = datevec(dataout.temp_time); 
+
+mths = unique(dv_wave(:,1:2),'rows'); 
+for i = 1:size(mths,1)
+    idx_wave = find(dv_wave(:,1)==mths(i,1)&dv_wave(:,2)==mths(i,2)); 
+    idx_temp = find(dv_temp(:,1)==mths(i,1)&dv_temp(:,2)==mths(i,2)); 
+    
+    %parse data for export and textfile writing
+    fields = fieldnames(dataout); 
+    monthly_data = dataout; 
+    for j = 1:length(fields); 
+        if strcmp(fields{j},'temp_time')|strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')|strcmp(fields{j},'qf_sst')|strcmp(fields{j},'qf_bott_temp')
+            monthly_data.(fields{j}) = dataout.(fields{j})(idx_temp); 
+        else
+            monthly_data.(fields{j}) = dataout.(fields{j})(idx_wave); 
+        end
+    end
+    for j = 1:size(monthly_data.time,1)
+        monthly_data.serialID{j,1}= buoy_info.serial; 
+        monthly_data.name{j,1} = buoy_info.name; 
+    end
+    
+    buoy_info.archive_path = 'F:\wawaves_test';     
+    [check] = check_archive_path(buoy_info.archive_path, buoy_info, monthly_data);  
+    realtime_archive_mat(buoy_info, monthly_data);
+    realtime_archive_text(buoy_info, monthly_data, 0); 
+end
     
     
 
-%% back fill 
-% site = 'GoodrichBank'; 
-% % site = buoy_info.name;  
-% data_path = 'E:\wawaves'; 
-% %remove text archive
-% rmdir([data_path '\' site  '\text_archive'],'s'); 
-% backfill_RT_text_archive(data_path, site); 
+    
+
+
 
 
