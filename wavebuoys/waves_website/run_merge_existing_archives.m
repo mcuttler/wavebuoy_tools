@@ -13,10 +13,11 @@ buoy_info.DeployDepth = 0;
 buoy_info.DeployLat = 0; 
 buoy_info.DeployLon = 0; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+
 
 %%
 [merged_data, original_data, current_data] = merge_existing_Spotter_archives(buoy_info); 
