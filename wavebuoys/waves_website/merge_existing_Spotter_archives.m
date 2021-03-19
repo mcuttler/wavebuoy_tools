@@ -4,7 +4,7 @@ function [merged_data, original_data, current_data] = merge_existing_Spotter_arc
 
 %first loop through pre-existing archives and collate data
 if strcmp(buoy_info.type,'sofar')
-    original_archive_path = ['E:\SpoondriftBuoys\' buoy_info.serial '_' buoy_info.name '\MAT'];
+    original_archive_path = ['F:\SpoondriftBuoys\' buoy_info.serial '_' buoy_info.name '\MAT'];
     %only waves or version 2 buoys
     if strcmp(buoy_info.version,'V2')
         original_data = struct('time',[],'hsig',[],'tp',[],'tm',[],'dp',[],'dpspr',[],'dm',[],...
@@ -14,10 +14,10 @@ if strcmp(buoy_info.type,'sofar')
     elseif strcmp(buoy_info.version,'V1')
         original_data = struct('time',[],'hsig',[],'tp',[],'tm',[],'dp',[],'dpspr',[],'dm',[],...
             'dmspr',[],'lat',[],'lon',[],'wind_time',[],'wind_speed',[],'wind_dir',[],'wind_seasurfaceId',[],...
-            'a1',[],'a2',[],'b1',[],'b2',[],'varianceDensity',[],'frequency',[],'df',[],'directionSpread',[],'direction',[],'spec_time',[]);
+            'a1',[],'a2',[],'b1',[],'b2',[],'varianceDensity',[],'frequency',[],'df',[],'directionalSpread',[],'direction',[],'spec_time',[]);
         merged_data = struct('time',[],'hsig',[],'tp',[],'tm',[],'dp',[],'dpspr',[],'dm',[],...
             'dmspr',[],'lat',[],'lon',[],'wind_time',[],'wind_speed',[],'wind_dir',[],'wind_seasurfaceId',[],...
-            'a1',[],'a2',[],'b1',[],'b2',[],'varianceDensity',[],'frequency',[],'df',[],'directionSpread',[],'direction',[],'spec_time',[]);
+            'a1',[],'a2',[],'b1',[],'b2',[],'varianceDensity',[],'frequency',[],'df',[],'directionalSpread',[],'direction',[],'spec_time',[]);
     end
     
     %loop through existing years/months 
@@ -40,13 +40,10 @@ if strcmp(buoy_info.type,'sofar')
                         if isfield(dum.SpotData, fields{j})
                             if ~isempty(dum.SpotData.(fields{j}))
                                 if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')
-                                    if strcmp(fields{j},'a1')
-                                        original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.(fields{j})'];                                     
-                                        original_data.spec_time = [original_data.spec_time; dum.SpotData.time]; 
-                                    else
-                                        original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.(fields{j})'];  
-                                    end
-                                else
+                                    original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.(fields{j})'];  
+                                elseif strcmp(fields{j},'spec_time')
+                                    original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.time]; 
+                                else                                    
                                     original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.(fields{j})];
                                 end
                             else
@@ -60,7 +57,11 @@ if strcmp(buoy_info.type,'sofar')
                             if strcmp(fields{j},'temp_time')|strcmp(fields{j},'wind_time')
                                 original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.time];
                             else
-                                original_data.(fields{j}) = [original_data.(fields{j}); nan];
+                                if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')
+                                    original_data.(fields{j}) = [original_data.(fields{j}); ones(1,39).*nan]; 
+                                else
+                                    original_data.(fields{j}) = [original_data.(fields{j}); nan];
+                                end
                             end
                         end
                     end
@@ -94,6 +95,14 @@ if strcmp(buoy_info.type,'sofar')
             clear SpotData
         end
     end
+    
+    %add spec_time if doesn't exist
+    if ~isfield(current_data,'spec_time')&isfield(current_data,'a1')
+        if size(current_data.time,1)==size(current_data.a1,1)
+            current_data.spec_time = current_data.time; 
+        end
+    end
+        
     
     %% combine
     fields = fieldnames(original_data);     
@@ -169,9 +178,40 @@ if strcmp(buoy_info.type,'sofar')
             end
         end        
     end
+    %spectral data
+    if isfield(merged_data,'a1')
+        t_spec = merged_data.spec_time(~isnan(merged_data.spec_time));
+        t_spec = unique(t_spec); 
+        for i = 1:size(t_spec,1)
+            merged_data2.spec_time(i,1) = t_spec(i); 
+            idx = find(merged_data.time==t_spec(i)); 
+            fields = {'a1','a2','b1','b2','varianceDensity','frequency','df','directionalSpread','direction'};
+            for j = 1:length(fields)
+                if length(idx)>1                                                           
+                    t1 = merged_data.(fields{j})(idx(1),:); 
+                    t2 = merged_data.(fields{j})(idx(2),:);  
+                    
+                    %all NaN
+                    if all(isnan(t1))&all(isnan(t2))
+                        merged_data2.(fields{j}) = [merged_data2.(fields{j}); nan]; 
+                    %t1 NaN, t2 not NaN
+                    elseif all(isnan(t1))&all(~isnan(t2))
+                        merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx(2))]; 
+                    elseif all(~isnan(t1))&all(isnan(t2))
+                        merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx(1))]; 
+                    else
+                        merged_data2.(fields{j})=[merged_data2.(fields{j}); merged_data.(fields{j})(idx(1))];
+                    end
+                else
+                    merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx)];
+                end
+            end
+        end
+    end
+        
     merged_data = merged_data2; 
     
-    % sort to make sure all in right order
+    %%  sort to make sure all in right order
     [merged_data.time, sorted] = sort(merged_data.time); 
     
     fields = {'hsig','tp','tm','dp','dpspr','dm','dmspr','lat','lon','wind_time','wind_speed','wind_dir','wind_seasurfaceId'};
@@ -187,6 +227,13 @@ if strcmp(buoy_info.type,'sofar')
         end
     end
     
+    if isfield(merged_data,'spec_time')
+        [merged_data.spec_time, sorted_s] = sort(merged_data.spec_time);
+        fields = {'a1','a2','b1','b2','varianceDensity','frequency','df','directionalSpread','direction'};
+        for j = 1:length(fields)
+            merged_data.(fields{j}) = merged_data.(fields{j})(sorted_s,:); 
+        end
+    end
         
 end
 end
