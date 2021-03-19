@@ -8,14 +8,14 @@ buoy_info.datawell_name = 'nan';
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'BremerCanyon';
+buoy_info.DeployLoc = 'KingGeorgeSound';
 buoy_info.DeployDepth = 15; 
 buoy_info.DeployLat = -35.079750; 
 buoy_info.DeployLon = 117.979450; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
-buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
+buoy_info.archive_path = 'F:\wawaves';
+buoy_info.backup_path = 'F:\wawaves_test'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %%
@@ -63,6 +63,11 @@ dv_wave = datevec(dataout.time);
 if isfield(dataout,'temp_time'); 
     dv_temp = datevec(dataout.temp_time); 
 end
+
+if isfield(dataout,'spec_time'); 
+    dv_spec = datevec(dataout.spec_time); 
+end
+
 mths = unique(dv_wave(:,1:2),'rows');
 %remove archive text file 
 rmdir([buoy_info.archive_path '\' buoy_info.name  '\text_archive'],'s'); 
@@ -73,12 +78,17 @@ for i = 1:size(mths,1)
         idx_temp = find(dv_temp(:,1)==mths(i,1)&dv_temp(:,2)==mths(i,2)); 
     end
     
+    if isfield(dataout,'spec_time')
+        idx_spec = find(dv_spec(:,1)==mths(i,1)&dv_spec(:,2)==mths(i,2)); 
+    end
     %parse data for export and textfile writing
     fields = fieldnames(dataout); 
     monthly_data = dataout; 
     for j = 1:length(fields); 
         if strcmp(fields{j},'temp_time')|strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')|strcmp(fields{j},'qf_sst')|strcmp(fields{j},'qf_bott_temp')
             monthly_data.(fields{j}) = dataout.(fields{j})(idx_temp); 
+        elseif strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')|strcmp(fields{j},'spec_time')
+            monthly_data.(fields{j}) = dataout.(fields{j})(idx_spec); 
         else
             monthly_data.(fields{j}) = dataout.(fields{j})(idx_wave); 
         end
