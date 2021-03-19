@@ -74,6 +74,7 @@ end
 %Spectral variables
 if isfield(resp.Body.Data.data,'frequencyData')
     for j = 1:size(resp.Body.Data.data.frequencyData)
+        Spotter.spec_time = datenum(resp.Body.Data.data.frequencyData(j).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
         Spotter.a1 = resp.Body.Data.data.frequencyData.a1';
         Spotter.a2 = resp.Body.Data.data.frequencyData.a2';
         Spotter.b1 = resp.Body.Data.data.frequencyData.b1';
