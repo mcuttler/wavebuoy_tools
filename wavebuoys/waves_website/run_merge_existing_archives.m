@@ -2,29 +2,25 @@
 clear; clc; 
 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0551'; %spotter serial number, or just Datawell 
-buoy_info.name = 'GoodrichBank'; 
+buoy_info.serial = 'SPOT-0168'; %spotter serial number, or just Datawell 
+buoy_info.name = 'KingGeorgeSound'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
+buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'GoodrichBank';
-buoy_info.DeployDepth = 90; 
-buoy_info.DeployLat = -10.416983; 
-buoy_info.DeployLon = 130.000567; 
+buoy_info.DeployLoc = 'BremerCanyon';
+buoy_info.DeployDepth = 15; 
+buoy_info.DeployLat = -35.079750; 
+buoy_info.DeployLon = 117.979450; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'F:\wawaves';
-buoy_info.backup_path = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\waves_website\realtime_archive_backup';
+buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.archive_path = 'E:\wawaves';
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
-
 %%
-% start_date = datenum(2020,01,01); 
-% end_date = datenum(2021,03,01); 
+[merged_data, original_data, current_data] = merge_existing_Spotter_archives(buoy_info); 
 
-
-[merged_data] = merge_existing_archives(buoy_info); 
 
 %% quality control
 bulkparams = merged_data; 
@@ -51,7 +47,7 @@ qaqc.rocHs =0.5;
 qaqc.HsLim = 10; 
 qaqc.rocTp = 10; 
 qaqc.TpLim = 25; 
-qaqc.rocSST = 2; 
+qaqc.rocSST = 1; 
 
 if isfield(qaqc, 'time_temp')
     [bulkparams.qf_waves, bulkparams.qf_sst, bulkparams.qf_bott_temp] = qaqc_uwa_waves_website(qaqc); 
@@ -61,14 +57,21 @@ end
 
 %% update archive
 dataout = bulkparams; 
+save(['C:\Data\wawave_temp\' buoy_info.name '_archive.mat'],'dataout','-v7.3'); 
 
 dv_wave = datevec(dataout.time); 
-dv_temp = datevec(dataout.temp_time); 
-
-mths = unique(dv_wave(:,1:2),'rows'); 
+if isfield(dataout,'temp_time'); 
+    dv_temp = datevec(dataout.temp_time); 
+end
+mths = unique(dv_wave(:,1:2),'rows');
+%remove archive text file 
+rmdir([buoy_info.archive_path '\' buoy_info.name  '\text_archive'],'s'); 
 for i = 1:size(mths,1)
+    disp([buoy_info.name ' ' num2str(mths(i,1)) ' ' num2str(mths(i,2))]); 
     idx_wave = find(dv_wave(:,1)==mths(i,1)&dv_wave(:,2)==mths(i,2)); 
-    idx_temp = find(dv_temp(:,1)==mths(i,1)&dv_temp(:,2)==mths(i,2)); 
+    if isfield(dataout,'temp_time')
+        idx_temp = find(dv_temp(:,1)==mths(i,1)&dv_temp(:,2)==mths(i,2)); 
+    end
     
     %parse data for export and textfile writing
     fields = fieldnames(dataout); 
@@ -83,11 +86,11 @@ for i = 1:size(mths,1)
     for j = 1:size(monthly_data.time,1)
         monthly_data.serialID{j,1}= buoy_info.serial; 
         monthly_data.name{j,1} = buoy_info.name; 
-    end
+    end    
     
-    buoy_info.archive_path = 'F:\wawaves_test';     
     [check] = check_archive_path(buoy_info.archive_path, buoy_info, monthly_data);  
     realtime_archive_mat(buoy_info, monthly_data);
+    realtime_backup_mat(buoy_info, monthly_data);
     realtime_archive_text(buoy_info, monthly_data, 0); 
 end
     

@@ -264,6 +264,6 @@ end
 data = bulkparams; 
 %save data to different formats        
 realtime_archive_mat(buoy_info, data);
-% realtime_archive_text(buoy_info, data, 2);         
+realtime_archive_text(buoy_info, data, 2);         
 update_website_buoy_info(buoy_info, data); 
 

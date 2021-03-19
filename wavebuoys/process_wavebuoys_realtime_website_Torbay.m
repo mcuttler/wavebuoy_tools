@@ -126,9 +126,11 @@ elseif strcmp(buoy_info.type,'datawell')==1
     %original code for Datawell buoys does all checking of directories and
     %grabbing archived data
     [dw_data, archive_data,check] = Process_Datawell_realtime_website(buoy_info, data, data.file20, data.file21, data.file25, data.file28, data.file82);
-    clear data; 
+    clear data;        
     
-    %check that it's new data    
+    [check] = check_archive_path(buoy_info.archive_path, buoy_info, dw_data);   
+    
+    %check that it's new data
     if all(check)~=0
         if ~isempty(archive_data)
             if size(dw_data.time,1)>size(archive_data.time,1)
