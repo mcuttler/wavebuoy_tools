@@ -14,8 +14,8 @@ buoy_info.DeployLat = -35.079750;
 buoy_info.DeployLon = 117.979450; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'F:\wawaves';
-buoy_info.backup_path = 'F:\wawaves_test'; 
+buoy_info.archive_path = 'E:\wawaves';
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
 %%
