@@ -65,20 +65,19 @@ for i = 1:size(tdata,1)
         elseif strcmp(attname, 'deployment_id')
             netcdf.putAtt(ncid,varid, attname, buoy_info.DeployID);
         elseif strcmp(attname, 'geospatial_lat_min')
-            netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lat))); 
+            netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lat(idx_bulk)))); 
         elseif strcmp(attname, 'geospatial_lon_min')
-            netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lon))); 
+            netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lon(idx_bulk)))); 
         elseif strcmp(attname, 'geospatial_lat_max')
-            netcdf.putAtt(ncid,varid, attname, (nanmax(bulkparams.lat)));
+            netcdf.putAtt(ncid,varid, attname, (nanmax(bulkparams.lat(idx_bulk)))); 
         elseif strcmp(attname, 'geospatial_lon_max')
-            netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lon))); 
+            netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lon(idx_bulk))));             
         elseif strcmp(attname, 'time_coverage_start')
-            tdum = datestr(bulkparams.time(1),31); 
+            tdum = datestr(bulkparams.time(idx_bulk(1)),31); 
             tdum(11) = 'T'; tdum(end+1)='Z';
             netcdf.putAtt(ncid,varid, attname, tdum); 
-        elseif strcmp(attname, 'time_coverage_end')
-            tdum1 = bulkparams.time(idx_bulk); 
-            tdum = datestr(tdum1(end),31); 
+        elseif strcmp(attname, 'time_coverage_end') 
+            tdum = datestr(idx_bulk(end),31); 
             tdum(11) = 'T'; tdum(end+1)='Z';
             netcdf.putAtt(ncid,varid, attname,tdum);             
         elseif strcmp(attname, 'date_created')
