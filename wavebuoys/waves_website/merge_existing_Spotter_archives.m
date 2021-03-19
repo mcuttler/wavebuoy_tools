@@ -4,7 +4,7 @@ function [merged_data, original_data, current_data] = merge_existing_Spotter_arc
 
 %first loop through pre-existing archives and collate data
 if strcmp(buoy_info.type,'sofar')
-    original_archive_path = ['F:\SpoondriftBuoys\' buoy_info.serial '_' buoy_info.name '\MAT'];
+    original_archive_path = ['E:\SpoondriftBuoys\' buoy_info.serial '_' buoy_info.name '\MAT'];
     %only waves or version 2 buoys
     if strcmp(buoy_info.version,'V2')
         original_data = struct('time',[],'hsig',[],'tp',[],'tm',[],'dp',[],'dpspr',[],'dm',[],...

@@ -27,7 +27,7 @@ modify_smart_mooring_archive;
 %%
 %run backfill
 clear; clc; 
-site = 'TorbayWest'; 
+site = 'Torbay'; 
 % site = buoy_info.name;  
 data_path = 'E:\wawaves'; 
 %remove text archive
