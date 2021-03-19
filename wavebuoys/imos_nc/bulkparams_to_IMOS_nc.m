@@ -77,7 +77,8 @@ for i = 1:size(tdata,1)
             tdum(11) = 'T'; tdum(end+1)='Z';
             netcdf.putAtt(ncid,varid, attname, tdum); 
         elseif strcmp(attname, 'time_coverage_end')
-            tdum = datestr(bulkparams.time(end),31); 
+            tdum1 = bulkparams.time(idx_bulk); 
+            tdum = datestr(tdum1(end),31); 
             tdum(11) = 'T'; tdum(end+1)='Z';
             netcdf.putAtt(ncid,varid, attname,tdum);             
         elseif strcmp(attname, 'date_created')
@@ -114,7 +115,7 @@ for i = 1:size(tdata,1)
     fclose(fid);      
     
     attnames = {'standard_name', 'long_name', 'units', 'calendar','axis','comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference_datum','magnetic_dec', 'positive',...
-        'observation_type','coordinates','flag_value','flag_meaning','reference'}; 
+        'observation_type','coordinates','flag_values','flag_meanings','quality_control_conventions'}; 
     
     attinfo = varinfo(3:end);     
     
@@ -139,7 +140,11 @@ for i = 1:size(tdata,1)
         
         %create and define variable and attributes      
 
-        if ii>9&ii<14   
+        if ii==1
+            netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
+            varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+            %netcdf.defVarFill(ncid,varid,false,-9999);
+        elseif ii>9&ii<14   
             netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        
             varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
             netcdf.defVarFill(ncid,varid,false,int8(-127));
@@ -161,7 +166,7 @@ for i = 1:size(tdata,1)
                 if ~isempty(attinfo{1,j}{ii})
                     if strcmp(attnames{j},'magnetic_dec')
                         netcdf.putAtt(ncid, varid, attnames{j}, buoy_info.MagDec)
-                    elseif strcmp(attnames{j},'reference')
+                    elseif strcmp(attnames{j},'quality_control_conventions')
                         if length(attinfo{1,j}{ii})>1
                             netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
                         end
