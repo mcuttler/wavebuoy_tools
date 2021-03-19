@@ -103,7 +103,7 @@ for i = 1:size(tdata,1)
     dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
     
     dimname = 'station_id_strlen';
-    st_id_length = 30; 
+    st_id_length = length(buoy_info.DeployLoc); 
     
     dimid_str = netcdf.defDim(ncid, dimname, st_id_length); 
     
@@ -132,8 +132,7 @@ for i = 1:size(tdata,1)
             %variable for STATION_ID     
             if length(buoy_info.DeployLoc)~=st_id_length
                 buoy_info.DeployLoc(end+1:st_id_length) = ' '; 
-            end
-            
+            end            
             netcdf.putVar(ncid, varid, buoy_info.DeployLoc);             
         end
         
@@ -159,7 +158,8 @@ for i = 1:size(tdata,1)
         for j = 1:length(attinfo); 
             if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')
                 if ~isnan(attinfo{1,j}(ii))
-                    netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii));
+                    %change here for byte (I think)                                      
+                    netcdf.putAtt(ncid, varid, attnames{j},int8(attinfo{1,j}(ii))); 
                 end            
             else
                 if ~isempty(attinfo{1,j}{ii})
