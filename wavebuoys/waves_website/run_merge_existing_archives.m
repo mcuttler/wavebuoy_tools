@@ -2,18 +2,18 @@
 clear; clc; 
 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0168'; %spotter serial number, or just Datawell 
-buoy_info.name = 'KingGeorgeSound'; 
+buoy_info.serial = 'SPOT-0170'; %spotter serial number, or just Datawell 
+buoy_info.name = 'BremerCanyon_Drifting'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'KingGeorgeSound';
-buoy_info.DeployDepth = 15; 
-buoy_info.DeployLat = -35.079750; 
-buoy_info.DeployLon = 117.979450; 
+buoy_info.DeployLoc = 'BremerCanyon';
+buoy_info.DeployDepth = 0; 
+buoy_info.DeployLat = 0; 
+buoy_info.DeployLon = 0; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'F:\wawaves';
 buoy_info.backup_path = 'F:\wawaves_test'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs

@@ -54,7 +54,7 @@ if strcmp(buoy_info.type,'sofar')
                                 end
                             end
                         else
-                            if strcmp(fields{j},'temp_time')|strcmp(fields{j},'wind_time')
+                            if strcmp(fields{j},'temp_time')|strcmp(fields{j},'wind_time')|strcmp(fields{j},'spec_time')
                                 original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.time];
                             else
                                 if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')
@@ -71,6 +71,8 @@ if strcmp(buoy_info.type,'sofar')
             end
         end
     end
+    
+
     
     %% load current formatted data
     mat_years = dir([buoy_info.archive_path '\' buoy_info.name '\mat_archive']); 
@@ -115,6 +117,8 @@ if strcmp(buoy_info.type,'sofar')
             elseif strcmp(fields{i},'temp_time')
                 merged_data.temp_time = [original_data.temp_time; current_data.temp_time]; 
             end
+        elseif isfield(original_data,fields{i})&~isfield(current_data,fields{i})
+            merged_data.(fields{i}) = original_data.(fields{i})
         else
             merged_data.(fields{i}) = [original_data.(fields{i}); current_data.(fields{i})];
         end
@@ -178,6 +182,7 @@ if strcmp(buoy_info.type,'sofar')
             end
         end        
     end
+    
     %spectral data
     if isfield(merged_data,'a1')
         t_spec = merged_data.spec_time(~isnan(merged_data.spec_time));
