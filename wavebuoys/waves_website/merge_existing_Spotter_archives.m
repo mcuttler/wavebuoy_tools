@@ -4,7 +4,7 @@ function [merged_data, original_data, current_data] = merge_existing_Spotter_arc
 
 %first loop through pre-existing archives and collate data
 if strcmp(buoy_info.type,'sofar')
-    original_archive_path = ['E:\SpoondriftBuoys\' buoy_info.serial '_' buoy_info.name '\MAT'];
+    original_archive_path = ['F:\SpoondriftBuoys\' buoy_info.serial '_' buoy_info.name '\MAT'];
     %only waves or version 2 buoys
     if strcmp(buoy_info.version,'V2')
         original_data = struct('time',[],'hsig',[],'tp',[],'tm',[],'dp',[],'dpspr',[],'dm',[],...
@@ -39,28 +39,38 @@ if strcmp(buoy_info.type,'sofar')
                     for j = 1:length(fields)
                         if isfield(dum.SpotData, fields{j})
                             if ~isempty(dum.SpotData.(fields{j}))
-                                if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')
-                                    original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.(fields{j})'];  
-                                elseif strcmp(fields{j},'spec_time')
-                                    original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.time]; 
+                                if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')|strcmp(fields{j},'spec_time')
+                                    if strcmp(fields{j},'spec_time')  
+                                        original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.time]; 
+                                    else
+                                        original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.(fields{j})'];
+                                    end
                                 else                                    
                                     original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.(fields{j})];
                                 end
                             else
-                                if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')
-                                    original_data.(fields{j}) = [original_data.(fields{j}); ones(1,39).*nan]; 
+                                if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')|strcmp(fields{j},'spec_time'); 
+                                    if strcmp(fields{j},'spec_time')
+                                         original_data.(fields{j})= [original_data.(fields{j}); nan]; 
+                                    else
+                                        original_data.(fields{j}) = [original_data.(fields{j}); ones(1,39).*nan];
+                                    end
                                 else
                                     original_data.(fields{j}) = [original_data.(fields{j}); nan];
                                 end
                             end
                         else
-                            if strcmp(fields{j},'temp_time')|strcmp(fields{j},'wind_time')|strcmp(fields{j},'spec_time')
+                            if strcmp(fields{j},'temp_time')|strcmp(fields{j},'wind_time')
                                 original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.time];
                             else
-                                if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')
-                                    original_data.(fields{j}) = [original_data.(fields{j}); ones(1,39).*nan]; 
+                                if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')|strcmp(fields{j},'spec_time')                                    
+                                    if strcmp(fields{j},'spec_time')
+                                         original_data.(fields{j}) = [original_data.(fields{j}); dum.SpotData.time(1)]; 
+                                    else
+                                        original_data.(fields{j}) = [original_data.(fields{j}); ones(1,39).*nan];
+                                    end
                                 else
-                                    original_data.(fields{j}) = [original_data.(fields{j}); nan];
+                                    original_data.(fields{j}) = [original_data.(fields{j}); nan];                                   
                                 end
                             end
                         end
@@ -189,7 +199,7 @@ if strcmp(buoy_info.type,'sofar')
         t_spec = unique(t_spec); 
         for i = 1:size(t_spec,1)
             merged_data2.spec_time(i,1) = t_spec(i); 
-            idx = find(merged_data.time==t_spec(i)); 
+            idx = find(merged_data.spec_time==t_spec(i)); 
             fields = {'a1','a2','b1','b2','varianceDensity','frequency','df','directionalSpread','direction'};
             for j = 1:length(fields)
                 if length(idx)>1                                                           
@@ -201,14 +211,14 @@ if strcmp(buoy_info.type,'sofar')
                         merged_data2.(fields{j}) = [merged_data2.(fields{j}); nan]; 
                     %t1 NaN, t2 not NaN
                     elseif all(isnan(t1))&all(~isnan(t2))
-                        merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx(2))]; 
+                        merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx(2),:)]; 
                     elseif all(~isnan(t1))&all(isnan(t2))
-                        merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx(1))]; 
+                        merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx(1),:)]; 
                     else
-                        merged_data2.(fields{j})=[merged_data2.(fields{j}); merged_data.(fields{j})(idx(1))];
+                        merged_data2.(fields{j})=[merged_data2.(fields{j}); merged_data.(fields{j})(idx(1),:)];
                     end
                 else
-                    merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx)];
+                    merged_data2.(fields{j}) = [merged_data2.(fields{j}); merged_data.(fields{j})(idx,:)];
                 end
             end
         end
