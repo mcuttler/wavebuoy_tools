@@ -71,13 +71,13 @@ for i = 1:size(tdata,1)
         elseif strcmp(attname, 'geospatial_lat_max')
             netcdf.putAtt(ncid,varid, attname, (nanmax(bulkparams.lat(idx_bulk)))); 
         elseif strcmp(attname, 'geospatial_lon_max')
-            netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lon(idx_bulk))));             
+            netcdf.putAtt(ncid,varid, attname, (nanmax(bulkparams.lon(idx_bulk))));             
         elseif strcmp(attname, 'time_coverage_start')
             tdum = datestr(bulkparams.time(idx_bulk(1)),31); 
             tdum(11) = 'T'; tdum(end+1)='Z';
             netcdf.putAtt(ncid,varid, attname, tdum); 
         elseif strcmp(attname, 'time_coverage_end') 
-            tdum = datestr(idx_bulk(end),31); 
+            tdum = datestr(bulkparams.time(idx_bulk(end)),31); 
             tdum(11) = 'T'; tdum(end+1)='Z';
             netcdf.putAtt(ncid,varid, attname,tdum);             
         elseif strcmp(attname, 'date_created')
