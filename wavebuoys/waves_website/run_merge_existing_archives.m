@@ -13,8 +13,8 @@ buoy_info.DeployDepth = 0;
 buoy_info.DeployLat = 0; 
 buoy_info.DeployLon = 0; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.archive_path = 'F:\wawaves';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
@@ -58,7 +58,7 @@ end
 
 %% update archive
 dataout = bulkparams; 
-save(['C:\Data\wawave_temp\' buoy_info.name '_archive.mat'],'dataout','-v7.3'); 
+% save(['F:\Data\wawave_temp\' buoy_info.name '_archive.mat'],'dataout','-v7.3'); 
 
 dv_wave = datevec(dataout.time); 
 if isfield(dataout,'temp_time'); 
@@ -71,7 +71,7 @@ end
 
 mths = unique(dv_wave(:,1:2),'rows');
 %remove archive text file 
-rmdir([buoy_info.archive_path '\' buoy_info.name  '\text_archive'],'s'); 
+% rmdir([buoy_info.archive_path '\' buoy_info.name  '\text_archive'],'s'); 
 for i = 1:size(mths,1)
     disp([buoy_info.name ' ' num2str(mths(i,1)) ' ' num2str(mths(i,2))]); 
     idx_wave = find(dv_wave(:,1)==mths(i,1)&dv_wave(:,2)==mths(i,2)); 
@@ -89,7 +89,7 @@ for i = 1:size(mths,1)
         if strcmp(fields{j},'temp_time')|strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')|strcmp(fields{j},'qf_sst')|strcmp(fields{j},'qf_bott_temp')
             monthly_data.(fields{j}) = dataout.(fields{j})(idx_temp); 
         elseif strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')|strcmp(fields{j},'spec_time')
-            monthly_data.(fields{j}) = dataout.(fields{j})(idx_spec); 
+            monthly_data.(fields{j}) = dataout.(fields{j})(idx_spec,:); 
         else
             monthly_data.(fields{j}) = dataout.(fields{j})(idx_wave); 
         end
@@ -98,11 +98,13 @@ for i = 1:size(mths,1)
         monthly_data.serialID{j,1}= buoy_info.serial; 
         monthly_data.name{j,1} = buoy_info.name; 
     end    
-    
+    buoy_info.archive_path = 'F:\wawaves_test'; 
     [check] = check_archive_path(buoy_info.archive_path, buoy_info, monthly_data);  
     realtime_archive_mat(buoy_info, monthly_data);
     realtime_backup_mat(buoy_info, monthly_data);
 %     realtime_archive_text(buoy_info, monthly_data, 0); 
+clear idx_wave idx_temp idx_spec
+
 end
     
     
