@@ -10,16 +10,29 @@ ddv = unique(dv(:,1:2),'rows');
 
 if size(ddv,1)==1
     backup_path = [buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1))]; 
+    if isfield(buoy_info,'backup_path2')
+        backup_path2 = [buoy_info.backup_path2 '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1))]; 
+    end
+    
     filename = [buoy_info.name '_' num2str(ddv(1,1)) num2str(ddv(1,2),'%02d') '.mat']; 
     if strcmp(buoy_info.type,'sofar')
         SpotData = buoy_data; 
         save([backup_path '\' filename],'SpotData','-v7.3');
+        if isfield(buoy_info,'backup_path2')
+            save([backup_path2 '\' filename],'SpotData','-v7.3');
+        end            
     elseif strcmp(buoy_info.type,'datawell')
         dw_data = buoy_data; 
         save([backup_path '\' filename],'dw_data','-v7.3');
+        if isfield(buoy_info,'backup_path2')
+            save([backup_path2 '\' filename],'dw_data','-v7.3');
+        end
     elseif strcmp(buoy_info.type,'triaxys')
-        axys_data = buoy_data; 
+        axys_data = buoy_data;         
         save([backup_path '\' filename],'axys_data','-v7.3');
+        if isfield(buoy_info,'backup_path2')
+            save([backup_path2 '\' filename],'axys_data','-v7.3');
+        end
     end
     
 else
@@ -49,12 +62,21 @@ else
          if strcmp(buoy_info.type,'sofar')
              SpotData = buoy_data; 
              save([backup_path '\' filename],'SpotData','-v7.3');
+             if isfield(buoy_info,'backup_path2')
+                 save([backup_path2 '\' filename],'SpotData','-v7.3');
+             end 
          elseif strcmp(buoy_info.type,'datawell')
              dw_data = buoy_data; 
              save([backup_path '\' filename],'dw_data','-v7.3');
+             if isfield(buoy_info,'backup_path2')
+                 save([backup_path2 '\' filename],'dw_data','-v7.3');
+             end
          elseif strcmp(buoy_info.type,'triaxys')
              axys_data = buoy_data; 
              save([backup_path '\' filename],'axys_data','-v7.3');
+             if isfield(buoy_info,'backup_path2')
+                 save([backup_path2 '\' filename],'axys_data','-v7.3');
+             end
          end
         
     end

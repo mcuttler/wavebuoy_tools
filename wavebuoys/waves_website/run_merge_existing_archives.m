@@ -102,7 +102,7 @@ for i = 1:size(mths,1)
     [check] = check_archive_path(buoy_info.archive_path, buoy_info, monthly_data);  
     realtime_archive_mat(buoy_info, monthly_data);
     realtime_backup_mat(buoy_info, monthly_data);
-    realtime_archive_text(buoy_info, monthly_data, 0); 
+%     realtime_archive_text(buoy_info, monthly_data, 0); 
 end
     
     

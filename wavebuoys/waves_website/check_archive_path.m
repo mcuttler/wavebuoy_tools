@@ -29,7 +29,7 @@ else
 end
 
 %% extra back up (e.g. UWA network storage)
-if isfield(buoy_info,'backup_path')&~isempty(buoy_info.backup_path)
+if isfield(buoy_info,'backup_path')
     if dv(1,1)==dv(end,1) %same year
         if ~exist([buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(dv(1,1))]); 
             mkdir([buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(dv(1,1))]);       
@@ -38,6 +38,20 @@ if isfield(buoy_info,'backup_path')&~isempty(buoy_info.backup_path)
         for i = 1:size(dv,1)
             if ~exist([buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(dv(i,1))]); 
                 mkdir([buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(dv(i,1))]); 
+            end
+        end
+    end
+end
+%% second back up
+if isfield(buoy_info,'backup_path2')
+    if dv(1,1)==dv(end,1) %same year
+        if ~exist([buoy_info.backup_path2 '\' buoy_info.name '\mat_archive\' num2str(dv(1,1))]); 
+            mkdir([buoy_info.backup_path2 '\' buoy_info.name '\mat_archive\' num2str(dv(1,1))]);       
+        end
+    else
+        for i = 1:size(dv,1)
+            if ~exist([buoy_info.backup_path2 '\' buoy_info.name '\mat_archive\' num2str(dv(i,1))]); 
+                mkdir([buoy_info.backup_path2 '\' buoy_info.name '\mat_archive\' num2str(dv(i,1))]); 
             end
         end
     end

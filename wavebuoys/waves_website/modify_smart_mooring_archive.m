@@ -208,21 +208,21 @@ for i =1:length(fields);
     end
 end
 % 
-
-    [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData); 
-    idx = find(archive_data.time<SpotData.time(1)); 
-    idx2 = find(archive_data.temp_time<SpotData.temp_time(1)); 
-    if ~isempty(idx)&~isempty(idx2)
-        fields = fieldnames(SpotData); 
-        for i =1:length(fields); 
-            if strcmp(fields{i},'bott_temp')|strcmp(fields{i},'surf_temp')|strcmp(fields{i},'temp_time')
-                SpotData.(fields{i}) = [archive_data.(fields{i})(idx2);SpotData.(fields{i})]; 
-            else
-                SpotData.(fields{i}) = [archive_data.(fields{i})(idx);SpotData.(fields{i})];
-            end
-            
-        end
-    end
+% 
+%     [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData); 
+%     idx = find(archive_data.time<SpotData.time(1)); 
+%     idx2 = find(archive_data.temp_time<SpotData.temp_time(1)); 
+%     if ~isempty(idx)&~isempty(idx2)
+%         fields = fieldnames(SpotData); 
+%         for i =1:length(fields); 
+%             if strcmp(fields{i},'bott_temp')|strcmp(fields{i},'surf_temp')|strcmp(fields{i},'temp_time')
+%                 SpotData.(fields{i}) = [archive_data.(fields{i})(idx2);SpotData.(fields{i})]; 
+%             else
+%                 SpotData.(fields{i}) = [archive_data.(fields{i})(idx);SpotData.(fields{i})];
+%             end
+%             
+%         end
+%     end
 
 
     
@@ -260,7 +260,7 @@ if isfield(qaqc, 'time_temp')
 else
     [bulkparams.qf_waves, ~, ~] = qaqc_uwa_waves_website(qaqc);
 end
-
+%%
 data = bulkparams; 
 %save data to different formats        
 realtime_archive_mat(buoy_info, data);
