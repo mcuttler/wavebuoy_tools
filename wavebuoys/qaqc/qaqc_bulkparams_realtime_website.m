@@ -29,9 +29,7 @@ elseif strcmp(buoy_info.type,'datawell');
     bulkparams = new_data; 
 end
 
-%ensure no time duplications
 bulkparams = remove_duplicates(bulkparams); 
-
 
 
 %bulkparams data 

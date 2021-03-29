@@ -2,7 +2,13 @@
 
 %% 
 function [dataout] = remove_duplicates(data)
-data = rmfield(data,{'qf_sst','qf_bott_temp','qf_waves'}); 
+data = rmfield(data,'qf_waves'); 
+if isfield(data,'qf_sst')
+    data = rmfield(data,'qf_sst'); 
+end
+if isfield(data,'qf_bott_temp')
+    data = rmfield(data,'qf_bott_temp'); 
+end
 
 t_wave = unique(data.time); 
 
@@ -16,7 +22,7 @@ for i = 1:length(t_wave)
     dataout.time(i,1) = t_wave(i); 
     idx = find(data.time==t_wave(i));     
     for j = 1:length(fields)        
-        if strcmp(fields{j},'temp_time')|strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')
+        if strcmp(fields{j},'temp_time')|strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')|strcmp(fields{j},'time')
             dum = 1;
         else
             if length(idx)>1            
