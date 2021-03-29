@@ -17,12 +17,12 @@ if strcmp(buoy_info.type,'sofar')
     fields_archive = fieldnames(archive_data); 
     fields_int = intersect(fields, fields_archive);
     for j = 1:size(fields_int,1)
-        bulkparams.(fields_int{j}) = [archive_data.(fields_int{j}); new_data.(fields_int{j})]; 
+        bulkparams.(fields_int{j}) = [archive_data.(fields_int{j,:}); new_data.(fields_int{j,:})]; 
     end
     %now include any missing fields from archive data
     for j = 1:size(fields_archive)
         if ~isfield(bulkparams, fields_archive{j})
-            bulkparams.(fields_archive{j}) = archive_data.(fields_archive{j}); 
+            bulkparams.(fields_archive{j,:}) = archive_data.(fields_archive{j,:}); 
         end
     end    
 elseif strcmp(buoy_info.type,'datawell'); 
