@@ -12,10 +12,7 @@ outpathNC = [outpathNC '\nc\' buoy_info.DeployLoc];
 
 if ~exist(outpathNC)
     mkdir(outpathNC)
-end
-        
-tstart = datenum(tdata(1,1), tdata(1,2),1); 
-tend = datenum(tdata(end,1), tdata(end,2)+1, 1); 
+end        
 
 disp(['Saving bulkparams']);  
 
@@ -131,7 +128,7 @@ for ii = 1:m
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         %netcdf.defVarFill(ncid,varid,false,-9999);
-    elseif ii>9&ii<14   
+    elseif strcmp(varinfo{1,2}{ii,1},'wave_quality_flag') | strcmp(varinfo{1,2}{ii,1},'wave_subflag') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_flag') | strcmp(varinfo{1,2}{ii,1},'TEMP_subflag')
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,int8(-127));
@@ -144,10 +141,26 @@ for ii = 1:m
     
     %add attributes
     for j = 1:length(attinfo); 
-        if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')
-            if ~isnan(attinfo{1,j}(ii))
-                %change here for byte (I think)                                      
-                netcdf.putAtt(ncid, varid, attnames{j},int8(attinfo{1,j}(ii))); 
+        if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')            
+            if ~isnan(attinfo{1,j}(ii))                                 
+                if strcmp(varinfo{1,2}{ii,1},'wave_quality_flag') | strcmp(varinfo{1,2}{ii,1},'wave_subflag') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_flag') | strcmp(varinfo{1,2}{ii,1},'TEMP_subflag')
+                    netcdf.putAtt(ncid, varid, attnames{j},int8(attinfo{1,j}(ii))); 
+                else
+                    netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii)); 
+                end
+            end
+        elseif strcmp(attnames{j},'flag_values')
+            if ~isempty(attinfo{1,j}{ii})
+                flags = str2num(attinfo{1,j}{ii}); 
+                flags_out = []; 
+                for jj = 1:length(flags); 
+                    if jj ==1
+                        flags_out = num2str(flags(jj)); 
+                    else
+                        flags_out = [flags_out, [', ' num2str(flags(jj))]];
+                    end
+                end
+                netcdf.putAtt(ncid, varid, attnames{j},flags_out);                 
             end
         else
             if ~isempty(attinfo{1,j}{ii})
@@ -167,17 +180,17 @@ for ii = 1:m
     %put data to variable
     if strcmp(varinfo{1,1}{ii,1},'temp')
         %modify this for spotter v2, datawell 
-        netcdf.putVar(ncid, varid, ones(size(bulkparams.time(idx_bulk))).*nan); 
+        netcdf.putVar(ncid, varid, ones(size(bulkparams.time,1),1).*nan); 
     elseif strcmp(varinfo{1,1}{ii,1},'time')
-        imos_time = bulkparams.time(idx_bulk) - datenum(1950,1,1,0,0,0); 
+        imos_time = bulkparams.time - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'qc_flag_wave') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_wave')| strcmp(varinfo{1,1}{ii,1},'qc_flag_temp') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_temp')
         if isfield(bulkparams, varinfo{1,1}{ii,1})
-            netcdf.putVar(ncid, varid, int8(bulkparams.(varinfo{1,1}{ii,1})(idx_bulk))); 
+            netcdf.putVar(ncid, varid, int8(bulkparams.(varinfo{1,1}{ii,1})));  
         end
     else
         if isfield(bulkparams, varinfo{1,1}{ii,1})
-            netcdf.putVar(ncid, varid, bulkparams.(varinfo{1,1}{ii,1})(idx_bulk));
+            netcdf.putVar(ncid, varid, bulkparams.(varinfo{1,1}{ii,1})); 
         end
     end
     
