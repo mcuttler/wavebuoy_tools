@@ -12,7 +12,7 @@ homepath = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys';
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0171_TorbayEast_20200114_to_20200319'; 
+datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0093_PerthCanyon_20191015_to_20200903'; 
 
 %path of Sofar parser script
 parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.1'; 
@@ -21,17 +21,17 @@ parser = 'parser_v1.11.1.py';
 %% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.name = 'SPOT0171'; %spotter serial number, or just Datawell 
+buoy_info.name = 'SPOT0093'; %spotter serial number, or just Datawell 
 buoy_info.version = 'Spotter-V1'; %or DWR4 for Datawell, for example
-buoy_info.site_code = 'TORE01';
-buoy_info.DeployLoc = 'TorbayEast01';%this is IMOS site_name and station_id
-buoy_info.DeployDepth = 30; 
+buoy_info.site_code = 'PERC01';
+buoy_info.DeployLoc = 'PerthCanyon01';%this is IMOS site_name and station_id
+buoy_info.DeployDepth = 300; 
 buoy_info.DeployLat = -35.07075; 
 buoy_info.DeployLon = 117.77619; 
-buoy_info.DeployID = 'TorE0101'; %deployment number at this site
+buoy_info.DeployID = 'PerC0101'; %deployment number at this site
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-buoy_info.MagDec = 1.98; 
+buoy_info.MagDec = 2.01; 
 
 %inputs only for Datawell folder structure
 years = 2020; 
