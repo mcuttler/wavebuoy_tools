@@ -8,14 +8,14 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+homepath = 'C:\Users\00104893\LocalDocuments\IMOS AODN\Matlab Codes\Github Repository\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Data_for_testing_Spotter_V1'; 
+datapath = 'C:\Users\00104893\LocalDocuments\IMOS AODN\Testing netCDF creation\RAW_delayed_mode\SPOT0171_TorbayEast_20200114_to_20200319'; 
 
 %path of Sofar parser script
-parserpath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.1'; 
+parserpath = 'C:\Users\00104893\LocalDocuments\Spotters\parser_v1.11.1'; 
 parser = 'parser_v1.11.1.py'; 
 
 
@@ -23,12 +23,12 @@ parser = 'parser_v1.11.1.py';
 buoy_info.type = 'sofar'; 
 buoy_info.name = 'SPOT0171'; %spotter serial number, or just Datawell 
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
-buoy_info.site_code = 'TEST01';
-buoy_info.DeployLoc = 'Testing01';%this is IMOS site_name and station_id
+buoy_info.site_code = 'TOR01';
+buoy_info.DeployLoc = 'Torbay01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -35; 
-buoy_info.DeployLon = 117; 
-buoy_info.DeployID = 'Testing0101'; %deployment number at this site
+buoy_info.DeployLat = -35.07075; 
+buoy_info.DeployLon = 117.77619; 
+buoy_info.DeployID = 'Tor0101'; %deployment number at this site
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 1.98; 
@@ -38,9 +38,9 @@ years = 2020;
 months = 1:8; 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
+buoy_info.archive_path = 'C:\Users\00104893\LocalDocuments\IMOS AODN\Testing netCDF creation\ProcessedData_DelayedMode_v2';
 buoy_info.facility_code = 'NTP-WAVE';
-buoy_info.data_code = 'W'; %T for temperature, W for wave
+buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
 buoy_info.file_version = 1; 
 buoy_info.product_type = 'timeseries'; 
@@ -102,8 +102,8 @@ if strcmp(buoy_info.type,'sofar')==1
      
     %bulkparams
     %text files for IMOS-compliant netCDF generation
-    globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt';     
-    varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';        
+    globfile = 'C:\Users\00104893\LocalDocuments\IMOS AODN\Matlab Codes\Github Repository\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt';     
+    varsfile = 'C:\Users\00104893\LocalDocuments\IMOS AODN\Matlab Codes\Github Repository\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';        
     bulkparams_to_IMOS_nc(bulkparams_nc, buoy_info.archive_path, buoy_info, globfile, varsfile); 
     
     %displacements
