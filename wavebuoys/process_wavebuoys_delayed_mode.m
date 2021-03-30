@@ -23,12 +23,12 @@ parser = 'parser_v1.11.1.py';
 buoy_info.type = 'sofar'; 
 buoy_info.name = 'SPOT0171'; %spotter serial number, or just Datawell 
 buoy_info.version = 'Spotter-V1'; %or DWR4 for Datawell, for example
-buoy_info.site_code = 'TOR01';
-buoy_info.DeployLoc = 'Torbay01';%this is IMOS site_name and station_id
+buoy_info.site_code = 'TORE01';
+buoy_info.DeployLoc = 'TorbayEast01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 30; 
 buoy_info.DeployLat = -35.07075; 
 buoy_info.DeployLon = 117.77619; 
-buoy_info.DeployID = 'Tor0101'; %deployment number at this site
+buoy_info.DeployID = 'TorE0101'; %deployment number at this site
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 1.98; 
