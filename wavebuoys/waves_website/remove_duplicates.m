@@ -2,7 +2,10 @@
 
 %% 
 function [dataout] = remove_duplicates(data)
-data = rmfield(data,'qf_waves'); 
+if isfield(data,'qf_waves'); 
+    data = rmfield(data,'qf_waves'); 
+end
+
 if isfield(data,'qf_sst')
     data = rmfield(data,'qf_sst'); 
 end
@@ -31,14 +34,14 @@ for i = 1:length(t_wave)
                 if isnan(t1)&isnan(t2)
                     dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
                 elseif isnan(t1)&~isnan(t2)
-                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2))]; 
+                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
                 elseif ~isnan(t1)&isnan(t2)
-                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1))]; 
+                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
                 else                
-                    dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1))];
+                    dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
                 end
             else
-                dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx)];
+                dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
             end
         end
     end
@@ -59,14 +62,14 @@ if isfield(data,'temp_time')
                     if isnan(t1)&isnan(t2)
                         dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
                     elseif isnan(t1)&~isnan(t2)
-                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2))]; 
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
                     elseif ~isnan(t1)&isnan(t2)
-                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1))]; 
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
                     else
-                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1))];
+                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
                     end
                 else
-                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx)];
+                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
                 end                            
             end
         end

@@ -57,7 +57,10 @@ for i = 1:length(fields)
     SpotData.(fields{i}) = SpotData.(fields{i})(idx,:); 
 end
 
-
+[~,I] = sort(SpotData.time); 
+for i = 1:length(fields)
+    SpotData.(fields{i}) = SpotData.(fields{i})(I,:); 
+end
     
     
 end
