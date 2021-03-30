@@ -40,7 +40,7 @@ months = 1:8;
 %inputs for IMOS filename structure
 buoy_info.archive_path = 'C:\Users\00104893\LocalDocuments\IMOS AODN\Testing netCDF creation\ProcessedData_DelayedMode_v2';
 buoy_info.facility_code = 'NTP-WAVE';
-buoy_info.data_code = 'W'; %T for temperature, W for wave
+buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
 buoy_info.file_version = 1; 
 buoy_info.product_type = 'timeseries'; 
