@@ -3,3 +3,5 @@ SofarSpotter/Process_SofarSpotter_delayed_mode.asv
 *.asv
 *.mat
 *.mat
+*.mat
+wavebuoys/imos_nc/testing_nc.mat
