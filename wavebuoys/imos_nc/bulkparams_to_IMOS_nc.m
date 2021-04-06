@@ -51,14 +51,16 @@ for ii = 1:size(globatts{1,1},1);
         netcdf.putAtt(ncid,varid, attname, buoy_info.DeployDepth);
     elseif strcmp(attname, 'deployment_id')
         netcdf.putAtt(ncid,varid, attname, buoy_info.DeployID);
-    elseif strcmp(attname, 'geospatial_lat_min')
-        netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lat)));  
+    elseif strcmp(attname, 'geospatial_lat_min')        
+        dlat = bulkparams.lat; dlat(dlat<-99)=nan;
+        netcdf.putAtt(ncid,varid, attname, (nanmin(dlat))); 
     elseif strcmp(attname, 'geospatial_lon_min')
-        netcdf.putAtt(ncid,varid, attname, (nanmin(bulkparams.lon))); 
-    elseif strcmp(attname, 'geospatial_lat_max')
-        netcdf.putAtt(ncid,varid, attname, (nanmax(bulkparams.lat))); 
-    elseif strcmp(attname, 'geospatial_lon_max')
-        netcdf.putAtt(ncid,varid, attname, (nanmax(bulkparams.lon)));             
+        dlon = bulkparams.lon; dlon(dlon<-99)=nan;
+        netcdf.putAtt(ncid,varid, attname, (nanmin(dlon))); 
+    elseif strcmp(attname, 'geospatial_lat_max')        
+        netcdf.putAtt(ncid,varid, attname, (nanmax(dlat))); 
+    elseif strcmp(attname, 'geospatial_lon_max')       
+        netcdf.putAtt(ncid,varid, attname, (nanmax(dlon))); 
     elseif strcmp(attname, 'time_coverage_start')
         tdum = datestr(bulkparams.time(1),31); 
         tdum(11) = 'T'; tdum(end+1)='Z';
@@ -100,7 +102,7 @@ varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s%s%s%s','delimiter',','
 fclose(fid);      
 
 attnames = {'standard_name', 'long_name', 'units', 'calendar','axis','comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference_datum','magnetic_dec', 'positive',...
-    'observation_type','coordinates','flag_values','flag_meanings','quality_control_conventions'}; 
+    'observation_type','coordinates','flag_values','flag_meanings','quality_control_convention'}; 
 
 attinfo = varinfo(3:end);     
 
@@ -151,16 +153,7 @@ for ii = 1:m
             end
         elseif strcmp(attnames{j},'flag_values')
             if ~isempty(attinfo{1,j}{ii})
-                flags = str2num(attinfo{1,j}{ii}); 
-                flags_out = []; 
-                for jj = 1:length(flags); 
-                    if jj ==1
-                        flags_out = num2str(flags(jj)); 
-                    else
-                        flags_out = [flags_out, [', ' num2str(flags(jj))]];
-                    end
-                end
-                netcdf.putAtt(ncid, varid, attnames{j},flags_out);                 
+                netcdf.putAtt(ncid, varid, attnames{j},int8(str2num(attinfo{1,j}{ii}))); 
             end
         else
             if ~isempty(attinfo{1,j}{ii})

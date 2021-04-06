@@ -12,7 +12,7 @@ homepath = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys';
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0093_PerthCanyon_20191015_to_20200903'; 
+datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0171_TorbayEast_20200114_to_20200319'; 
 
 %path of Sofar parser script
 parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.1'; 
@@ -21,17 +21,17 @@ parser = 'parser_v1.11.1.py';
 %% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.name = 'SPOT0093'; %spotter serial number, or just Datawell 
+buoy_info.name = 'SPOT-0171'; %spotter serial number, or just Datawell 
 buoy_info.version = 'Spotter-V1'; %or DWR4 for Datawell, for example
-buoy_info.site_code = 'PERC01';
-buoy_info.DeployLoc = 'PerthCanyon01';%this is IMOS site_name and station_id
-buoy_info.DeployDepth = 300; 
-buoy_info.DeployLat = -35.07075; 
-buoy_info.DeployLon = 117.77619; 
-buoy_info.DeployID = 'PerC0101'; %deployment number at this site
+buoy_info.site_code = 'TORE01';
+buoy_info.DeployLoc = 'TorbayEast01';%this is IMOS site_name and station_id
+buoy_info.DeployDepth = 30; 
+buoy_info.DeployLat = nan; 
+buoy_info.DeployLon = nan; 
+buoy_info.DeployID = 'TORE0101'; %deployment number at this site
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-buoy_info.MagDec = 2.01; 
+buoy_info.MagDec = 1.98; 
 
 %inputs only for Datawell folder structure
 years = 2020; 
@@ -69,18 +69,7 @@ if strcmp(buoy_info.type,'sofar')==1
     % double check parameter settings in '.\qaqc\qaqc_bulkparams.m' before
     % proceeding
     
-    [bulkparams] = qaqc_bulkparams(bulkparams);
-    
-    %add exception value based on qf_master
-%     fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
-%     flag = find(bulkparams.qf_master==4);   
-%     for f = 1:length(fields)
-%         if isfield(bulkparams, fields{f}); 
-%             [bulkparams_nc] = qaqc_add_exception_value(bulkparams, fields, flag);     
-%         else
-%             bulkparams_nc.(fields{f}) = ones(size(bulkparams_nc.time,1),1).*nan; 
-%         end
-%     end        
+    [bulkparams] = qaqc_bulkparams(bulkparams);             
 
     
     %clean up for export
@@ -96,6 +85,17 @@ if strcmp(buoy_info.type,'sofar')==1
         end           
         
     end    
+    
+    %quickly denan and replace with fill values
+    fields = fieldnames(bulkparams_nc); 
+    for i = 1:length(fields)
+        if strcmp(fields{i},'qc_flag_wave') | strcmp(fields{i},'qc_subflag_wave') | strcmp(fields{i},'qc_flag_temp') | strcmp(fields{i},'qc_subflag_wave')
+            bulkparams_nc.(fields{i})(isnan(bulkparams_nc.(fields{i}))) = -127; 
+        else
+            bulkparams_nc.(fields{i})(isnan(bulkparams_nc.(fields{i}))) = -9999;
+        end
+    end
+        
         
     disp(['Saving data for ' buoy_info.name ' as netCDF']);             
     
