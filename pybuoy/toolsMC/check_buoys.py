@@ -36,7 +36,7 @@ def matlab2datetime(matlab_datenum):
     return day + dayfrac
 
 #%%
-site = 'SharkBay'
+site = 'CoralBay'
 # deploy_loc = [113.130500,-25.420100]
 filestart = r'Y:\CUTTLER_wawaves\Data\realtime_archive_backup'
 fileend = r'mat_archive\2021'
@@ -56,8 +56,12 @@ for j, file in enumerate(files):
             
 #convert time to datetime
 data['datetime'] = []
+
 for j, val in enumerate(data['time']):
     data['datetime'].append(matlab2datetime(val))
+data['datetime_temp']=[]
+for j, val in enumerate(data['temp_time']):
+    data['datetime_temp'].append(matlab2datetime(float(val)))
     
 #calculate time index by month
 tind = pd.Series(data['datetime']).dt.month
