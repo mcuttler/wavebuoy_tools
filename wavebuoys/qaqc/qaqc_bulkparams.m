@@ -8,7 +8,7 @@ function [bulkparams] = qaqc_bulkparams(bulkparams)
 
 %    User defined test criteria
 check.STD = 3; 
-check.time_window = 12; %hours for calculating mean + std
+check.time_window = 72; %hours for calculating mean + std
 check.time = bulkparams.time; 
 
 fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
@@ -63,7 +63,7 @@ check.WVDIR = bulkparams.dp;
 check.WVSP = bulkparams.pkspr; 
 
 check.MINWH = 0.25;
-check.MAXWH = 8;
+check.MAXWH = 10;
 check.MINWP = 3; 
 check.MAXWP = 25;
 check.MINSV = 0.07; 
