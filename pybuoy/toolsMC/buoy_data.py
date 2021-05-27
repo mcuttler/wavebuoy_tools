@@ -14,11 +14,10 @@ import h5py
 import os
 import netCDF4 as nc
 import numpy as np 
-import cartopy.crs as ccrs
-from matplotlib.gridspec import GridSpec
+import os 
 import sys
 
-#%%
+#%% locally archived data
 def load_buoy_text_archive(site, archive_path):
     """ 
     To be completed
@@ -35,7 +34,7 @@ def load_buoy_text_archive(site, archive_path):
             days = os.listdir(os.path.join(datapath,yr,month))
             for dd in days:
                 textarchive.append(os.path.join(datapath,yr,month,dd))
-    #loop through textarchive and load days into dataframe
+    #loop through text archive and load days into dataframe
     for i, file in enumerate(textarchive): 
         if i == 0:
             buoydata = pd.read_csv(file)      
@@ -45,6 +44,32 @@ def load_buoy_text_archive(site, archive_path):
     return buoydata     
         
 
-#%% 
+#%% WA DoT data
+def import_WA_DoT(datapath):
+    """
+    MC to complete
+    UWA, 2021
+    Parameters
+    ----------
+    datapath : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+    files = os.listdir(datapath)
+    #only keep csv 
+    files = [file for file in files if file[-3:]=='csv']
+    
+    #suck in data to dataframe
+    for i, file in enumerate(files):
+        if i==0:
+            dot = pd.read_csv(os.path.join(datapath,file))
+        else:
+            dot = dot.append(pd.read_csv(os.path.join(datapath,file)))
+            
+    return dot 
             
         
