@@ -3,6 +3,14 @@ clear; clc;
 
 
 %buoy type and deployment info number and deployment info 
+clear; clc
+
+%location of wavebuoy_tools repo
+% buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
+% addpath(genpath(buoycodes))
+
+%buoy type and deployment info number and deployment info 
+%buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
 buoy_info.serial = 'SPOT-1037'; %spotter serial number, or just Datawell 
 buoy_info.name = 'Thevenard'; 
@@ -19,16 +27,22 @@ buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, o
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-limit = 500; 
-%%
-modify_smart_mooring_archive; 
 
+%use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
+% buoy_info.MagDec = 1.98; 
+
+%use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
+
+limit = 40; 
 %%
-%run backfill
-clear; clc; 
-site = 'BremerCanyon_Drifting'; 
-% site = buoy_info.name;  
-data_path = 'E:\wawaves'; 
-%remove text archive
-rmdir([data_path '\' site  '\text_archive'],'s'); 
-backfill_RT_text_archive(data_path, site); 
+% modify_smart_mooring_archive; 
+% 
+% %%
+% %run backfill
+% clear; clc; 
+% site = 'BremerCanyon_Drifting'; 
+% % site = buoy_info.name;  
+% data_path = 'E:\wawaves'; 
+% %remove text archive
+% rmdir([data_path '\' site  '\text_archive'],'s'); 
+% backfill_RT_text_archive(data_path, site); 

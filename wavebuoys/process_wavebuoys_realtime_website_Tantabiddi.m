@@ -77,7 +77,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, limit); 
                 %output MEM and SST plots 
-                if strcmp(buoy_info.DataType,'spectral')        
+                if strcmp(buoy_info.DataType,'spectral')&isfield(SpotData,'a1')       
                     [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
                     make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
                 end

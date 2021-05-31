@@ -43,7 +43,7 @@ if strcmp(buoy_info.type,'sofar')==1
         [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;     
+            limit = buoy_info.UpdateTime*2;        
             [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 
@@ -177,7 +177,7 @@ elseif strcmp(buoy_info.type,'triaxys')
 end
 
 %%
-quit
+% quit
 
 
 

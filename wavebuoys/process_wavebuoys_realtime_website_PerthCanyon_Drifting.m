@@ -14,18 +14,18 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1055'; %spotter serial number, or just Datawell 
-buoy_info.name = 'MontebelloIslands'; 
+buoy_info.serial = 'SPOT-0172'; %spotter serial number, or just Datawell 
+buoy_info.name = 'PerthCanyon_Drifting'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
-buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
+buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'MontebelloIslands';
-buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -20.39299; 
-buoy_info.DeployLon = 115.48026; 
+buoy_info.DeployLoc = 'PerthCanyon_Drift';
+buoy_info.DeployDepth = 0; 
+buoy_info.DeployLat = 0; 
+buoy_info.DeployLon = 0; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'parrametes'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
@@ -39,16 +39,11 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
     if strcmp(buoy_info.version,'smart_mooring')
-       if strcmp(buoy_info.DataType,'spectral')
-            limit = buoy_info.UpdateTime;
-            [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime_fullwaves(buoy_info, limit); 
-        else
-            limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-            [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
-        end        
+        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
+        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;     
+            limit = buoy_info.UpdateTime*2; 
             [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 
@@ -56,7 +51,17 @@ if strcmp(buoy_info.type,'sofar')==1
             [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);     
             flag = 1; 
         end                    
-    end    
+    end   
+    
+    %PerthCanyon_drifting always seems to download more than limit through
+    %API
+    if length(SpotData.time)>limit
+        fields = fieldnames(SpotData); 
+        for i = 1:length(fields)
+            SpotData.(fields{i}) = SpotData.(fields{i})(end-1:end,:); 
+        end
+    end
+    
     
     if flag == 1
         for i = 1:size(SpotData.time,1)
@@ -183,6 +188,7 @@ end
 
 %%
 % quit
+
 
 
 

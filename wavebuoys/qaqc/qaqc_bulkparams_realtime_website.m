@@ -24,7 +24,13 @@ if strcmp(buoy_info.type,'sofar')
         if ~isfield(bulkparams, fields_archive{j})
             bulkparams.(fields_archive{j,:}) = archive_data.(fields_archive{j,:}); 
         end
-    end    
+    end 
+    %now include missing parameters from new data
+    for j =1:size(fields); 
+        if ~isfield(bulkparams, fields{j}); 
+            bulkparams.(fields{j}) = new_data.(fields{j,:}); 
+        end
+    end
 elseif strcmp(buoy_info.type,'datawell'); 
     bulkparams = new_data; 
 end

@@ -23,7 +23,7 @@ status = resp_waves.StatusCode;
 disp([status]); 
 
 
-tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,3,0,0),30); 
+tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,4,0,0),30); 
 tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 

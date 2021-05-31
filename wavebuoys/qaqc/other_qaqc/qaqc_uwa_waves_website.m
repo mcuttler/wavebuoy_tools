@@ -57,10 +57,14 @@ function [qf_waves, qf_sst, qf_bott_temp] = qaqc_uwa_waves_website(qaqc);
             end
             %rate of change test
             if ii>1
-                if abs(diff(qaqc.SST(ii-1:ii)))>qaqc.rocSST
-                    qf_sst_dum(ii,2) = 4;
+                if qaqc.SST(ii-1)<0
+                    qf_sst_dum(ii,2)=4;
                 else
-                    qf_sst_dum(ii,2) = 1;
+                    if abs(diff(qaqc.SST(ii-1:ii)))>qaqc.rocSST
+                        qf_sst_dum(ii,2) = 4;
+                    else
+                        qf_sst_dum(ii,2) = 1;
+                    end
                 end
             end
         end
@@ -77,10 +81,14 @@ function [qf_waves, qf_sst, qf_bott_temp] = qaqc_uwa_waves_website(qaqc);
             end
             %rate of change test
             if ii>1
-                if abs(diff(qaqc.BOTT_TEMP(ii-1:ii)))>qaqc.rocSST
-                    qf_bott_temp_dum(ii,2) = 4;
+                if qaqc.BOTT_TEMP(ii-1)<0
+                    qf_bott_temp_dum(ii,2) = 4;               
                 else
-                    qf_bott_temp_dum(ii,2) = 1;
+                    if abs(diff(qaqc.BOTT_TEMP(ii-1:ii)))>qaqc.rocSST
+                        qf_bott_temp_dum(ii,2) = 4;
+                    else
+                        qf_bott_temp_dum(ii,2) = 1;
+                    end
                 end
             end
         end

@@ -27,6 +27,10 @@ for i = 1:length(t_wave)
     for j = 1:length(fields)        
         if strcmp(fields{j},'temp_time')|strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')|strcmp(fields{j},'time')
             dum = 1;
+        elseif strcmp(fields{j},'spec_time')|strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')            
+            dum = 1;
+        elseif strcmp(fields{j},'serialID')|strcmp(fields{j},'name')
+            dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1))];             
         else
             if length(idx)>1            
                 t1 = data.(fields{j})(idx(1));
@@ -76,6 +80,36 @@ if isfield(data,'temp_time')
         clear idx t1 t2
     end
 end
+
+%spectral data
+if isfield(data,'spec_time')
+    t_spec = unique(data.spec_time); 
+    for i = 1:length(t_spec)
+        dataout.spec_time(i,1) = t_spec(i); 
+        idx = find(data.spec_time==t_spec(i));     
+        for j = 1:length(fields)
+            if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')
+                if length(idx)>1
+                    t1 = data.(fields{j})(idx(1));
+                    t2 = data.(fields{j})(idx(2));                 
+                    if isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
+                    elseif isnan(t1)&~isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
+                    elseif ~isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
+                    else
+                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
+                    end
+                else
+                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+                end                            
+            end
+        end
+        clear idx t1 t2
+    end
+end
+
 
 end
         
