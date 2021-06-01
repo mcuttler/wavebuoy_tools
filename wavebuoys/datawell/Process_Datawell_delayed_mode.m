@@ -3,7 +3,7 @@
 
 %%
 
-function [data] = Process_Datawell_post_process(buoy_info, data, file20, file21, file25, file28, file80, file82, file23, filed)
+function [data] = Process_Datawell_delayed_mode(buoy_info, data, file20, file21, file25, file28, file80, file82, file23, filed)
 
 %Grab data from file21 and file28
 data20 = importdata(file20);
@@ -80,7 +80,7 @@ data82 = importdata(file82);
     end
     
     
-    data = process_datawell_postprocess_wave_temp_current(buoy_info, E, theta, s, m2, n2, spec_params, time20, data80, time80, data82.data, time82, data);     
+    data = process_delayed_mode_wave_temp_current(buoy_info, E, theta, s, m2, n2, spec_params, time20, data80, time80, data82.data, time82, data);     
     
     %% process displacements 
     disp_data = importdata(filed); 
