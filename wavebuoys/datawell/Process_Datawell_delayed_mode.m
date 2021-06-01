@@ -119,7 +119,7 @@ data82 = importdata(file82);
         data.disp_time = ones(size(sync_data.time,1),cols).*nan; 
         
         for ii = 1:size(sync_data.time,1); 
-            data.disp_tstart(ii,1) = sync_data.t_utc(ii); 
+            disp_tstart(ii,1) = sync_data.t_utc(ii); 
             if strcmp(flags(ii),'g')
                 if ii == 1
                     dstart = 1;
@@ -129,7 +129,7 @@ data82 = importdata(file82);
                 %fill timestamp for each displacement
                 for jj = 1:size(data.disp_h,2)
                     if jj == 1
-                        data.disp_time(ii,jj) = data.disp_tstart(ii,1);
+                        data.disp_time(ii,jj) = disp_tstart(ii,1);
                     else
                         %DWR4 outputs at 2.56 Hz (I think)
                         data.disp_time(ii,jj) = data.disp_time(ii,jj-1)+((1/2.56)*(1/60)*(1/60)); 
@@ -141,7 +141,7 @@ data82 = importdata(file82);
             end
         end
     else
-        data.disp_tstart; data.disp_time = []; data.disp_h = []; data.disp_n = []; data.disp_w = [];
+        data.disp_time = []; data.disp_h = []; data.disp_n = []; data.disp_w = [];
     end
 
 end
