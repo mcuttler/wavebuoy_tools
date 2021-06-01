@@ -59,8 +59,8 @@ end
 %    User defined test criteria
 check.WVHGT = bulkparams.hs; 
 check.WVPD = bulkparams.tp; 
-check.WVDIR = bulkparams.dp; 
-check.WVSP = bulkparams.pkspr; 
+check.WVDIR = bulkparams.dp;
+check.WVSP = bulkparams.pkspr;
 
 check.MINWH = 0.25;
 check.MAXWH = 10;

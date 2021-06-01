@@ -21,7 +21,8 @@ parser = 'parser_v1.11.2.py';
 %% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'datawell'; 
-buoy_info.name = 'Datawell-74089'; %serial number - SPOT-0170 or Datawell-74089 
+buoy_info.name = 'Torbay'; %
+buoy_info.serial = 'Datawell-74089'; %serial number - SPOT-0170 or Datawell-74089 
 buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
 buoy_info.site_code = 'TOR01';
 buoy_info.DeployLoc = 'Torbay01';%this is IMOS site_name and station_id
@@ -36,7 +37,7 @@ buoy_info.timezone = 8; %signed integer for UTC offset
 buoy_info.MagDec = 1.98; 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'P:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\Processed_CF_card';
+buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\Processed_CF_card';
 buoy_info.facility_code = 'NTP-WAVE';
 buoy_info.data_code = 'W'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
@@ -169,6 +170,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
              data = rmfield(data,'hsig');
              data.temp=data.surf_temp;
              data = rmfield(data,'surf_temp');
+             data.pkspr = data.dpspr;
+             data = rmfield(data,'dpspr'); 
              
              cnt=cnt+1;
              clear temp
@@ -177,7 +180,13 @@ elseif strcmp(buoy_info.type,'datawell')==1
              for jj = 1:length(fields)
                  if strcmp(fields{jj}, 'spec2D')
                      data.spec2D = cat(3,data.spec2D,temp.spec2D);
-                 else
+                 elseif strcmp(fields{jj},'hs')
+                     data.hs = [data.hs; temp.hsig];
+                 elseif strcmp(fields{jj},'temp')
+                     data.temp = [data.temp; temp.surf_temp]; 
+                 elseif strcmp(fields{jj},'pkspr')
+                     data.pkspr = [data.pkspr; temp.dpspr]; 
+                 else                     
                      data.(fields{jj}) = [data.(fields{jj}); temp.(fields{jj})];
                  end
              end                  
@@ -188,19 +197,15 @@ elseif strcmp(buoy_info.type,'datawell')==1
      %run delayed mode QAQC
      disp('Performing QA/QC checks...'); 
      [data] = qaqc_bulkparams(data);
-    
-     t1=datevec(data.time(1));
-     t2=datevec(data.time(end));
-     fname=['buoy_data_' num2str(t1(1)) '_' num2str(t1(2)) '_' num2str(t1(3)) '-' num2str(t2(1)) '_' num2str(t2(2)) '_' num2str(t2(3)) '.mat'];
-
      
-   save(['p:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\' fname],'data','-v7.3');
+     fname = [buoy_info.name '_' buoy_info.serial '_' datestr(data.time(1),'yyyymmdd') '-' datestr(data.time(end),'yyyymmdd') '.mat'];
+     save(fullfile(buoy_info.archive_path, fname),'data','-v7.3'); 
+     
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Triaxys
 elseif strcmp(buoy_info.type,'triaxys')
     disp('No Triaxys code yet'); 
 end
-
 
 %%
     
