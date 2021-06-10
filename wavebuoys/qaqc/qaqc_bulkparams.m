@@ -8,7 +8,7 @@ function [bulkparams] = qaqc_bulkparams(bulkparams)
 
 %    User defined test criteria
 check.STD = 3; 
-check.time_window = 72; %hours for calculating mean + std
+check.time_window = 24; %hours for calculating mean + std
 check.time = bulkparams.time; 
 
 fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
@@ -29,7 +29,7 @@ end
 %    User defined test criteria - absolute difference from preceding points
 %    to denote 'flatline' 
 check.WHTOL = 0.05; 
-check.WPTOL = 0.1;
+check.WPTOL = 0.01;
 check.WDTOL = 0.5; 
 check.WSPTOL = 0.5; 
 check.TTOL = 0.01; 
@@ -52,9 +52,9 @@ end
 % QARTOD TEST 19 - LT time series bulk wave parameters max/min/acceptable
 % range
 % in.WVHGT - timeseries wave height : WVHGT
-% in.WVPD - timeseries wave period : WVPD
+% in.WVPD - timeserieswave period : WVPD
 % in.WVDIR - timeseries wave direction : WVDIR
-% in.WVSP - timeseries wave spreading : WVSP
+% in.WVSP - timeseries wave spreading : WVSP 
 
 %    User defined test criteria
 check.WVHGT = bulkparams.hs; 
@@ -87,11 +87,11 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % QARTOD TEST 20 - LT time series rate of change 
 
 %    User defined test criteria
-check.WHROC= 0.5; 
+check.WHROC= 1; 
 check.WPROC= 5; 
 check.WDROC= 20; 
 check.WSPROC= 25; 

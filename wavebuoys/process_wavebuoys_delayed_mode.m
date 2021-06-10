@@ -12,7 +12,8 @@ homepath = 'C:\Data\wavebuoy_tools\wavebuoys';
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'P:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\CSV_export\'; 
+datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0558_Tantabiddi_20201101_20210401\Tantabiddi'; 
+
 
 %path of Sofar parser script
 parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.2'; 
@@ -20,26 +21,26 @@ parser = 'parser_v1.11.2.py';
 
 %% 
 %buoy type and deployment info number and deployment info 
-buoy_info.type = 'datawell'; 
-buoy_info.name = 'Torbay'; %
-buoy_info.serial = 'Datawell-74089'; %serial number - SPOT-0170 or Datawell-74089 
-buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
-buoy_info.site_code = 'TOR01';
-buoy_info.DeployLoc = 'Torbay01';%this is IMOS site_name and station_id
-buoy_info.DeployDepth = 30; 
+buoy_info.type = 'sofar'; 
+buoy_info.name = 'SPOT-0558'; %spotter serial number, or just Datawell 
+buoy_info.version = 'Spotter-V1'; %or DWR4 for Datawell, for example
+buoy_info.site_code = 'TANT01';
+buoy_info.DeployLoc = 'Tantabiddi01';%this is IMOS site_name and station_id
+buoy_info.DeployDepth = 45; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2019,12,01,0,0,0); 
-buoy_info.tend = datenum(2021,2,13,0,0,0); 
-buoy_info.DeployID = 'TOR0102'; %deployment number at this site
+buoy_info.tstart = datenum(2020,11,1,0,0,0); 
+buoy_info.tend = datenum(2021,4,1,0,0,0); 
+buoy_info.DeployID = 'TANT0101'; %deployment number at this site
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-buoy_info.MagDec = 1.98; 
+buoy_info.MagDec = 12.86; 
+
 
 %inputs for IMOS filename structure
 buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\Processed_CF_card';
 buoy_info.facility_code = 'NTP-WAVE';
-buoy_info.data_code = 'W'; %T for temperature, W for wave
+buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
 buoy_info.file_version = 1; 
 buoy_info.product_type = 'timeseries'; 
@@ -55,7 +56,7 @@ if strcmp(buoy_info.type,'sofar')==1
     %process delayed mode (from buoy memory card)
     if strcmp(buoy_info.version, 'Spotter-V2')
         [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);
-        %test V2 data --- add sst output to 'bulkparams' for qa/qc 
+       
     else
          [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);
          bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
@@ -101,10 +102,7 @@ if strcmp(buoy_info.type,'sofar')==1
          if size(bulkparams_nc.(fields{i}),1)==tsize
              bulkparams_nc.(fields{i}) = bulkparams_nc.(fields{i})(idx,:); 
          end
-     end
-     
-    disp(['Saving data for ' buoy_info.name ' as netCDF']);             
-    
+     end         
      
     %bulkparams
     %text files for IMOS-compliant netCDF generation

@@ -101,10 +101,34 @@ fid = fopen(varsfile);
 varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
 fclose(fid);      
 
+%get rid of temperature variables and attributes if not V2 buoy
+if strcmp(buoy_info.version, 'Spotter-V1')
+    %build mask
+    tmask = [];
+    for ii = 1:size(varinfo{1},1)
+        if ~strcmp(varinfo{1}{ii},'temp') & ~strcmp(varinfo{1}{ii}, 'qc_flag_temp') & ~strcmp(varinfo{1}{ii},'qc_subflag_temp')
+            tmask = [tmask; ii]; 
+        end
+    end
+    %now remove temp    for ii = 1:size(varinfo,2)
+    for ii = 1:size(varinfo,2)
+        for jj = 1:size(tmask,1)
+            try
+                dvarinfo{ii}{jj,1} = varinfo{ii}{tmask(jj)}; 
+            catch
+                dvarinfo{ii}(jj,1) = varinfo{ii}(tmask(jj));
+            end
+        end
+    end
+    varinfo = dvarinfo; clear dvarinfo;
+end
+
 attnames = {'standard_name', 'long_name', 'units', 'calendar','axis','comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference_datum','magnetic_dec', 'positive',...
     'observation_type','coordinates','flag_values','flag_meanings','quality_control_convention'}; 
 
 attinfo = varinfo(3:end);     
+
+
 
 [m,~] = size(varinfo{1,1}); 
 for ii = 1:m    
@@ -139,7 +163,7 @@ for ii = 1:m
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,-9999);
     end
-    %
+    
     
     %add attributes
     for j = 1:length(attinfo); 
