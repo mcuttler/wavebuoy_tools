@@ -41,19 +41,19 @@ else
                 end
                 
                 if didx==1                  
-                    sub_flag(i,1) = 3; 
+                    sub_flag(i,1) = 3; %mean+/- std
                     primary_flag(i,1) = dum(didx); 
                 elseif didx==2
-                    sub_flag(i,1) = 4; 
+                    sub_flag(i,1) = 4; %flat line
                     primary_flag(i,1) = dum(didx); 
                 elseif didx==3
-                    sub_flag(i,1) = 5; 
+                    sub_flag(i,1) = 5; %range
                     primary_flag(i,1) = dum(didx); 
                 elseif didx==4
-                    sub_flag(i,1) = 6; 
+                    sub_flag(i,1) = 6; %rate of change
                     primary_flag(i,1) = dum(didx); 
                 elseif didx==5
-                    sub_flag(i,1) = 7; 
+                    sub_flag(i,1) = 7; %spike 
                     primary_flag(i,1) = dum(didx); 
                 end
             else
