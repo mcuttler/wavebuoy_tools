@@ -9,26 +9,26 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Hilarys'; 
+buoy_info.serial = 'SPOT-1028'; %spotter serial number, or just Datawell 
+buoy_info.name = 'BusseltonJetty'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
-buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
+buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
+buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'Hilarys';
-buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -31.851983; 
-buoy_info.DeployLon = 115.646567; 
+buoy_info.DeployLoc = 'BusseltonJetty';
+buoy_info.DeployDepth = 10; 
+buoy_info.DeployLat = -33.630250; 
+buoy_info.DeployLon = 115.338967; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-
 %% get historical data 
 limit = 100; 
-% modify_smart_mooring_archive; 
-[SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);  
+modify_smart_mooring_archive; 
+% [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);  
+
 clear data dum endDate fields header i idx idxt idxw j jj m n options qaqc r resp_sensor...
     resp_waves start_time startDate status tend tstart uri_sensor uri_waves bulkparams Spotter
 %% or define time period
@@ -108,8 +108,13 @@ if ~isfield(archive.SpotData,'name')
     end
 end
 
-
 %% join the two archives
+if size(SpotData.name,1)~=size(SpotData.time,1)
+    for i = 1:size(SpotData.time)
+        SpotData.name{i,1} = buoy_info.name;
+    end
+end
+
 idxw = find(SpotData.time>archive.SpotData.time(end)); 
 if isfield(SpotData,'temp_time')
     idxt = find(SpotData.temp_time>archive.SpotData.temp_time(end)); 

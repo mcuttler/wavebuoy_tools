@@ -14,10 +14,10 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-1266'; %spotter serial number, or just Datawell 
 buoy_info.name = 'Hilarys'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Hilarys';
