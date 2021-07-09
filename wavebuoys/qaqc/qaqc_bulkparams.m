@@ -8,7 +8,7 @@ function [bulkparams] = qaqc_bulkparams(bulkparams)
 
 %    User defined test criteria
 check.STD = 3; 
-check.time_window = 24; %hours for calculating mean + std
+check.time_window = 48; %hours for calculating mean + std
 check.time = bulkparams.time; 
 
 fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
@@ -33,8 +33,8 @@ check.WPTOL = 0.01;
 check.WDTOL = 0.5; 
 check.WSPTOL = 0.5; 
 check.TTOL = 0.01; 
-check.rep_fail = 144; 
-check.rep_suspect = 48; 
+check.rep_fail = 240;  
+check.rep_suspect = 144; 
 
 fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
 tol = {'WHTOL','WPTOL','WPTOL', 'WDTOL','WDTOL','WSPTOL','WSPTOL','TTOL'}; 
@@ -62,7 +62,7 @@ check.WVPD = bulkparams.tp;
 check.WVDIR = bulkparams.dp;
 check.WVSP = bulkparams.pkspr;
 
-check.MINWH = 0.25;
+check.MINWH = 0.10;
 check.MAXWH = 10;
 check.MINWP = 3; 
 check.MAXWP = 25;
@@ -91,9 +91,9 @@ end
 % QARTOD TEST 20 - LT time series rate of change 
 
 %    User defined test criteria
-check.WHROC= 1; 
-check.WPROC= 5; 
-check.WDROC= 20; 
+check.WHROC= 2; 
+check.WPROC= 10; 
+check.WDROC= 50; 
 check.WSPROC= 25; 
 check.TROC = 2; 
 
@@ -129,7 +129,7 @@ end
 
 %% assing primary and subflags
 
-fields = {'hs','tp','dp'};
+fields = {'hs','tm','dm'};
 qaqc_tests = {'15','16','19','20','spike'}; 
 
 [bulkparams.qc_flag_wave, bulkparams.qc_subflag_wave] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests); 

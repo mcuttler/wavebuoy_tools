@@ -5,3 +5,4 @@ SofarSpotter/Process_SofarSpotter_delayed_mode.asv
 *.mat
 *.mat
 wavebuoys/imos_nc/testing_nc.mat
+pybuoy/mygif.gif

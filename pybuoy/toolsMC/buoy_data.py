@@ -16,6 +16,7 @@ import netCDF4 as nc
 import numpy as np 
 import os 
 import sys
+from toolsMC import buoy_tools
 
 #%% locally archived data
 def load_buoy_text_archive(site, archive_path):
@@ -42,7 +43,56 @@ def load_buoy_text_archive(site, archive_path):
             buoydata = buoydata.append(pd.read_csv(file))
      
     return buoydata     
+#%%
+def load_buoy_mat_archive(site,filestart, fileend):
+    """
+    Parameters
+    ----------
+    site : TYPE
+        DESCRIPTION.
+    fielstart : TYPE
+        DESCRIPTION.
+    fileend : TYPE
+        DESCRIPTION.
+    filepath : TYPE
+        DESCRIPTION.
+     : TYPE
+        DESCRIPTION.
+    
+    Example:
+        filestart = r'Y:\CUTTLER_wawaves\Data\realtime_archive_backup'
+        fileend = r'mat_archive\2021'
         
+        
+    Returns
+    -------
+    data : TYPE
+        DESCRIPTION.
+
+    """
+
+    filepath = os.path.join(filestart,site,fileend)                   
+    files = os.listdir(filepath)
+    data = dict([])
+    
+    for j, file in enumerate(files):
+        f = h5py.File(os.path.join(filepath,file),'r')
+        fields = np.array(f['SpotData'])     
+        for field in fields:
+            if j==0:
+                data[field]=np.transpose(np.array(f['SpotData'][field]))
+            else:
+                data[field]=np.append(data[field],np.transpose(np.array(f['SpotData'][field])))
+            
+    #convert time to datetime
+    data['datetime'] = []
+
+    for j, val in enumerate(data['time']):
+        data['datetime'].append(buoy_tools.matlab2datetime(val))
+    data['datetime_temp']=[]
+    for j, val in enumerate(data['temp_time']):
+        data['datetime_temp'].append(buoy_tools.matlab2datetime(float(val)))     
+    return data                
 
 #%% WA DoT data
 def import_WA_DoT(datapath):

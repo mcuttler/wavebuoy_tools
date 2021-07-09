@@ -1,6 +1,6 @@
 %% check source of QAQC errors
 
-function [source] = qaqc_error_source(qc_subflag, type)
+function [source] = qaqc_error_source(data,qc_subflag, type)
 
 if strcmp(type,'bulkparams')
     qaqc_errors = {'unspecified error',
@@ -50,6 +50,7 @@ elseif strcmp(type,'temp')
         'temp_spike'}; 
 end
 
+qc_subflag = qc_subflag+1; %subflags are assigned from 0 to 36 in netCDF
 errors = unique(qc_subflag); 
 errors = errors(errors>0); %disregard good results 
 fid = figure; 
@@ -64,10 +65,51 @@ ytxt = 0.95;
 for i = 1:length(errors); 
     counts(i,1) = length(find(qc_subflag==errors(i))); 
     text(0.05, ytxt, ['Flag ' num2str(errors(i)) ': ' qaqc_errors{errors(i)} ' = ' num2str(counts(i,1))],'units','normalized','fontsize',10); 
-    ytxt = ytxt-0.025; 
+    ytxt = ytxt-0.025;     
 end
 
 source = [errors counts];
+
+%% plot timeseries figure
+fid = figure;
+ax(1) = subplot(3,1,1); 
+plot(data.time, data.hs);
+hold on; grid on;
+leg = {'r*','b*','g*','y*','c*','m*','k*','ro','bo','go','yo','co','mo','ko'}; 
+for i = 1:length(errors)
+    h(i) = plot(data.time(qc_subflag==errors(i)), data.hs(qc_subflag==errors(i)),leg{i}); 
+end
+datetick('x','dd-mmm'); 
+text(0.05, 0.95,'(a)','units','normalized'); 
+ylabel('Hs (m)'); 
+xlabel('Date'); 
+l = legend(h, qaqc_errors(errors)); 
+
+ax(2) = subplot(3,1,2); 
+plot(data.time, data.tp); 
+hold on; grid on; 
+for i = 1:length(errors)
+    h(i) = plot(data.time(qc_subflag==errors(i)), data.tp(qc_subflag==errors(i)),leg{i}); 
+end
+datetick('x','dd-mmm');
+xlabel('Date'); 
+ylabel('Tp (s)'); 
+
+
+ax(3) = subplot(3,1,3); 
+plot(data.time, data.dp); 
+hold on; grid on; 
+for i = 1:length(errors)
+    h(i) = plot(data.time(qc_subflag==errors(i)), data.dp(qc_subflag==errors(i)),leg{i}); 
+end
+datetick('x','dd-mmm');
+xlabel('Date'); 
+ylabel('Dp (deg from)'); 
+
+set(fid, 'PaperPositionMode', 'manual','PaperUnits','centimeters','units','centimeters',...
+'position',[1 1 24 18], 'PaperPosition', [0 0 24 18])
+
+
 end
 
 

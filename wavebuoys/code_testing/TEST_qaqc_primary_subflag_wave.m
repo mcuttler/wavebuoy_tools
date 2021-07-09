@@ -1,9 +1,4 @@
-%% qaqc subflag
-% This code determines the 'reason' that data received the primary qa flag
-% Only determines reason for bad or questionable data (primary flag of 3
-
-function [primary_flag, sub_flag] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests); 
-
+%% Testing QAQC primary/subflag assignment 
 
 for i = 1:size(bulkparams.time,1)
 %build variable that compiles results of all qaqc tests for each time point
@@ -48,7 +43,7 @@ for i = 1:size(bulkparams.time,1)
         dd = sum(dum,2); 
         didx = find(dd==max(dd)); 
         if length(didx)>1
-            didx = didx(end);%assigns to last test, this could probably be better 
+            didx = didx(end);
         end
         
         %double check that at least one test is 3 or 4
@@ -81,57 +76,3 @@ for i = 1:size(bulkparams.time,1)
         end
     end
 end
-end
-    
-
-%% subfunction for assigning subflag 
-function [subflag] = qaqc_assign_subflag(errors, flag_range)
-
-flag_idx = find(errors==max(errors)); 
-
-if length(flag_idx)==1 %hs, tp or dp
-    subflag = flag_range(flag_idx); 
-elseif length(flag_idx)==2
-    if flag_idx==[1 2] %hs, tp
-        subflag = flag_range(4); 
-    elseif flag_idx==[1 3] %hs, dp
-        subflag = flag_range(5); 
-    elseif flag_idx==[2 3] %tp, dp
-        subflag = flag_range(6); 
-    end
-elseif length(flag_idx)==3 %hs, tp, dp
-    subflag=flag_range(7);
-end
-
-end
-
-
-
-        
-        
-        
-        
-            
-
-        
-        
-        
-    
-      
-
-
-
-    
-            
-            
-
-
-
-
-
-    
-        
-
-
-
-

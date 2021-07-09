@@ -140,5 +140,3 @@ def plot_gps_history(site):
     plt.legend(['Jan','Feb','Mar','Apr','DeployLoc'])
     plt.title(site)
     
-            
-        
