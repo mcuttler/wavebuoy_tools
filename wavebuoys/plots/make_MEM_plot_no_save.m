@@ -6,7 +6,7 @@
     %value) which causes dp and hs to be NaN
 %%
 
-function [] = make_MEM_plot(ndirec, freq, NE, hs, tp, dp, time)
+function [] = make_MEM_plot_no_save(ndirec, freq, NE, hs, tp, dp, time)
 
         ndirec2 = [ndirec 360];
         NE_plot = [NE NE(:,1)];

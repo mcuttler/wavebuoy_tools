@@ -12,7 +12,6 @@ function [NS,NE,ndirec,ndirecA, direc] = lygre_krogstad_MC(a1,a2,b1,b2,Ein,dthet
 %Edited - M Cuttler, UWA (July 2018)
 %    -Fixed directional convention export (12 July 2018)
 %%
-
 %% L&K notation
 d1 = a1(:);
 d2 = b1(:);

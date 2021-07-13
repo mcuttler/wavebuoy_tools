@@ -39,14 +39,12 @@ end
 S = real(S);
 
 % normalize
-
 tot=sum(S,2)*dtheta;
 for ii=1:length(en) %each frequency
     Sn(ii,:)=S(ii,:)/tot(ii);
 end;
 
-% calculate energy density by multiplying the energies at each frequency
-% by the normalized directional distribution at that frequency
+% calculate energy density by the normalized directional distribution at that frequencyy by multiplying the energies at each frequency
 
 for ii = 1:length(en);
     E(ii,:) = Sn(ii,:).* en(ii);

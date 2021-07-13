@@ -28,6 +28,9 @@
 %        "QARTOD-IOOS_Manual_for_Real-Time_Quality_Control_of_Waves_v2.1.pdf"
 %        3 = suspect
 %        4 = fail 
+
+%note, QARTOD only fails when Hs outside range, modified below so that
+%fails when any parameter outside range
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Example usage
@@ -68,22 +71,22 @@ for ii=1:length(in.WVHGT)
        QCFlag(ii,1) = 4; 
        QCFlag(ii,2) = 1;
    elseif in.WVPD(ii) < in.MINWP
-       QCFlag(ii,1) = 3; 
+       QCFlag(ii,1) = 4; 
        QCFlag(ii,2) = 2;
    elseif in.WVPD(ii) > in.MAXWP
-       QCFlag(ii,1) = 3; 
+       QCFlag(ii,1) = 4; 
        QCFlag(ii,2) = 2;
    elseif in.WVDIR(ii) < 0
-       QCFlag(ii,1) = 3; 
+       QCFlag(ii,1) = 4; 
        QCFlag(ii,2) = 3;
    elseif in.WVDIR(ii) > 360
-       QCFlag(ii,1) = 3; 
+       QCFlag(ii,1) = 4; 
        QCFlag(ii,2) = 3;
    elseif in.WVSP(ii)< in.MINSV
-       QCFlag(ii,1) = 3; 
+       QCFlag(ii,1) = 4; 
        QCFlag(ii,2) = 4;
    elseif in.WVSP(ii) > in.MAXSV
-       QCFlag(ii,1) = 3; 
+       QCFlag(ii,1) = 4; 
        QCFlag(ii,2) = 4;
    else
        QCFlag(ii,1) = 1; 

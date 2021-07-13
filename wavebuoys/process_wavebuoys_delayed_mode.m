@@ -8,44 +8,42 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+homepath = 'G:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\CodeTesting\Data_for_testing_Spotter_V1'; 
+datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0558_Tantabiddi_20201101_20210401'; 
+
 
 %path of Sofar parser script
-parserpath = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.1'; 
-parser = 'parser_v1.11.1.py'; 
+parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.2'; 
+parser = 'parser_v1.11.2.py'; 
 
-
+%% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.name = 'SPOT0171'; %spotter serial number, or just Datawell 
-buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
-buoy_info.site_code = 'TEST01';
-buoy_info.DeployLoc = 'Testing01';%this is IMOS site_name and station_id
-buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -35; 
-buoy_info.DeployLon = 117; 
-buoy_info.DeployID = 'Testing0101'; %deployment number at this site
+buoy_info.name = 'SPOT-0558'; %spotter serial number, or just Datawell 
+buoy_info.version = 'Spotter-V2'; %or DWR4 for Datawell, for example
+buoy_info.site_code = 'TANT01';
+buoy_info.DeployLoc = 'Tantabiddi01';%this is IMOS site_name and station_id
+buoy_info.DeployDepth = 45; 
+buoy_info.DeployLat = nan; 
+buoy_info.DeployLon = nan; 
+buoy_info.tstart = datenum(2020,11,4,0,0,0); 
+buoy_info.tend = datenum(2021,4,2,0,0,0); 
+buoy_info.DeployID = 'TANT0101'; %deployment number at this site
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-buoy_info.MagDec = 1.98; 
+buoy_info.MagDec = 12.86; 
 
-%inputs only for Datawell folder structure
-years = 2020; 
-months = 1:8; 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'D:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
+buoy_info.archive_path = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
 buoy_info.facility_code = 'NTP-WAVE';
-buoy_info.data_code = 'W'; %T for temperature, W for wave
+buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
 buoy_info.file_version = 1; 
 buoy_info.product_type = 'timeseries'; 
-
-
 
 %% process delayed mode data
 
@@ -56,9 +54,10 @@ if strcmp(buoy_info.type,'sofar')==1
     chunk = 10; 
     
     %process delayed mode (from buoy memory card)
-    if strcmp(buoy_info.version, 'V2')
-        [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);
-        %test V2 data --- add sst output to 'bulkparams' for qa/qc 
+    if strcmp(buoy_info.version, 'Spotter-V2')
+        [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);       
+        %down sample temperature to be at same time stamp as wave data 
+        [bulkparams] = sofar_join_bulkparams_and_sst(bulkparams, sst); 
     else
          [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);
          bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
@@ -66,22 +65,21 @@ if strcmp(buoy_info.type,'sofar')==1
     
     disp('Performing QA/QC checks...'); 
     
+     %clip to time of interest
+     clear idx
+     idx = find(bulkparams.time>=buoy_info.tstart&bulkparams.time<=buoy_info.tend); 
+     tsize = size(bulkparams.time,1); 
+     fields = fieldnames(bulkparams); 
+     for i = 1:length(fields); 
+         if size(bulkparams.(fields{i}),1)==tsize
+             bulkparams.(fields{i}) = bulkparams.(fields{i})(idx,:); 
+         end
+     end       
     % double check parameter settings in '.\qaqc\qaqc_bulkparams.m' before
     % proceeding
     
-    [bulkparams] = qaqc_bulkparams(bulkparams);
+    [bulkparams] = qaqc_bulkparams(bulkparams);             
     
-    %add exception value based on qf_master
-%     fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
-%     flag = find(bulkparams.qf_master==4);   
-%     for f = 1:length(fields)
-%         if isfield(bulkparams, fields{f}); 
-%             [bulkparams_nc] = qaqc_add_exception_value(bulkparams, fields, flag);     
-%         else
-%             bulkparams_nc.(fields{f}) = ones(size(bulkparams_nc.time,1),1).*nan; 
-%         end
-%     end        
-
     
     %clean up for export
     bulkparams_nc = bulkparams; 
@@ -89,21 +87,29 @@ if strcmp(buoy_info.type,'sofar')==1
     for i = 1:length(fields); 
         if strcmp(fields{i}(end-1:end),'15') | strcmp(fields{i}(end-1:end),'16') | strcmp(fields{i}(end-1:end),'19') | strcmp(fields{i}(end-1:end),'20') | strcmp(fields{i}(end-1:end),'ke')
             bulkparams_nc = rmfield(bulkparams_nc, fields{i}); 
-        elseif strcmp(fields{i}(1:2),'te')
-            bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
-        elseif strcmp(fields{i}(end-1:end),'mp')
-            bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
-        end           
+%         elseif strcmp(fields{i}(1:2),'te')
+%             bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
+%         elseif strcmp(fields{i}(end-1:end),'mp')
+%             bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
+        end          
         
     end    
-        
-    disp(['Saving data for ' buoy_info.name ' as netCDF']);             
     
+    %quickly denan and replace with fill values
+    fields = fieldnames(bulkparams_nc); 
+    for i = 1:length(fields)
+        if strcmp(fields{i},'qc_flag_wave') | strcmp(fields{i},'qc_subflag_wave') | strcmp(fields{i},'qc_flag_temp') | strcmp(fields{i},'qc_subflag_wave')
+            bulkparams_nc.(fields{i})(isnan(bulkparams_nc.(fields{i}))) = -127; 
+        else
+            bulkparams_nc.(fields{i})(isnan(bulkparams_nc.(fields{i}))) = -9999;
+        end
+    end          
      
     %bulkparams
     %text files for IMOS-compliant netCDF generation
-    globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt';     
-    varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\bulk_wave_parameters_mapping.csv';        
+    globfile = [homepath '\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt']; 
+    varsfile = [homepath '\imos_nc\metadata\bulk_wave_parameters_mapping.csv']; 
+    
     bulkparams_to_IMOS_nc(bulkparams_nc, buoy_info.archive_path, buoy_info, globfile, varsfile); 
     
     %displacements
@@ -126,19 +132,79 @@ if strcmp(buoy_info.type,'sofar')==1
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
-    for yy = 1:length(years); 
-        for mm = 1:length(months);             
-            
-            [bulkparams, displacements, locations, spec, sst] = process_Datawell_delayed_mode();
-            
-        end
-    end    
+   %create blank array for output
+    dw_vars = {'serialID','E','theta','s','m2','n2','time','a1','a2','b1','b2',...
+        'frequency','ndirec','spec2D','hsig','tp','dp','dpspr', 'curr_mag','curr_dir',...
+        'curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std',...
+        'gps_time','gps_pos','disp_tstart','disp_time','disp_h','disp_n','disp_w'}; 
+    for i = 1:length(dw_vars)
+        data.(dw_vars{i}) = []; 
+    end
+    
+     cnt=1;
+     %loop through directory of files output from CF card (need datawell
+     %lib to convert to CSV)
+     files=dir((fullfile(datapath,'*-20.csv'))); %get all the field to process 20 file is 1D spectra
+     for kk=2:length(files) %file 1 is bad 1970 file
+         disp(['File ' num2str(kk) ' out of ' num2str(length(files))]); 
+         fname=files(kk).name(1:10);
+         
+         input.file20 = [datapath fname  '-20.csv'];
+         input.file21 =[datapath fname  '-21.csv'];
+         input.file25 =[datapath fname  '-25.csv'];
+         input.file28 = [datapath fname  '-28.csv'];
+         input.file80 =[datapath fname  '-80.csv'];
+         input.file82 =[datapath fname  '-82.csv'];
+         input.file23 = [datapath fname '-23.csv'];
+         input.filed = [datapath fname '-displacement.csv'];
+         
+         %load and organize data for each file containing 4 days of data
+         [temp] = Process_Datawell_delayed_mode(buoy_info, data, input.file20, input.file21, input.file25, input.file28, input.file80, input.file82, input.file23, input.filed);   
+         clear input
+         
+         %now append
+         if cnt==1
+             data=temp;
+             data.hs=data.hsig;
+             data = rmfield(data,'hsig');
+             data.temp=data.surf_temp;
+             data = rmfield(data,'surf_temp');
+             data.pkspr = data.dpspr;
+             data = rmfield(data,'dpspr'); 
+             
+             cnt=cnt+1;
+             clear temp
+         else
+             fields = fieldnames(data); 
+             for jj = 1:length(fields)
+                 if strcmp(fields{jj}, 'spec2D')
+                     data.spec2D = cat(3,data.spec2D,temp.spec2D);
+                 elseif strcmp(fields{jj},'hs')
+                     data.hs = [data.hs; temp.hsig];
+                 elseif strcmp(fields{jj},'temp')
+                     data.temp = [data.temp; temp.surf_temp]; 
+                 elseif strcmp(fields{jj},'pkspr')
+                     data.pkspr = [data.pkspr; temp.dpspr]; 
+                 else                     
+                     data.(fields{jj}) = [data.(fields{jj}); temp.(fields{jj})];
+                 end
+             end                  
+             clear temp
+             cnt=cnt+1;
+         end         
+     end
+     %run delayed mode QAQC
+     disp('Performing QA/QC checks...'); 
+     [data] = qaqc_bulkparams(data);
+     
+     fname = [buoy_info.name '_' buoy_info.serial '_' datestr(data.time(1),'yyyymmdd') '-' datestr(data.time(end),'yyyymmdd') '.mat'];
+     save(fullfile(buoy_info.archive_path, fname),'data','-v7.3'); 
+     
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Triaxys
 elseif strcmp(buoy_info.type,'triaxys')
     disp('No Triaxys code yet'); 
 end
-
 
 %%
     

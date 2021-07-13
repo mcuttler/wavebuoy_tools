@@ -51,10 +51,11 @@ fidx = 1:chunk:size(flist,1);
 bulkparams = struct('time',[], 'hs',[],'tm',[]','tp',[],'dm',[],'dp',[],'meanspr',[],'pkspr',[]); 
 locations = struct('time',[],'lat',[],'lon',[]); 
 displacements = struct('time',[], 'x',[],'y',[],'z',[]); 
-spec = struct('time',[],'a1',[],'b1',[],'a2',[],'b2',[],'Sxx',[],'Syy',[],'Szz',[]); 
+spec = struct('time',[],'freq',[],'a1',[],'b1',[],'a2',[],'b2',[],'Sxx',[],'Syy',[],'Szz',[]); 
 sst = struct('time',[],'sst',[]); 
 %%
 for j = 1:size(fidx,2)
+    %%
     if j==size(fidx,2)
         dlist = flist(fidx(j):end)'; 
     else
@@ -137,13 +138,16 @@ for j = 1:size(fidx,2)
                                 displacements.z = [displacements.z; data(:,10)]; 
                             end
                         else
-                            dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'],',',1);
-                            data = dumdata.data; 
-                            if strcmp(filenames{kk},'a1');                 
-                                spec.freq = str2double(dumdata.textdata(9:end)); 
-                                spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                            dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'],',',1);                               
+                            if strcmp(filenames{kk},'a1')                   
+                                spec.freq = [spec.freq; str2double(dumdata.textdata(9:end))]; 
+                                spec.time = [spec.time; datenum(dumdata.data(:,1:6))+(dumdata.data(:,7)/(8.64*10^7))]; 
                             end
-                            eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; data(:,9:end)];']);
+                            
+                            if size(dumdata.data,2)~=size(spec.freq,2)
+                                dumdata.data(:,end+1:size(spec.freq,2)+8)=nan; 
+                            end
+                            spec.(filenames{kk}) = [spec.(filenames{kk}); dumdata.data(:,9:end)];                           
                         end
                     end
                 end                
@@ -151,7 +155,7 @@ for j = 1:size(fidx,2)
             end
         end
     else        
-        if exist([datapath '\tmp\sst.csv']);
+        if exist([datapath '\tmp\sst.csv'])
             filenames = {'bulkparameters','location','displacement','sst', 'a1','a2','b1','b2','Sxx','Syy','Szz'}; 
         else
             filenames = {'bulkparameters','location','displacement', 'a1','a2','b1','b2','Sxx','Syy','Szz'};
@@ -186,14 +190,16 @@ for j = 1:size(fidx,2)
                     end
                 else
                     dumdata = importdata([filenames{kk} '.csv'],',',1);
-                    data = dumdata.data; 
+
                     if strcmp(filenames{kk},'a1')                   
-                        spec.freq = str2double(dumdata.textdata(9:end)); 
-                        spec.time = [spec.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                        spec.freq = [spec.freq; str2double(dumdata.textdata(9:end))]; 
+                        spec.time = [spec.time; datenum(dumdata.data(:,1:6))+(dumdata.data(:,7)/(8.64*10^7))]; 
                     end
                     
-                    eval(['spec.' filenames{kk} '= [spec.' filenames{kk} '; dumdata.data(:,9:end)];']);
-                    
+                    if size(dumdata.data,2)~=size(spec.freq,2)
+                        dumdata.data(:,end+1:size(spec.freq,2)+8)=nan; 
+                    end                          
+                    spec.(filenames{kk}) = [spec.(filenames{kk}); dumdata.data(:,9:end)];                                        
                 end
             end
             
@@ -201,7 +207,7 @@ for j = 1:size(fidx,2)
     end
     disp(['Finished chunk ' num2str(j) ' out of ' num2str(size(fidx,2))]);
     clc
-    
+%%    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %clean up tmp directory for next chunk
     delete([datapath '\tmp\*.csv']);     
