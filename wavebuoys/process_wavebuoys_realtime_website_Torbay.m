@@ -14,9 +14,9 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'datawell'; 
-buoy_info.serial = 'Datawell-74103';  
+buoy_info.serial = 'Datawell-74089';  
 buoy_info.name = 'Torbay'; 
-buoy_info.datawell_name = 'Dev_Site2'; 
+buoy_info.datawell_name = 'Dev_Site'; 
 buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
@@ -113,7 +113,7 @@ if strcmp(buoy_info.type,'sofar')==1
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
     %check buoy position and send email if out of search radius
-    [warning] = buoy_search_radius_and_alert(buoy_info);     
+%     [warning] = buoy_search_radius_and_alert(buoy_info);     
     
     data.time = datenum(now);   
     data.tnow = datevec(data.time); 

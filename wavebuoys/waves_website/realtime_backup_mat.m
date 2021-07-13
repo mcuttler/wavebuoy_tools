@@ -58,6 +58,9 @@ else
         end
         clear idx idx_temp
         backup_path = [buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(ddv(i,1))];
+        if isfield(buoy_info,'backup_path2')
+            backup_path2 = [buoy_info.backup_path2 '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1))]; 
+        end
         filename = [buoy_info.name '_' num2str(ddv(i,1)) num2str(ddv(i,2),'%02d') '.mat']; 
          if strcmp(buoy_info.type,'sofar')
              SpotData = buoy_data; 

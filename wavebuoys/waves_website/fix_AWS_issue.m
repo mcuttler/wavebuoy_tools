@@ -9,21 +9,22 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1028'; %spotter serial number, or just Datawell 
-buoy_info.name = 'BusseltonJetty'; 
+buoy_info.serial = 'SPOT-1034'; %spotter serial number, or just Datawell 
+buoy_info.name = 'ClerkeReef'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'BusseltonJetty';
-buoy_info.DeployDepth = 10; 
-buoy_info.DeployLat = -33.630250; 
-buoy_info.DeployLon = 115.338967; 
+buoy_info.DeployLoc = 'ClerkeReef';
+buoy_info.DeployDepth = 26; 
+buoy_info.DeployLat = -17.30585; 
+buoy_info.DeployLon = 119.31218; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+
 %% get historical data 
 limit = 100; 
 modify_smart_mooring_archive; 
