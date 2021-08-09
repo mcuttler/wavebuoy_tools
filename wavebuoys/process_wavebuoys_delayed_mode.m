@@ -12,11 +12,11 @@ homepath = 'G:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys';
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0558_Tantabiddi_20201101_20210401'; 
+datapath = 'Y:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\CodeTesting\Data_for_testing_Spotter_V1'; 
 
 
 %path of Sofar parser script
-parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.2'; 
+parserpath = 'F:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.2'; 
 parser = 'parser_v1.11.2.py'; 
 
 %% 
@@ -38,7 +38,7 @@ buoy_info.MagDec = 12.86;
 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
+buoy_info.archive_path = 'F:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
 buoy_info.facility_code = 'NTP-WAVE';
 buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
