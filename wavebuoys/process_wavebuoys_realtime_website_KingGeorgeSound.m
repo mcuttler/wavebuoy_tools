@@ -30,6 +30,9 @@ buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.backup_path2 = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\realtime_archive_backup';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+%data for search radius and alert
+buoy_info.time_cutoff = 3; %hours
+buoy_info.search_rad = 190; %meters for watch circle radius 
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
@@ -52,8 +55,8 @@ if strcmp(buoy_info.type,'sofar')==1
             [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);     
             flag = 1; 
         end                    
-    end    
-    
+    end   
+
     if flag == 1
         for i = 1:size(SpotData.time,1)
             SpotData.name{i,1} = buoy_info.name; 
@@ -62,7 +65,8 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-        
+        %warning email
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);  
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        

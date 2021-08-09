@@ -3,10 +3,11 @@
 function [] = update_website_buoy_info(buoy_info, data); 
 
 %read in existing data
-% fid = fopen([buoy_info.archive_path '\buoys.csv'],'r'); 
-% fmt = '%s%s%s%s%s%s%s%s%s%s'; 
-% web_data = textscan(fid, fmt, 'Delimiter',','); 
-% fclose(fid);     
+fid = fopen([buoy_info.archive_path '\buoys.csv'],'r'); 
+fmt = ['%d%s%s%s%0.4f%0.4f%d%d%s%d%d%d%d%d%s%s%s']; 
+web_data = textscan(fid, fmt, 'Delimiter',','); 
+fclose(fid); 
+%
 in_data = importdata([buoy_info.archive_path '\buoys.csv']); 
 dcol = size(in_data.textdata,2)-size(in_data.data,2); 
 for i = 1:size(in_data.textdata,1)

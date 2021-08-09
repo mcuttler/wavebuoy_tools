@@ -8,24 +8,41 @@ function [data] = load_archived_data(archive_path, buoy_info, SpotData);
 data  = []; 
 dv = datevec(SpotData.time); 
 ddv = unique(dv(:,1:2),'rows'); 
-
+%if one month 
 if size(ddv,1)==1
     monthly_file = [archive_path '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1)) '\' buoy_info.name '_' num2str(ddv(1,1)) num2str(ddv(1,2),'%02d') '.mat'];
     if exist(monthly_file)
-        dum = load(monthly_file);
-        data = dum.SpotData; 
+        try
+            dum = load(monthly_file);
+        catch
+            monthly_file = [buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1)) '\' buoy_info.name '_' num2str(ddv(1,1)) num2str(ddv(1,2),'%02d') '.mat'];
+            dum = load(monthly_file);
+        end
+        data = dum.SpotData;
     else
-        %check if new month, then load previous data
+        %if new month, then load previous data
          monthly_file = [archive_path '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1)) '\' buoy_info.name '_' num2str(ddv(1,1)) num2str(ddv(1,2)-1,'%02d') '.mat'];
          if exist(monthly_file)
-             dum = load(monthly_file);
+             try                
+                 dum = load(monthly_file);
+             catch
+                 monthly_file = [buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1)) '\' buoy_info.name '_' num2str(ddv(1,1)) num2str(ddv(1,2)-1,'%02d') '.mat'];
+                 dum = load(monthly_file); 
+             end
              data = dum.SpotData; 
          end         
     end
+%if two months, load the first month as second month won't exist  
 else
     monthly_file = [archive_path '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1)) '\' buoy_info.name '_' num2str(ddv(1,1)) num2str(ddv(1,2),'%02d') '.mat'];
     if exist(monthly_file)
-        dum = load(monthly_file);
+        try
+            dum = load(monthly_file);
+        catch
+            monthly_file = [buoy_info.backup_path '\' buoy_info.name '\mat_archive\' num2str(ddv(1,1)) '\' buoy_info.name '_' num2str(ddv(1,1)) num2str(ddv(1,2),'%02d') '.mat'];
+            dum = load(monthly_file); 
+        end
+        
         data = dum.SpotData; 
     end         
 

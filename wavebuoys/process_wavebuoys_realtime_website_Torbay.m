@@ -22,8 +22,8 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Torbay';
 buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -35.069717; 
-buoy_info.DeployLon = 117.772767; 
+buoy_info.DeployLat = -35.06858; 
+buoy_info.DeployLon = 117.76905; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
@@ -113,7 +113,7 @@ if strcmp(buoy_info.type,'sofar')==1
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
     %check buoy position and send email if out of search radius
-%     [warning] = buoy_search_radius_and_alert(buoy_info);     
+    [warning] = buoy_search_radius_and_alert(buoy_info);     
     
     data.time = datenum(now);   
     data.tnow = datevec(data.time); 
