@@ -1,28 +1,37 @@
 %% update master buoy info spreadsheet for wawaves.org website
+%This code will pull in the master CSV that contains metadata for waves
+%website and update various information
 
-function [] = update_website_buoy_info(buoy_info, data); 
+%required input: 
+%buoy info structure
+%data containing new data
 
-%read in existing data
+%M Cuttler (UWA, 2021)
+
+%%
+function [] = update_website_buoy_info(buoy_info, data)
+
+%read in existing data - read everything as strings
 fid = fopen([buoy_info.archive_path '\buoys.csv'],'r'); 
-fmt = ['%d%s%s%s%0.4f%0.4f%d%d%s%d%d%d%d%d%s%s%s']; 
-web_data = textscan(fid, fmt, 'Delimiter',','); 
+fmt = ['%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s']; 
+in_data = textscan(fid, fmt, 'Delimiter',','); 
 fclose(fid); 
-%
-in_data = importdata([buoy_info.archive_path '\buoys.csv']); 
-dcol = size(in_data.textdata,2)-size(in_data.data,2); 
-for i = 1:size(in_data.textdata,1)
-    for j = 1:size(in_data.textdata,2)
-        if isempty(in_data.textdata{i,j})
-            web_data{i,j} = num2str(in_data.data(i-1,j-dcol)); 
-            write_idx(i,j) = 1; 
-        else
-            web_data{i,j} = in_data.textdata{i,j}; 
-            write_idx(i,j) = 0; 
-        end
-    end
-end            
 
-%find column for 'last update', label, breadcrumb, lat, lon
+%extract text data 
+for i = 1:size(in_data,2)
+    web_data(:,i) = in_data{1,i}; 
+end
+
+%create 'write_idx' which defines which rows/columsn are writable with
+%updated data 
+dcol = size(web_data,2); 
+drow = size(web_data,1); 
+write_cols = [1 5 6 7 8 10 11 12 13 14]; 
+write_idx  = zeros(drow,dcol); 
+write_idx(2:end,write_cols) = 1; 
+     
+
+%find column for 'last update', label, drifting, lat, lon
 for i = 1:size(web_data,2)
     if strcmp(web_data{1,i},'last_updated')
         last_update = i; 
@@ -92,7 +101,7 @@ for i = 1:size(web_data,2)
     end
 end
 
-fid = fopen([buoy_info.archive_path '\buoys.csv'],'w'); 
+fid = fopen([buoy_info.archive_path '\buoys_test.csv'],'w'); 
 
 for i = 1:size(web_data,1)
     if i == 1
