@@ -65,7 +65,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-          [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
@@ -181,7 +181,7 @@ elseif strcmp(buoy_info.type,'triaxys')
 end
 
 %%
-quit
+% quit
 
 
 
