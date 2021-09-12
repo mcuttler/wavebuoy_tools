@@ -29,7 +29,7 @@ disp(status);
 if isfield(resp.Body.Data.data,'waves')
     for j = 1:size(resp.Body.Data.data.waves)
         Spotter.serialID{j,1} = buoy_info.serial; 
-         Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
         Spotter.hsig(j,1) = resp.Body.Data.data.waves(j).significantWaveHeight;        
         Spotter.tp(j,1) = resp.Body.Data.data.waves(j).peakPeriod;
         Spotter.tm(j,1) = resp.Body.Data.data.waves(j).meanPeriod;
@@ -63,11 +63,20 @@ end
 
 %check for wind data 
 if isfield(resp.Body.Data.data,'wind')
-    for j = 1:size(resp.Body.Data.data.wind)
-        Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;
-        Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;
-        Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
-        Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(j).seasurfaceId;
+    if isempty(resp.Body.Data.data.wind)
+        for j = 1:size(resp.Body.Data.data.waves)
+            Spotter.wind_speed(j,1) = nan;
+            Spotter.wind_dir(j,1) = nan;
+            Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+            Spotter.wind_seasurfaceId(j,1) = nan;
+        end
+    else
+        for j = 1:size(resp.Body.Data.data.wind)
+            Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;    
+            Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;
+            Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+            Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(j).seasurfaceId;
+        end
     end
 end
 
