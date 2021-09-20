@@ -12,7 +12,7 @@ homepath = 'G:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys';
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'Y:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\CodeTesting\Data_for_testing_Spotter_V1'; 
+datapath = 'F:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0558_Tantabiddi_20201101_20210401'; 
 
 
 %path of Sofar parser script
