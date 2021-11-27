@@ -39,7 +39,7 @@ for ii = 1:length(num)
             if length(tidx1)>1
                 tidx1 = tidx1(1); 
             end            
-            max_diff = 15/(60*24); 
+            max_diff = 20/(60*24); 
             if abs(data.temp_time(tidx1)-data.time(num(ii))) < max_diff
                 tidx = tidx1;
             else

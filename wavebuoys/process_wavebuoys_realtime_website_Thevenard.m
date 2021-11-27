@@ -76,6 +76,18 @@ if strcmp(buoy_info.type,'sofar')==1
             
             %check that it's new data
             if SpotData.time(1)>archive_data.time(end)
+                %if smart mooring, only keep new temp and wave data
+                idx_w = find(SpotData.time>archive_data.time(end)); 
+                idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
+                ff = fieldnames(SpotData); 
+                for f = 1:length(ff)
+                    if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
+                    else
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:); 
+                    end
+                end
+                clear ff idx_w idx_t f
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
                 

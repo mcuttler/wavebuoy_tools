@@ -22,14 +22,16 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Dampier';
 buoy_info.DeployDepth = 25; 
-buoy_info.DeployLat = -20.478150; 
-buoy_info.DeployLon = 116.517100; 
+buoy_info.DeployLat = -20.478750; 
+buoy_info.DeployLon = 116.516900; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-
+%data for search radius and alert
+buoy_info.time_cutoff = 3; %hours
+buoy_info.search_rad = 190; %meters for watch circle radius 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
@@ -39,7 +41,7 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
     if strcmp(buoy_info.version,'smart_mooring')
-        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
+        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time       
         [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
@@ -61,9 +63,11 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-        
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
+        %Matt alters 2021-11-18
+        
         if all(check)~=0        
             [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
             

@@ -23,12 +23,12 @@ status = resp_waves.StatusCode;
 disp([status]); 
 
 
-tstart = datestr(datenum(resp_waves.Body.Data.data.waves(1).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,4,0,0),30); 
-tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
-startDate = [tstart 'Z']; 
-endDate = [tend 'Z']; 
+% tstart = datestr(datenum(resp_waves.Body.Data.data.waves(1).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,4,0,0),30); 
+% tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
+% startDate = [tstart 'Z']; 
+% endDate = [tend 'Z']; 
 
-uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]); 
+uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDatewaves '&endDate=' endDatewaves]); 
 resp_sensor = send(r,uri_sensor);
 status = resp_sensor.StatusCode;
 disp([status]); 
@@ -172,12 +172,12 @@ end
 
 %% check that mooring data has correc time stamps to continue
 
-if Spotter.time(1)-Spotter.temp_time(end)>0
-    flag = 0; 
-else
-    flag = 1;
-end
-
+% if Spotter.time(1)-Spotter.temp_time(end)>0
+%     flag = 0; 
+% else
+%     flag = 1;
+% end
+flag = 1; 
 end
 
 

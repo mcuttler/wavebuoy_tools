@@ -11,6 +11,7 @@
 %%
 function [Spotter,flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit);
 
+%re-code so that it just grabs the 'limit' for waves, and the last 1
 import matlab.net.*
 import matlab.net.http.*
 header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
@@ -23,7 +24,7 @@ status = resp_waves.StatusCode;
 disp([status]); 
 
 
-tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,4,0,0),30); 
+tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,12,0,0),30); 
 tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
@@ -171,11 +172,12 @@ end
 
 %% check that mooring data has correc time stamps to continue
 
-if Spotter.time(1)-Spotter.temp_time(end)>0
-    flag = 0; 
-else
-    flag = 1;
-end
+% if Spotter.time(1)-Spotter.temp_time(end)>0
+%     flag = 0; 
+% else
+%     flag = 1;
+% end
+flag = 1; 
 
 end
 
