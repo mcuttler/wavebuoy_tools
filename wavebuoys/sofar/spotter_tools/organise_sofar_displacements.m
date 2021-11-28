@@ -1,6 +1,7 @@
 %% Organise Sofar FLT from specific buoys
 
-% Read in raw FLT files and then organise into hourly displacements
+% Use 'process_SofarSpotter_delayed_mode to get displacements, then
+% organise into hourly blocks 
 
 %MC - Novemeber 2021
 
@@ -8,6 +9,10 @@
 clear; clc; 
 % lcoation of all 'raw' delayed mode data for Spotters
 datapath = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\RAW_delayed_mode'; 
+
+%sofar parser 
+parserpath = 'X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\SofarParser\parser_v1.12.0'; 
+parser = 'parser_v1.12.0.py'; 
 
 % specific folders for buoys to process, uncomment for each buoy - could
 % process all together, but easier for now to do one at a time
@@ -25,15 +30,14 @@ spotdata = {'SPOT0171_TorbayEast_20200319_to_20200529';'SPOT0171_TorbayEast_2021
 % spotname = 'Tantabiddi'; 
 % spotdata = {'SPOT0558_Tantabiddi_20201101_20210401'}; 
 
-%% get FLT data 
+%% get displacement data 
 
 for k = 1:length(spotdata)
     clc; 
     sofarpath = fullfile(datapath,spotdata{k},'Raw'); 
-    %takes path to file and utcoffset - change for VIC, but don't account
-    %for daylight savings - ddisp will have 'timelocal' and 'timeutc' in
-    %structure 
-    [ddisp] = process_sofar_FLT(sofarpath, 8); 
+    
+    [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(sofarpath, parserpath, parser, 10);
+    
     
     %save to dout
     if k == 1

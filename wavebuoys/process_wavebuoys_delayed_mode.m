@@ -8,7 +8,7 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'G:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+homepath = 'C:\Data\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
