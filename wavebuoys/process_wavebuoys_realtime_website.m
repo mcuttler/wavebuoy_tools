@@ -9,16 +9,16 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-buoycodes = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+buoycodes = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0938'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-1040'; %spotter serial number, or just Datawell 
 buoy_info.name = 'SharkBay'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %or DWR4 for Datawell, for example
-buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
+buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'CoralBay';
 buoy_info.DeployDepth = 30; 
