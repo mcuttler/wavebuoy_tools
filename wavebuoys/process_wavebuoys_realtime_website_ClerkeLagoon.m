@@ -82,10 +82,10 @@ if strcmp(buoy_info.type,'sofar')==1
                 end
             end                
             %check that it's new data
-            if SpotData.time(1)>archive_data.time(end)
+            idx_w = find(SpotData.time>archive_data.time(end)); 
+            idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
+            if SpotData.time(1)>archive_data.time(end)&size(idx_t,1)>6
                 %if smart mooring, only keep new temp and wave data
-                idx_w = find(SpotData.time>archive_data.time(end)); 
-                idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
                 ff = fieldnames(SpotData); 
                 for f = 1:length(ff)
                     if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
@@ -111,6 +111,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 %code to update the buoy info master file for website to read
                 update_website_buoy_info(buoy_info, data); 
             end
+            clear idx_t idx_w
         else
             SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
             if isfield(SpotData,'temp_time')
