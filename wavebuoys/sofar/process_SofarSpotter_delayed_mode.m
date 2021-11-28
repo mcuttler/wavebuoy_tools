@@ -30,7 +30,7 @@
 %%
 
 function [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk); 
-
+homedir = cd; 
 dum = dir(datapath); 
 %remove initial entries as filler
 dum = dum(3:end); 
@@ -92,7 +92,7 @@ for j = 1:size(fidx,2)
     %apparently Matlab will add a folder the path that causes errors when
     %running external executables from Matlab. To fix this, remove the
     %folder that it adds     
-    system(['set path=%path:C:\Program Files\MATLAB\R2018b\bin\win64;=% & python ' parser]);   
+    system(['set path=%path:C:\Program Files\MATLAB\R2017b\bin\win64;=% & C:\ProgramData\Anaconda3\python ' parser]);   
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %append data from parser to single output file 
@@ -268,6 +268,6 @@ for i = 1:size(bulkparams.time,1)
 end
 end
 
-
+cd(homedir); 
 end
 
