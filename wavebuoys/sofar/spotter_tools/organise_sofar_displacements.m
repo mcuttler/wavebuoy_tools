@@ -41,8 +41,7 @@ clc;
 
 for s = 1:length(spotname)
     disp(['Getting data for ' spotname{s}]); 
-    for k = 1:size(spotdata,2)
-        clc; 
+    for k = 1:size(spotdata,2)   
         sofarpath = fullfile(datapath,spotdata{s,k},'Raw'); 
         
         %     [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(sofarpath, parserpath, parser, 10);
@@ -89,6 +88,7 @@ for s = 1:length(spotname)
         dbuoy.x_hourly(j,1:length(idx)) = dbuoy.x(idx)'; 
         dbuoy.y_hourly(j,1:length(idx)) = dbuoy.y(idx)'; 
         dbuoy.z_hourly(j,1:length(idx)) = dbuoy.z(idx)';
+        clear idx 
     end
     
     eval([spotname{s} '=dbuoy;']);
@@ -99,7 +99,9 @@ for s = 1:length(spotname)
     savename = [spotname{s} '_displacements.mat']; 
     savefile = fullfile(outpath,savename); 
     
-    eval(['save(' savefile '),' spotname{s} ', -v7.3']); 
+    save(savefile, strcat('', spotname{s},''),'-v7.3'); 
+     
+
 end
 
 
