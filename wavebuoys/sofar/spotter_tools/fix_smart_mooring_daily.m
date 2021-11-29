@@ -32,7 +32,7 @@ for d = 1:size(dd,1)
                 end
             end                
             %check that it's new data
-            if SpotData.time(1)>archive_data.time(end)
+%             if SpotData.time(1)>archive_data.time(end)
                 %if smart mooring, only keep new temp and wave data
                 idx_w = find(SpotData.time>archive_data.time(end)); 
                 idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
@@ -49,18 +49,18 @@ for d = 1:size(dd,1)
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                        
 
                 %save data to different formats        
-                realtime_archive_mat(buoy_info, data);
+%                 realtime_archive_mat(buoy_info, data);
 %                 realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
                 %output MEM and SST plots 
-                if strcmp(buoy_info.DataType,'spectral')        
-                    [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-                    make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
-                end
+%                 if strcmp(buoy_info.DataType,'spectral')        
+%                     [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
+%                     make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
+%                 end
                 
                 %code to update the buoy info master file for website to read
-%                 update_website_buoy_info(buoy_info, data); 
-            end
+                update_website_buoy_info(buoy_info, data); 
+%             end
         else
             SpotData.qf_waves = ones(size(SpotData.time,1),1).*1;
             if isfield(SpotData,'temp_time')
