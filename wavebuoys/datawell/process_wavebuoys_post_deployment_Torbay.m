@@ -30,8 +30,8 @@ buoy_info.DeployLon = 117.772767;
 buoy_info.UpdateTime =  0.5; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 %folder where data to be processed is
-buoy_info.data_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\CSV_export\';
-buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\';
+buoy_info.data_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_Oct2019_Download\CSV_export\';
+buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_Oct2019_Download\';
 
 %% process realtime mode data
 %create blank array
@@ -49,7 +49,7 @@ buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_Wave
  cnt=1;
 
 files=dir((fullfile(buoy_info.data_path,'*-20.csv'))); %get all the field to process 20 file is 1D spectra
-for kk=2:length(files) %file 1 is bad 1970 file
+for kk=4:length(files) %file 1 is bad 1970 file
         fname=files(kk).name(1:10);
     
     input.file20 = [buoy_info.data_path fname  '-20.csv'];
@@ -106,7 +106,7 @@ for kk=2:length(files) %file 1 is bad 1970 file
          data.gps_time = [data.gps_time;  temp.gps_time];
          data.gps_pos = [data.gps_pos ;  temp.gps_pos];   
          
-         data.disp_tstart = [data.disp_tstart; temp.disp_tstart]; 
+         %data.disp_tstart = [data.disp_tstart; temp.disp_tstart]; 
          data.disp_time = [data.disp_time; temp.disp_time]; 
          data.disp_h = [data.disp_h; temp.disp_h]; 
          data.disp_n = [data.disp_n; temp.disp_n]; 
