@@ -39,9 +39,15 @@ spotdata{4,1} = 'SPOT0558_Tantabiddi_20201101_20210401';
 %% get displacement data 
 clc;
 
-for s = 1:length(spotname)
+for s = 2:length(spotname)
     disp(['Getting data for ' spotname{s}]); 
-    for k = 1:size(spotdata,2)   
+    if s == 1 | s == 2
+        kk = 3;
+    else
+        kk = 1; 
+    end
+    
+    for k = 1:kk  
         sofarpath = fullfile(datapath,spotdata{s,k},'Raw'); 
         
         %     [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(sofarpath, parserpath, parser, 10);
@@ -59,7 +65,7 @@ for s = 1:length(spotname)
         end
         
         %rename to buoy name if last buoy folder
-        if k == size(spotdata,2)
+        if k == kk
             eval([spotname{s} '=dout;']); 
         end
         clear displacements
