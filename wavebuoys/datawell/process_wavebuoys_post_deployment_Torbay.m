@@ -49,7 +49,7 @@ buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_Wave
  cnt=1;
 
 files=dir((fullfile(buoy_info.data_path,'*-20.csv'))); %get all the field to process 20 file is 1D spectra
-for kk=4:length(files) %file 1 is bad 1970 file
+for kk=10:length(files) %file 1 is bad 1970 file
         fname=files(kk).name(1:10);
     
     input.file20 = [buoy_info.data_path fname  '-20.csv'];
