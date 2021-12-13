@@ -84,7 +84,7 @@ if strcmp(buoy_info.type,'sofar')==1
             %check that it's new data
             idx_w = find(SpotData.time>archive_data.time(end)); 
             idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
-            if SpotData.time(1)>archive_data.time(end)&size(idx_t,1)>6
+            if SpotData.time(1)>archive_data.time(end)&SpotData.temp_time(end)>SpotData.time(end)
                 %if smart mooring, only keep new temp and wave data
                 ff = fieldnames(SpotData); 
                 for f = 1:length(ff)
