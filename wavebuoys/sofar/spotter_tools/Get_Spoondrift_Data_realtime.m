@@ -95,6 +95,11 @@ if m~=n
                 for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = nan;
                 end
+           elseif length(dum)>1
+               data.serialID{j,1} = buoy_info.serial; 
+               for jj = 1:length(fields)
+                   data.(fields{jj})(j,1) = nanmean(Spotter.(fields{jj})(dum,1)); 
+               end
            else
                data.serialID{j,1} = buoy_info.serial;                 
                for jj = 1:length(fields)
