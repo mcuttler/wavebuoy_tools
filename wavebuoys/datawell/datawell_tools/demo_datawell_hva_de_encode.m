@@ -4,11 +4,15 @@
 b = 457;
 milli_b = b/1000;
 
-i = [-2044 -1 0 1 2044]
+hexstring = 'eb82e6e1cdd22b7de3';
+
+% i = [-2044 -1 0 1 2044]
+
+i = [hex2dec(hexstring(1:3)), hex2dec(hexstring(4:6)),hex2dec(hexstring(7:9)),hex2dec(hexstring(10:12)),hex2dec(hexstring(13:15)),hex2dec(hexstring(15:18))]
 
 displacement = milli_b * sinh(i./b) % decode
 
-ii = b*asinh(displacement/milli_b)  % encode
+% ii = b*asinh(displacement/milli_b)  % encode
 
 %%
 b = 457;
