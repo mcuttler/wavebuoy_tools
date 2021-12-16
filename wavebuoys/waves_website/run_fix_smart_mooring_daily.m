@@ -30,8 +30,8 @@ buoy_info.time_cutoff = 6; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
 
 
-tstart = datenum(2021,12,12);
-tend = datenum(2021,12,13); 
+tstart = datenum(2021,12,1);
+tend = datenum(2021,12,14); 
 
 fix_smart_mooring_daily(buoy_info, tstart, tend);
 %% 

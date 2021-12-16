@@ -172,12 +172,12 @@ end
 
 %% check that mooring data has correc time stamps to continue
 
-% if Spotter.time(1)-Spotter.temp_time(end)>0
-%     flag = 0; 
-% else
-%     flag = 1;
-% end
-flag = 1; 
+if Spotter.temp_time(end)>Spotter.time(end)
+    flag = 1; 
+else
+    flag = 0;
+end
+% flag = 1; 
 
 end
 

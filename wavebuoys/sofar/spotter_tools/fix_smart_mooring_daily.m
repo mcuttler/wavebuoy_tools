@@ -49,7 +49,7 @@ for d = 1:size(dd,1)
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                        
 
                 %save data to different formats        
-%                 realtime_archive_mat(buoy_info, data);
+                realtime_archive_mat(buoy_info, data);
 %                 realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
                 %output MEM and SST plots 

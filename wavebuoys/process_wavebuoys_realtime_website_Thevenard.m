@@ -41,13 +41,9 @@ buoy_info.search_rad = 190; %meters for watch circle radius
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
     if strcmp(buoy_info.version,'smart_mooring')
-        if strcmp(buoy_info.DataType,'spectral')
-            limit = buoy_info.UpdateTime;
-            [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime_fullwaves(buoy_info, limit); 
-        else
-            limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-            [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
-        end        
+        limit = buoy_info.UpdateTime*4; %note, for AQL they only transmit 2 points even though it's 2 hour update time
+        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
+%         flag = 1; %ignore flag in Smart mooring code 
     else
         if strcmp(buoy_info.DataType,'parameters')
             limit = buoy_info.UpdateTime*2;     
@@ -77,7 +73,7 @@ if strcmp(buoy_info.type,'sofar')==1
             %check that it's new data
             idx_w = find(SpotData.time>archive_data.time(end)); 
             idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
-            if SpotData.time(1)>archive_data.time(end)&size(idx_t,1)>6
+            if SpotData.time(1)>archive_data.time(end)&SpotData.temp_time(end)>SpotData.time(end)
                 %if smart mooring, only keep new temp and wave data
                 ff = fieldnames(SpotData); 
                 for f = 1:length(ff)
@@ -89,8 +85,8 @@ if strcmp(buoy_info.type,'sofar')==1
                 end
                 clear ff idx_w idx_t f
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-                [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
-                
+                [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                        
+
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
                 realtime_backup_mat(buoy_info, data);
