@@ -15,6 +15,8 @@ hexstring = 'eb82e6e1cdd22b7de3';
 %now find the two points in the displacements that match the heave
 idxh0 = find(abs(displacements.data(:,1)-h(1))==min(abs(displacements.data(:,1) - h(1)))); 
 idxh1 = find(abs(displacements.data(:,1)-h(2))==min(abs(displacements.data(:,1) - h(2)))); 
+
+
 %%
 if ~isempty(idxh0) & ~isempty(idxh1)
     for i = 1:size(idxh0,1)
@@ -30,8 +32,8 @@ if ~isempty(idxh0) & ~isempty(idxh1)
     end
     
     %get displacements
-    dd = (idxh0(j)+1)-4607; 
-    dxyz = displacements.data(dd:idxh0(j)+1,:); 
+    ddum = (idxh0+1)-4607; 
+    dxyz = displacements.data(ddum:idxh0+1,:); 
 else
     disp('No matching data in displacements')
 end
