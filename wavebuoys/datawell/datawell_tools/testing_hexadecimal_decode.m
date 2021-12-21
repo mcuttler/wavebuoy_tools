@@ -10,31 +10,31 @@ displacements = importdata(fullfile(csv_path,dispfile));
 
 %% 
 hexstring = 'eb82e6e1cdd22b7de3'; 
-[h,n,w] = datawell_hex_to_displacement(hexstring); 
+[hn1,h] = datawell_hex_to_displacement(hexstring); 
 
-%now find the two points in the displacements that match the heave
-idxh0 = find(abs(displacements.data(:,1)-h(1))==min(abs(displacements.data(:,1) - h(1)))); 
-idxh1 = find(abs(displacements.data(:,1)-h(2))==min(abs(displacements.data(:,1) - h(2)))); 
+%calc differences between hex data and disp data to find matching rows 
+for i = 1:3
+    dhn1(:,i) = abs(displacements.data(:,i)-hn1(1,i)); 
+    dh(:,i) = abs(displacements.data(:,i)-h(1,i)); 
+end
 
+%sum all differences for each displacemment
+dhn1_sum = sum(dhn1,2); 
+dh_sum = sum(dh,2); 
 
-%%
-if ~isempty(idxh0) & ~isempty(idxh1)
-    for i = 1:size(idxh0,1)
-        dum = sort(abs(idxh0(i) - idxh1)); 
-        if dum(1)==1
-            j = i;         
-        end
-    end
-    
-    %check that heave matches - not sure why N and W don't match
-    if displacements.data(idxh0(j),1)==h(1) & displacements.data(idxh0(j)+1,1)==h(2)
-        check = 1; 
-    end
-    
-    %get displacements
+%find min displacement for hn1 and h
+ind_hn1 = find(dhn1_sum==min(dhn1_sum)); 
+ind_h = find(dh_sum==min(dh_sum)); 
+
+%quick check to make sure they are 1 row apart
+if ind_h - ind_hn1 == 1
+    %extract displacements         
     ddum = (idxh0+1)-4607; 
     dxyz = displacements.data(ddum:idxh0+1,:); 
+
 else
     disp('No matching data in displacements')
+
 end
+
 

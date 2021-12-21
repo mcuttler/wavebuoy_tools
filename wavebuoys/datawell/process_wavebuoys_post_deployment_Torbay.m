@@ -10,7 +10,7 @@
 clear; clc
 
 addpath(genpath('\\drive.irds.uwa.edu.au\SEE-PNP-001\ProcessingCodes\Wave_buoys\'));
-
+addpath(genpath('C:\Data\wavebuoy_tools\wavebuoys\datawell')); 
 %location of wavebuoy_tools repo
 % buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
 % addpath(genpath(buoycodes))
@@ -38,18 +38,18 @@ buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_Wave
     dw_vars = {'serialID','E','theta','s','m2','n2','time','a1','a2','b1','b2',...
         'frequency','ndirec','spec2D','hsig','tp','dp','dpspr', 'curr_mag','curr_dir',...
         'curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std',...
-        'gps_time','gps_pos','disp_tstart','disp_time','disp_h','disp_n','disp_w'}; 
+        'gps_time','gps_pos','disp_tstart','disp_time','disp_time_utc','disp_h','disp_n','disp_w'}; 
     for i = 1:length(dw_vars)
         data.(dw_vars{i}) = []; 
     end
 
 
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%% ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
  cnt=1;
 
 files=dir((fullfile(buoy_info.data_path,'*-20.csv'))); %get all the field to process 20 file is 1D spectra
-for kk=4:length(files) %file 1 is bad 1970 file
+for kk=8:length(files) %file 1 is bad 1970 file and avoid lab testing of buoy 
         fname=files(kk).name(1:10);
     
     input.file20 = [buoy_info.data_path fname  '-20.csv'];
@@ -108,6 +108,7 @@ for kk=4:length(files) %file 1 is bad 1970 file
          
          %data.disp_tstart = [data.disp_tstart; temp.disp_tstart]; 
          data.disp_time = [data.disp_time; temp.disp_time]; 
+         data.disp_time_utc = [data.disp_time_utc;temp.disp_time_utc]; 
          data.disp_h = [data.disp_h; temp.disp_h]; 
          data.disp_n = [data.disp_n; temp.disp_n]; 
          data.disp_w = [data.disp_w; temp.disp_w];         
@@ -118,8 +119,7 @@ for kk=4:length(files) %file 1 is bad 1970 file
     
 end
     
-    
-    
+%% QAQC and save     
      [data] = qaqc_bulkparams(data);
     
      t1=datevec(data.time(1));
