@@ -23,9 +23,13 @@ if exist(pathMAT)
         check = 1; 
         load([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2),'%02d') '.mat']);
         archive_data = dw_data; 
-    else exist([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2)-1, '%02d') '.mat'],'file')        
+    elseif exist([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2)-1, '%02d') '.mat'],'file')        
         check = 1; 
         load([pathMAT '\' num2str(data.tnow(1)) '\' buoy_info.name '_' num2str(data.tnow(1)) num2str(data.tnow(2)-1,'%02d') '.mat']);
+        archive_data = dw_data; 
+    elseif exist([pathMAT '\' num2str(data.tnow(1)-1) '\' buoy_info.name '_' num2str(data.tnow(1)-1) num2str(12) '.mat'],'file')&data.tnow(2)==1; 
+        check = 1; 
+        load([pathMAT '\' num2str(data.tnow(1)-1) '\' buoy_info.name '_' num2str(data.tnow(1)-1) num2str(12) '.mat']); 
         archive_data = dw_data; 
     end               
         
