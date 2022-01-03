@@ -1,0 +1,157 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration file="F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive\realtime_exe\process_wavebuoys_realtime_website_ClerkeLagoon.prj" location="F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive\realtime_exe" name="process_wavebuoys_realtime_website_ClerkeLagoon" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>process_wavebuoys_realtime_website_ClerkeLagoon</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>1.0</param.version>
+    <param.authnamewatermark />
+    <param.email />
+    <param.company />
+    <param.summary />
+    <param.description />
+    <param.screenshot />
+    <param.guid />
+    <param.installpath.string>\process_wavebuoys_realtime_website_ClerkeLagoon\</param.installpath.string>
+    <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
+    <param.logo />
+    <param.install.notes />
+    <param.target.install.notes />
+    <param.intermediate>${PROJECT_ROOT}\process_wavebuoys_realtime_website_ClerkeLagoon\for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\process_wavebuoys_realtime_website_ClerkeLagoon\for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}\process_wavebuoys_realtime_website_ClerkeLagoon\for_redistribution</param.output>
+    <param.logdir>${PROJECT_ROOT}\process_wavebuoys_realtime_website_ClerkeLagoon</param.logdir>
+    <param.enable.clean.build>false</param.enable.clean.build>
+    <param.user.defined.mcr.options />
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages />
+    <param.web.mcr>true</param.web.mcr>
+    <param.package.mcr>false</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
+    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>true</param.windows.command.prompt>
+    <param.create.log>false</param.create.log>
+    <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text>Syntax 
+	  -? 
+	 
+ Input Arguments 
+	 -?  print help on how to use the application 
+	 input arguments</param.help.text>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.version />
+      <param.authnamewatermark />
+      <param.email />
+      <param.company />
+      <param.summary />
+      <param.description />
+      <param.screenshot />
+      <param.guid />
+      <param.installpath.string />
+      <param.installpath.combo />
+      <param.logo />
+      <param.install.notes />
+      <param.target.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.logdir />
+      <param.enable.clean.build />
+      <param.user.defined.mcr.options />
+      <param.target.type />
+      <param.support.packages />
+      <param.web.mcr />
+      <param.package.mcr />
+      <param.no.mcr />
+      <param.web.mcr.name />
+      <param.package.mcr.name />
+      <param.no.mcr.name />
+      <param.windows.command.prompt />
+      <param.create.log />
+      <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
+    </unset>
+    <fileset.main>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\process_wavebuoys_realtime_website_ClerkeLagoon.m</file>
+    </fileset.main>
+    <fileset.resources />
+    <fileset.package />
+    <fileset.depfun>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\datawell\process_datawell_realtime_wave_temp_current.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\datawell\Process_Datawell_realtime_website.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\copyfig.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\crop_borders.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\eps2pdf.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\export_fig.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\fix_lines.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\ghostscript.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\hyperlink.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\isolate_axes.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\pdf2eps.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\pdftops.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\print2array.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\print2eps.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\read_write_entire_textfile.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\user_string.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\export_fig-master\using_hg2.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\make_MEM_plot.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\plots\polarPcolor_final.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\qaqc\other_qaqc\qaqc_uwa_waves_website.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\qaqc\qaqc_bulkparams_realtime_website.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\sofar\spotter_tools\Get_Spoondrift_Data_realtime.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\sofar\spotter_tools\Get_Spoondrift_Data_realtime_fullwaves.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\sofar\spotter_tools\Get_Spoondrift_SmartMooring_realtime.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\spectral_tools\lygre_krogstad.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\spectral_tools\lygre_krogstad_MC.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\check_archive_path.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\gda94ll2utm.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\load_archived_data.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\realtime_archive_mat.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\realtime_archive_text.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\realtime_backup_mat.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\remove_duplicates.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\spotter_buoy_search_radius_and_alert.m</file>
+      <file>F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\waves_website\update_website_buoy_info.m</file>
+    </fileset.depfun>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}\process_wavebuoys_realtime_website_ClerkeLagoon\for_testing" name="splash.png" optional="false">F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive\realtime_exe\process_wavebuoys_realtime_website_ClerkeLagoon\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\process_wavebuoys_realtime_website_ClerkeLagoon\for_testing" name="readme.txt" optional="true">F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive\realtime_exe\process_wavebuoys_realtime_website_ClerkeLagoon\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\process_wavebuoys_realtime_website_ClerkeLagoon\for_testing" name="process_wavebuoys_realtime_website_ClerkeLagoon.exe" optional="false">F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\example_archive\realtime_exe\process_wavebuoys_realtime_website_ClerkeLagoon\for_testing\process_wavebuoys_realtime_website_ClerkeLagoon.exe</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2021a</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
