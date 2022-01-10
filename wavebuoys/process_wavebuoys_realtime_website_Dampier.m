@@ -14,15 +14,15 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1392'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-0561'; %spotter serial number, or just Datawell 
 buoy_info.name = 'Augusta'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
-buoy_info.sofar_token = 'f8f4c8b08d51c3440bfd7042bf40d1'; 
+buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'August';
-buoy_info.DeployDepth = 15; 
-buoy_info.DeployLat = -34.3712; 
+buoy_info.DeployLoc = 'Dampier';
+buoy_info.DeployDepth = 25; 
+buoy_info.DeployLat = -20.4785; 
 buoy_info.DeployLon = 116.516900; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
