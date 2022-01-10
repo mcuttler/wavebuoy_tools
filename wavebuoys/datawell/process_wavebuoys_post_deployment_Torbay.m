@@ -88,7 +88,8 @@ for kk=8:length(files) %file 1 is bad 1970 file and avoid lab testing of buoy
         data.b1 = [data.b1;  temp.b1];
         data.b2 = [data.b2;  temp.b2];
 
-        data.spec2D = cat(3,data.spec2D,temp.spec2D);
+        %data.spec2D = cat(3,data.spec2D,temp.spec2D); %exclude for now as
+        %too much memory
         data.hs = [data.hs;  temp.hsig];
         data.tp = [data.tp;  temp.tp];
         data.dp = [data.dp;  temp.dp];
@@ -124,7 +125,7 @@ end
     
      t1=datevec(data.time(1));
      t2=datevec(data.time(end));
-     fname=['buoy_data_' num2str(t1(1)) '_' num2str(t1(2)) '_' num2str(t1(3)) '-' num2str(t2(1)) '_' num2str(t2(2)) '_' num2str(t2(3)) '.mat'];
+     fname=['buoy_data_' num2str(t1(1)) '_' num2str(t1(2)) '_' num2str(t1(3)) '-' num2str(t2(1)) '_' num2str(t2(2)) '_' num2str(t2(3)) '_v2.mat'];
 
      
    save(['p:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\' fname],'data','-v7.3');

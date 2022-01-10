@@ -69,7 +69,7 @@ if check == size(disp_data.data,1)
         end               
     end                  
 else
-    data.disp_time = []; data.disp_h = []; data.disp_n = []; data.disp_w = [];
+    data.disp_time = []; data.disp_time_utc = []; data.disp_samples_unique = []; data.disp_h = []; data.disp_n = []; data.disp_w = [];
 end
 
 
