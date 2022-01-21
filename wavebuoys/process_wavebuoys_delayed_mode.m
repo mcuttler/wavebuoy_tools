@@ -8,16 +8,16 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'C:\Data\wavebuoy_tools\wavebuoys'; 
+homepath = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'F:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0558_Tantabiddi_20201101_20210401'; 
+datapath = 'I:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\Buoy_displacement_processing\SPOT0169_KingGeorgeSound_20210326_to_20210821'; 
 
 
 %path of Sofar parser script
-parserpath = 'F:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.2'; 
-parser = 'parser_v1.11.2.py'; 
+parserpath = 'I:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.12.0'; 
+parser = 'parser_v1.12.0.py'; 
 
 %% 
 %buoy type and deployment info number and deployment info 
