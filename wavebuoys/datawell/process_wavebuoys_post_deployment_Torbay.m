@@ -30,8 +30,8 @@ buoy_info.DeployLon = 117.772767;
 buoy_info.UpdateTime =  0.5; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 %folder where data to be processed is
-buoy_info.data_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_Oct2019_Download\CSV_export\';
-buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_Oct2019_Download\';
+buoy_info.data_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\CSV_export\';
+buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\';
 
 %% process realtime mode data
 %create blank array
@@ -127,8 +127,8 @@ end
      t2=datevec(data.time(end));
      fname=['buoy_data_' num2str(t1(1)) '_' num2str(t1(2)) '_' num2str(t1(3)) '-' num2str(t2(1)) '_' num2str(t2(2)) '_' num2str(t2(3)) '_v2.mat'];
 
-     
-   save(['p:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\' fname],'data','-v7.3');
+     %output to the 'processed_CF_card' folder on PNP 
+   save(['P:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\Processed_CF_card\' fname],'data','-v7.3');
 %%
 
 
