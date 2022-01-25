@@ -54,8 +54,9 @@ if strcmp(buoy_info.type,'sofar')==1
             [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);     
             flag = 1; 
         end                    
-    end    
+    end
     
+    [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
     if flag == 1
         for i = 1:size(SpotData.time,1)
             SpotData.name{i,1} = buoy_info.name; 
@@ -63,8 +64,7 @@ if strcmp(buoy_info.type,'sofar')==1
         
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
-        [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);            
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
