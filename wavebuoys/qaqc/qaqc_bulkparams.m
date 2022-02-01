@@ -8,10 +8,15 @@ function [bulkparams] = qaqc_bulkparams(bulkparams)
 
 %    User defined test criteria
 check.STD = 3; 
-check.time_window = 48; %hours for calculating mean + std
+check.time_window = 72; %hours for calculating mean + std
 check.time = bulkparams.time; 
 
-fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+if isfield(bulkparams,'meanspr')
+    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+elseif isfield(bulkparams,'dmspr')
+     fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
+end
+
 outfields={'hs_15','tm_15','tp_15','dm_15','dp_15','meanspr_15','pkspr_15','temp_15'}; 
 
 for f = 1:length(fields)
@@ -36,8 +41,13 @@ check.TTOL = 0.01;
 check.rep_fail = 240;  
 check.rep_suspect = 144; 
 
-fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
-tol = {'WHTOL','WPTOL','WPTOL', 'WDTOL','WDTOL','WSPTOL','WSPTOL','TTOL'}; 
+if isfield(bulkparams,'meanspr')
+    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+elseif isfield(bulkparams,'dmspr')
+     fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
+end
+
+tol = {'WHTOL','WPTOL','WPTOL', 'WDTOL','WDTOL','WSPTOL','WSPTOL','TTOL'};
 outfields={'hs_16','tm_16','tp_16','dm_16','dp_16','meanspr_16','pkspr_16','temp_16'}; 
 
 for f = 1:length(fields)
@@ -60,7 +70,12 @@ end
 check.WVHGT = bulkparams.hs; 
 check.WVPD = bulkparams.tp; 
 check.WVDIR = bulkparams.dp;
-check.WVSP = bulkparams.pkspr;
+if isfield(bulkparams,'pkspr')
+    check.WVSP = bulkparams.pkspr;
+else
+    check.WVSP = bulkparams.dpspr;
+end
+
 
 check.MINWH = 0.10;
 check.MAXWH = 10;
@@ -75,8 +90,14 @@ check.MAXSV = 80.0;
 check.MINT = 5; 
 check.MAXT = 55; 
 
+if isfield(bulkparams,'temp')
+    field = 'temp';
+else
+    field = 'surf_temp';
+end
+
 for i = 1:size(bulkparams.time,1)
-    if bulkparams.temp(i,1)<check.MINT|bulkparams.temp(i,1)>check.MAXT
+    if bulkparams.(field)(i,1)<check.MINT|bulkparams.(field)(i,1)>check.MAXT
         bulkparams.temp_19(i,1) = 4;
     else
         bulkparams.temp_19(i,1) = 1; 
@@ -95,7 +116,12 @@ check.WDROC= 50;
 check.WSPROC= 25; 
 check.TROC = 2; 
 
-fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+if isfield(bulkparams,'meanspr')
+    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+elseif isfield(bulkparams,'dmspr')
+     fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
+end
+
 roc = {'WHROC','WPROC','WPROC', 'WDROC','WDROC','WSPROC','WSPROC','TROC'}; 
 outfields={'hs_20','tm_20','tp_20','dm_20','dp_20','meanspr_20','pkspr_20','temp_20'}; 
 
@@ -113,7 +139,12 @@ end
 
 %UWA spike test 
 
-fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+if isfield(bulkparams,'meanspr')
+    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+elseif isfield(bulkparams,'dmspr')
+     fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
+end
+
 roc = {'WHROC','WPROC','WPROC', 'WDROC','WDROC','WSPROC','WSPROC','TROC'}; 
 outfields={'hs_spike','tm_spike','tp_spike','dm_spike','dp_spike','meanspr_spike','pkspr_spike','temp_spike'}; 
 
@@ -132,7 +163,7 @@ qaqc_tests = {'15','16','19','20','spike'};
 
 [bulkparams.qc_flag_wave, bulkparams.qc_subflag_wave] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests); 
 
-fields = {'temp'};
+fields = {'temp'}; 
 qaqc_tests = {'15','16','19','20','spike'}; 
 [bulkparams.qc_flag_temp, bulkparams.qc_subflag_temp] = qaqc_temp_primary_and_subflag(bulkparams, fields, qaqc_tests); 
 
