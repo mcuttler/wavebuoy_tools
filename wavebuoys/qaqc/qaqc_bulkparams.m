@@ -8,7 +8,7 @@ function [bulkparams] = qaqc_bulkparams(bulkparams)
 
 %    User defined test criteria
 check.STD = 3; 
-check.time_window = 48; %hours for calculating mean + std
+check.time_window = 72; %hours for calculating mean + std
 check.time = bulkparams.time; 
 
 if isfield(bulkparams,'meanspr')
@@ -70,7 +70,12 @@ end
 check.WVHGT = bulkparams.hs; 
 check.WVPD = bulkparams.tp; 
 check.WVDIR = bulkparams.dp;
-check.WVSP = bulkparams.pkspr;
+if isfield(bulkparams,'pkspr')
+    check.WVSP = bulkparams.pkspr;
+else
+    check.WVSP = bulkparams.dpspr;
+end
+
 
 check.MINWH = 0.10;
 check.MAXWH = 10;
@@ -85,8 +90,14 @@ check.MAXSV = 80.0;
 check.MINT = 5; 
 check.MAXT = 55; 
 
+if isfield(bulkparams,'temp')
+    field = 'temp';
+else
+    field = 'surf_temp';
+end
+
 for i = 1:size(bulkparams.time,1)
-    if bulkparams.temp(i,1)<check.MINT|bulkparams.temp(i,1)>check.MAXT
+    if bulkparams.(field)(i,1)<check.MINT|bulkparams.(field)(i,1)>check.MAXT
         bulkparams.temp_19(i,1) = 4;
     else
         bulkparams.temp_19(i,1) = 1; 
@@ -152,12 +163,7 @@ qaqc_tests = {'15','16','19','20','spike'};
 
 [bulkparams.qc_flag_wave, bulkparams.qc_subflag_wave] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests); 
 
-if isfield(bulkparams,'temp')
-    fields = {'temp'};
-elseif isfield(bulkparams,'surf_temp')
-     fields = {'surf_temp'};
-end
-
+fields = {'temp'}; 
 qaqc_tests = {'15','16','19','20','spike'}; 
 [bulkparams.qc_flag_temp, bulkparams.qc_subflag_temp] = qaqc_temp_primary_and_subflag(bulkparams, fields, qaqc_tests); 
 

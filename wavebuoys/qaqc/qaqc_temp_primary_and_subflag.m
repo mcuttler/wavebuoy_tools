@@ -5,9 +5,15 @@
 function [primary_flag, sub_flag] = qaqc_temp_primary_and_subflag(bulkparams, fields, qaqc_tests); 
 
 %check that temperature data exists (e.g. not just -9999)
-if all(bulkparams.temp<0)
-    primary_flag(:,1) = ones(size(bulkparams.temp,1),1).*4; 
-    sub_flag(:,1) = ones(size(bulkparams.temp,1),1).*2; 
+if isfield(bulkparams,'temp')
+    tfield = 'temp';
+else
+    tfield = 'surf_temp';
+end
+
+if all(bulkparams.(tfield)<0)
+    primary_flag(:,1) = ones(size(bulkparams.(tfield),1),1).*4; 
+    sub_flag(:,1) = ones(size(bulkparams.(tfield),1),1).*2; 
 else
     for i = 1:size(bulkparams.time,1)
         %build variable that compiles results of all qaqc tests for each time point

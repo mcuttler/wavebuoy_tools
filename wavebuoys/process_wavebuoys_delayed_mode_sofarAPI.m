@@ -36,7 +36,7 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'Y:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\Transfer_to_AODN';
+buoy_info.archive_path = 'Y:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\ProcessedData_DelayedMode';
 buoy_info.facility_code = 'NTP-WAVE';
 buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
@@ -78,8 +78,16 @@ for i = 1:length(fields);
         %         elseif strcmp(fields{i}(end-1:end),'mp')
         %             bulkparams_nc = rmfield(bulkparams_nc,fields{i}); 
     end
+    if strcmp(fields{i},'serialID')
+        bulkparams_nc = rmfield(bulkparams_nc, fields{i}); 
+    end
+    
     
 end
+
+%rename surf_temp to temp for export **MC to fix this in future 
+bulkparams_nc.temp = bulkparams_nc.surf_temp; 
+bulkparams_nc = rmfield(bulkparams_nc,'surf_temp'); 
 
 %quickly denan and replace with fill values
 fields = fieldnames(bulkparams_nc); 

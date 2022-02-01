@@ -112,17 +112,22 @@ for ii =1:size(dumt,1)
     %assume surface and bottom sensor   
     if ~isempty(resp_waves.Body.Data.data.surfaceTemp)
         for j = 1:size(resp_waves.Body.Data.data.surfaceTemp,1)
-             data.temp_time(j,1) = datenum(resp_waves.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
-             data.surf_temp(j,1) = resp_waves.Body.Data.data.surfaceTemp(j).degrees; 
+             temp_time(j,1) = datenum(resp_waves.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+             surf_temp(j,1) = resp_waves.Body.Data.data.surfaceTemp(j).degrees; 
         end
-        % get temperature time to same time as waves/wind
-        
-           
-    else
-        data.temp_time = data.time;
-        data.surf_temp = data.temp_time.*nan; 
-        data.bott_temp = data.temp_time.*nan; 
+        % get temperature time to same time as waves/wind        
+        for j = 1:size(data.time,1)
+            ind = find(temp_time == data.time(j)); 
+            if ~isempty(ind)
+                data.surf_temp(j,1) = surf_temp(ind); 
+            else
+                data.surf_temp(j,1) = nan;
+            end
+        end                          
+    else       
+        data.surf_temp = data.time.*nan;         
     end
+    clear temp_time surf_temp
     
    
     %% spectral data
