@@ -1,6 +1,6 @@
 %% process archived wave data
 
-function [data] = process_datawell_realtime_wave_temp_current(E, theta, s, m2, n2, spec_params, wave_time, TC, temp_time, data); 
+function [data] = process_datawell_realtime_wave_temp_current(buoy_info, E, theta, s, m2, n2, spec_params, wave_time, TC, temp_time, data); 
 
 %% waves 
 [m,~] = size(E);
@@ -72,6 +72,7 @@ for ii = 1:m
     data.tp = [data.tp; tp];
     data.dp = [data.dp; dp];
     data.dpspr = [data.dpspr; dpspr]; 
+    data.serialID = [data.serialID; buoy_info.serial]; 
 end  
 
 

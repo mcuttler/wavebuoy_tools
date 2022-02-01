@@ -12,15 +12,15 @@
 
 
 %%
-function [Spotter] = Get_Spoondrift_Data_realtime(SpotterID,limit);
+function [Spotter] = Get_Spoondrift_Data_realtime(buoy_info,limit);
 
 import matlab.net.*
 import matlab.net.http.*
-header = matlab.net.http.HeaderField('token','e0eb70b6d9e0b5e00450929139ea34','spotterId',SpotterID);
+header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
 r = RequestMessage('GET', header);
 
 
-uri = URI(['https://api.sofarocean.com/api/wave-data?spotterId=' SpotterID...
+uri = URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial...
     '&includeSurfaceTempData=true&includeWindData=true&limit=' num2str(limit)]);
 
 resp = send(r,uri);
@@ -31,8 +31,8 @@ disp(status);
 %check for wave parameters
 if isfield(resp.Body.Data.data,'waves')
     for j = 1:size(resp.Body.Data.data.waves)
-        Spotter.serialID{j,1} = SpotterID; 
-         Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.serialID{j,1} = buoy_info.serial; 
+        Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
         Spotter.hsig(j,1) = resp.Body.Data.data.waves(j).significantWaveHeight;        
         Spotter.tp(j,1) = resp.Body.Data.data.waves(j).peakPeriod;
         Spotter.tm(j,1) = resp.Body.Data.data.waves(j).meanPeriod;
@@ -83,46 +83,55 @@ end
 if m~=n  
     if n>m %missing waves
         data = Spotter; 
-        fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'};                 
+        fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'}; 
+        for jj = 1:length(fields); 
+            data.(fields{jj}) = ones(size(Spotter.time,1),1).*nan; 
+        end
+        data.time = Spotter.wind_time; 
         for j = 1:n
            dum = find(Spotter.time==Spotter.wind_time(j)); 
            if isempty(dum)
-                data.serialID{j,1} = SpotterID; 
-                data.time(j,1) = Spotter.wind_time(j); 
+                data.serialID{j,1} = buoy_info.serial;                 
                 for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = nan;
                 end
-           else
-               data.serialID{j,1} = SpotterID;  
-               data.time(j,1) = Spotter.wind_time(j);
+           elseif length(dum)>1
+               data.serialID{j,1} = buoy_info.serial; 
                for jj = 1:length(fields)
-                    data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
+                   data.(fields{jj})(j,1) = nanmean(Spotter.(fields{jj})(dum,1)); 
+               end
+           else
+               data.serialID{j,1} = buoy_info.serial;                 
+               for jj = 1:length(fields)
+                    data.(fields{jj})(j,1) = Spotter.(fields{jj})(dum,1);
                end
            end
         end
-        
+        fields = {'time';'serialID';'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'}; 
         for jj = 1:length(fields)
             Spotter.(fields{jj}) = data.(fields{jj}); 
         end                         
                 
     elseif m>n %missing wind
         data = Spotter; 
-        fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};      
+        fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};
+        for jj = 1:length(fields); 
+            data.(fields{jj}) = ones(size(Spotter.time,1),1).*nan; 
+        end
+        data.wind_time = Spotter.time; 
         for j = 1:m
             dum = find(Spotter.wind_time==Spotter.time(j)); 
-            if isempty(dum)                
-                data.wind_time(j,1) = Spotter.time(j); 
+            if isempty(dum)                                
                 for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = nan;
                 end
-            else
-               data.wind_time(j,1) = Spotter.time(j); 
+            else               
                 for jj = 1:length(fields)
-                    data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
+                    data.(fields{jj})(j,1) = Spotter.(fields{jj})(dum,1);
                 end
             end
         end
-        
+        fields = {'wind_time';'wind_speed';'wind_dir';'wind_seasurfaceId'}; 
         for jj = 1:length(fields)
             Spotter.(fields{jj}) = data.(fields{jj}); 
         end      

@@ -1,5 +1,8 @@
 
 *.asv
 *.mat
+<<<<<<< HEAD
 *.gif
+=======
+>>>>>>> wawaves_realtime
 wavebuoys/sofar/spotter_tools/hs_err_pid5800.mdmp
