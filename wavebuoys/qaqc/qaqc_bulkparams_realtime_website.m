@@ -14,12 +14,29 @@ function [bulkparams] = qaqc_bulkparams_realtime_website(buoy_info, archive_data
 %append new data and archived data
 if strcmp(buoy_info.type,'sofar')
     fields = fieldnames(new_data); 
-    for j = 1:size(fields,1)
-        bulkparams.(fields{j}) = [archive_data.(fields{j}); new_data.(fields{j})]; 
+    fields_archive = fieldnames(archive_data); 
+    fields_int = intersect(fields, fields_archive);
+    for j = 1:size(fields_int,1)
+        bulkparams.(fields_int{j}) = [archive_data.(fields_int{j,:}); new_data.(fields_int{j,:})]; 
+    end
+    %now include any missing fields from archive data
+    for j = 1:size(fields_archive)
+        if ~isfield(bulkparams, fields_archive{j})
+            bulkparams.(fields_archive{j,:}) = archive_data.(fields_archive{j,:}); 
+        end
+    end 
+    %now include missing parameters from new data
+    for j =1:size(fields); 
+        if ~isfield(bulkparams, fields{j}); 
+            bulkparams.(fields{j}) = new_data.(fields{j,:}); 
+        end
     end
 elseif strcmp(buoy_info.type,'datawell'); 
     bulkparams = new_data; 
 end
+
+bulkparams = remove_duplicates(bulkparams); 
+
 
 %bulkparams data 
 qaqc.time = bulkparams.time; 
@@ -32,20 +49,20 @@ if isfield(bulkparams, 'temp_time')
 end
 
 %settings for range test (QARTOD19) 
-qaqc.MINWH = 0.25;
+qaqc.MINWH = 0.01;
 qaqc.MAXWH = 12;
-qaqc.MINWP = 3; 
+qaqc.MINWP = 1; 
 qaqc.MAXWP = 25;
 qaqc.MAXT = 45; 
 qaqc.MINT = 0; 
 
 %settings UWA 'master flag' test (combination of QARTOD19 and QARTOD20) -
 %requires 3 data points 
-qaqc.rocHs =0.5; 
-qaqc.HsLim = 10; 
-qaqc.rocTp = 8; 
+qaqc.rocHs = 0.5; 
+qaqc.HsLim = 12; 
+qaqc.rocTp = 10; 
 qaqc.TpLim = 25; 
-qaqc.rocSST = 1; 
+qaqc.rocSST = 2; 
 
 if isfield(qaqc, 'time_temp')
     [bulkparams.qf_waves, bulkparams.qf_sst, bulkparams.qf_bott_temp] = qaqc_uwa_waves_website(qaqc); 

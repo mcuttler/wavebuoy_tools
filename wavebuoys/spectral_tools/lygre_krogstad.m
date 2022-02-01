@@ -1,4 +1,4 @@
-function [NS,NE,direc] = lygre_krogstad(a1,a2,b1,b2,Ein);
+function [NS,NE,direc,ndirec] = lygre_krogstad(a1,a2,b1,b2,Ein);
 
 %%
 % Estimates directional spectrum from directional moments and variance

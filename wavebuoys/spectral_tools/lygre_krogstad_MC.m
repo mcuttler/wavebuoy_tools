@@ -55,7 +55,7 @@ end;
 
 % modify directional convention (modifies by 270 to switch to Nautical with
 % north at vertical
-%export this direction as it's what the output spectra correspond to (MC)
+% export this direction as it's what the output spectra correspond to (MC)
 
 ndirecA = 270-direc;
 ndirec  = 270-direc;

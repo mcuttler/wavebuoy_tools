@@ -11,6 +11,7 @@
 %%
 function [Spotter,flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit);
 
+%re-code so that it just grabs the 'limit' for waves, and the last 1
 import matlab.net.*
 import matlab.net.http.*
 header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
@@ -23,19 +24,15 @@ status = resp_waves.StatusCode;
 disp([status]); 
 
 
-tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,3,0,0),30); 
-tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'),30); 
+tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,12,0,0),30); 
+tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS')+ datenum(0,0,0,2,0,0),30); 
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
-
 uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]); 
 resp_sensor = send(r,uri_sensor);
 status = resp_sensor.StatusCode;
-if ~isempty(resp_sensor.Body.Data.data)
-    disp([status]); 
-else
-    disp(['No sensor data for that time period']); 
-end
+disp([status]); 
+
 
 %% WAVES AND WIND
 %check for wave parameters
@@ -73,85 +70,114 @@ end
 if m~=n  
     if n>m %missing waves
         data = Spotter; 
-        fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'};                 
+        fields = {'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'}; 
+        for jj = 1:length(fields); 
+            data.(fields{jj}) = ones(size(Spotter.time,1),1).*nan; 
+        end
+        data.time = Spotter.wind_time; 
         for j = 1:n
            dum = find(Spotter.time==Spotter.wind_time(j)); 
            if isempty(dum)
-                data.serialID{j,1} = SpotterID; 
-                data.time(j,1) = Spotter.wind_time(j); 
+                data.serialID{j,1} = buoy_info.serial;                 
                 for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = nan;
                 end
            else
-               data.serialID{j,1} = SpotterID;  
-               data.time(j,1) = Spotter.wind_time(j);
+               data.serialID{j,1} = buoy_info.serial;                 
                for jj = 1:length(fields)
-                    data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
+                    data.(fields{jj})(j,1) = Spotter.(fields{jj})(dum,1);
                end
            end
         end
-        
+        fields = {'time';'serialID';'hsig';'tp';'tm';'dp';'dpspr';'dm';'dmspr';'lat';'lon'}; 
         for jj = 1:length(fields)
             Spotter.(fields{jj}) = data.(fields{jj}); 
         end                         
                 
     elseif m>n %missing wind
         data = Spotter; 
-        fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};      
+        fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};
+        for jj = 1:length(fields); 
+            data.(fields{jj}) = ones(size(Spotter.time,1),1).*nan; 
+        end
+        data.wind_time = Spotter.time; 
         for j = 1:m
             dum = find(Spotter.wind_time==Spotter.time(j)); 
-            if isempty(dum)                
-                data.wind_time(j,1) = Spotter.time(j); 
+            if isempty(dum)                                
                 for jj = 1:length(fields)
                     data.(fields{jj})(j,1) = nan;
                 end
-            else
-               data.wind_time(j,1) = Spotter.time(j); 
+            else               
                 for jj = 1:length(fields)
-                    data.(fields{jj})(j,1) = data.(fields{jj})(dum,1);
+                    data.(fields{jj})(j,1) = Spotter.(fields{jj})(dum,1);
                 end
             end
         end
-        
+        fields = {'wind_time';'wind_speed';'wind_dir';'wind_seasurfaceId'}; 
         for jj = 1:length(fields)
             Spotter.(fields{jj}) = data.(fields{jj}); 
         end      
     end
 end
-
 %% TEMPERATURE
 %check for temperature data
 %assume surface and bottom sensor   
 Spotter.temp_time = []; 
 Spotter.surf_temp = []; 
 Spotter.bott_temp =[]; 
+Spotter.bott_temp_time = []; 
 if ~isempty(resp_sensor.Body.Data.data)    
     for j = 1:size(resp_sensor.Body.Data.data,1)
         if resp_sensor.Body.Data.data(j).sensorPosition==1
             Spotter.surf_temp = [Spotter.surf_temp; resp_sensor.Body.Data.data(j).value]; 
             Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
-        elseif resp_sensor.Body.Data.data(j).sensorPosition==2           
+        elseif resp_sensor.Body.Data.data(j).sensorPosition==2 
+            Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
             Spotter.bott_temp = [Spotter.bott_temp; resp_sensor.Body.Data.data(j).value]; 
         end
     end
+%if no temperature data, act like normal wave buoy
+else
+    Spotter.temp_time = Spotter.time; 
+    Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999;
 end
 
-%% check that mooring data has correc time stamps to continue
-t1 = datevec(Spotter.time(end)-datenum(0,0,0,1,40,0)); 
-t2 = datevec(Spotter.time(end)); 
-dv = datevec(Spotter.temp_time); 
-t1idx = find(dv(:,1)==t1(1)&dv(:,2)==t1(2)&dv(:,3)==t1(3)&dv(:,4)==t1(4)&dv(:,5)==t1(5)&dv(:,6)==t1(6)); 
-t2idx = find(dv(:,1)==t2(1)&dv(:,2)==t2(2)&dv(:,3)==t2(3)&dv(:,4)==t2(4)&dv(:,5)==t2(5)&dv(:,6)==t2(6)); 
-if ~isempty(t1idx)&~isempty(t2idx)
-    flag = 1; 
-    Spotter.temp_time = Spotter.temp_time(t1idx:t2idx); 
-    Spotter.surf_temp = Spotter.surf_temp(t1idx:t2idx); 
-    Spotter.bott_temp = Spotter.bott_temp(t1idx:t2idx);                             
+%make sure bottom and surface timestamps are same
+if length(Spotter.temp_time)~=length(Spotter.bott_temp_time)
+    if length(Spotter.temp_time)>length(Spotter.bott_temp_time)
+        for j = 1:length(Spotter.temp_time)
+            try
+                Spotter.temp_time(j,1)==Spotter.bott_temp_time(j,1);
+            catch
+                Spotter.bott_temp(j,1)=-9999; 
+            end
+        end
+        Spotter = rmfield(Spotter, 'bott_temp_time');     
+    elseif length(Spotter.temp_temp)<length(Spotter.bott_temp_time)
+        for j = 1:length(Spotter.bott_temp_time)
+             try
+                Spotter.bott_time(j,1)==Spotter.temp_time(j,1);
+            catch
+                Spotter.surf_temp(j,1)=-9999; 
+             end
+        end
+        Spotter.temp_time = Spotter.bott_temp_time;         
+    end
 else
-    flag = 0; 
-end   
-    
+    Spotter = rmfield(Spotter, 'bott_temp_time');     
+end
+        
 
+
+%% check that mooring data has correc time stamps to continue
+
+if Spotter.temp_time(end)>Spotter.time(end)
+    flag = 1; 
+else
+    flag = 0;
+end
+% flag = 1; 
 
 end
 
