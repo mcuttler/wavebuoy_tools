@@ -36,7 +36,7 @@ else
                 sub_flag(i,1) = -127;
             elseif dum(test19)==4
                 primary_flag(i,1) = 4; 
-                sub_flag(i,1) = 5;
+                sub_flag(i,1) = 4;
             end
         else 
             %check that at least one test is 3 or 4
@@ -47,19 +47,19 @@ else
                 end
                 
                 if didx==1                  
-                    sub_flag(i,1) = 3; %mean+/- std
+                    sub_flag(i,1) = 2; %mean+/- std
                     primary_flag(i,1) = dum(didx); 
                 elseif didx==2
-                    sub_flag(i,1) = 4; %flat line
+                    sub_flag(i,1) = 3; %flat line
                     primary_flag(i,1) = dum(didx); 
                 elseif didx==3
-                    sub_flag(i,1) = 5; %range
+                    sub_flag(i,1) = 4; %range
                     primary_flag(i,1) = dum(didx); 
                 elseif didx==4
-                    sub_flag(i,1) = 6; %rate of change
+                    sub_flag(i,1) = 5; %rate of change
                     primary_flag(i,1) = dum(didx); 
                 elseif didx==5
-                    sub_flag(i,1) = 7; %spike 
+                    sub_flag(i,1) = 6; %spike 
                     primary_flag(i,1) = dum(didx); 
                 end
             else
