@@ -8,12 +8,12 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+homepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Matlab Codes\Github Repository\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 
 %path of Sofar parser script
-parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.2'; 
+parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\SofarParser\parser_v1.11.2'; 
 parser = 'parser_v1.11.2.py'; 
 
 %% 
@@ -26,8 +26,8 @@ buoy_info.DeployLoc = 'GoodrichBank01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 90; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2021,11,11,0,0,0); 
-buoy_info.tend = datenum(2022,2,1,0,0,0); 
+buoy_info.tstart = datenum(2021,11,12,00,00,00); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
+buoy_info.tend = datenum(2022,01,31,00,00,00); 
 buoy_info.DeployID = 'GRBNK0102'; %deployment number at this site
 buoy_info.timezone = 9; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
@@ -36,7 +36,7 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'Y:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\ProcessedData_DelayedMode';
+buoy_info.archive_path = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
 buoy_info.facility_code = 'NTP-WAVE';
 buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';

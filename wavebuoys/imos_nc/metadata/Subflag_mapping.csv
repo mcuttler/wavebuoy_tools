@@ -1,0 +1,39 @@
+,                               hs_tp_dp_spike
+,
+0,unspecified_error
+1, too_few_data
+2, hs_outside_mean+3std
+3,tp_outside_mean+3std
+4,dp_outside_mean+3std
+5,hs_and_tp_outside_mean+3std
+6,hs_and_dp_outside_mean+3std
+7, tp_and_dp_outside_mean+3std
+8, hs_tp_dp_outside_mean+3std
+9,hs_flatline
+10,tp_flatline
+11,dp_flatline
+12, hs_and_tp_flatline
+13,hs_and_dp_flatline
+14,tp_and_dp_flatline
+15,hs_tp_dp_flatline
+16,hs_outside_range
+17,tp_outside_range
+18,dp_outside_range
+19,hs_and_tp_outside_range
+20,hs_and_dp_outside_range
+21,tp_and_dp_outside_range
+22,hs_tp_dp_outside_range
+23,hs_rate_of_change
+24,tp_rate_of_change
+25,dp_rate_of_change
+26,hs_and_tp_rate_of_change
+27,hs_and_dp_rate_of_change
+28,tp_and_dp_rate_of_change
+29,hs_tp_dp_rate_of_change
+30,hs_spike
+31,tp_spike
+32,dp_spike
+33,hs_and_tp_spike
+34,hs_and_dp_spike
+35,tp_and_dp_spike
+36,hs_tp_dp_spike

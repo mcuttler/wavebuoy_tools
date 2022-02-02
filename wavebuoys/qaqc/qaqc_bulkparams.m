@@ -33,13 +33,13 @@ end
 
 %    User defined test criteria - absolute difference from preceding points
 %    to denote 'flatline' 
-check.WHTOL = 0.05; 
+check.WHTOL = 0.01; 
 check.WPTOL = 0.01;
 check.WDTOL = 0.5; 
 check.WSPTOL = 0.5; 
 check.TTOL = 0.01; 
-check.rep_fail = 240;  
-check.rep_suspect = 144; 
+check.rep_fail = 240;  % might be in hrs.
+check.rep_suspect = 144; % might be in hrs.
 
 if isfield(bulkparams,'meanspr')
     fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
