@@ -8,37 +8,37 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'G:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+homepath = 'F:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0558_Tantabiddi_20201101_20210401'; 
+datapath = 'I:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\RAW_delayed_mode\SPOT0552_CapeBridgewaterDC_20200815_to_20210624'; 
 
 
 %path of Sofar parser script
-parserpath = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.11.2'; 
-parser = 'parser_v1.11.2.py'; 
+parserpath = 'I:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\SofarParser\parser_v1.12.0'; 
+parser = 'parser_v1.12.0.py'; 
 
 %% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.name = 'SPOT-0558'; %spotter serial number, or just Datawell 
+buoy_info.name = 'SPOT-0552'; %spotter serial number, or just Datawell 
 buoy_info.version = 'Spotter-V2'; %or DWR4 for Datawell, for example
-buoy_info.site_code = 'TANT01';
-buoy_info.DeployLoc = 'Tantabiddi01';%this is IMOS site_name and station_id
+buoy_info.site_code = 'CAPEBW01';
+buoy_info.DeployLoc = 'CapeBridgewater01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 45; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2020,11,4,0,0,0); 
-buoy_info.tend = datenum(2021,4,2,0,0,0); 
-buoy_info.DeployID = 'TANT0101'; %deployment number at this site
-buoy_info.timezone = 8; %signed integer for UTC offset 
+buoy_info.tstart = datenum(2020,08,16,0,0,0); 
+buoy_info.tend = datenum(2021,6,23,0,0,0); 
+buoy_info.DeployID = 'CAPEBW02'; %deployment number at this site
+buoy_info.timezone = 10; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-buoy_info.MagDec = 12.86; 
+buoy_info.MagDec = 0; 
 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'E:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
+buoy_info.archive_path = 'I:\Active_Projects\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
 buoy_info.facility_code = 'NTP-WAVE';
 buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
@@ -51,7 +51,7 @@ buoy_info.product_type = 'timeseries';
 if strcmp(buoy_info.type,'sofar')==1
     %set number of unique time poins to use for efficient processing (depends
     %on computer specifications) 
-    chunk = 10; 
+    chunk = 20; 
     
     %process delayed mode (from buoy memory card)
     if strcmp(buoy_info.version, 'Spotter-V2')
