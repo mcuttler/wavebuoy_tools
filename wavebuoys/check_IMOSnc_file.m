@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'Y:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\ProcessedData_DelayedMode\nc\GoodrichBank01';
+filepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode\nc\CapeBridgewater01';
 %IMOS file name
-filename = 'IMOS_NTP-WAVE_TW_20211112T001131Z_GRBNK01_WAVERIDER_FV01_timeseries_END-20220131T235448Z.nc';
+filename = 'IMOS_NTP-WAVE_TW_20200820T171107Z_CAPEBW01_WAVERIDER_FV01_timeseries_END-20210624T034220Z.nc';
 
 ncfile = fullfile(filepath, filename); 
 
@@ -86,7 +86,7 @@ ylabel('Tp (s)');
 ax(3) = subplot(3,1,3); 
 plot(data.time, data.dp); 
 hold on; grid on; 
-plot(data.time(data.quality_flag==3), data.dp(data.quality_flag==3),'ro'); 
+plot(data.time(data.quality_flag==3), data.dp(data.quality_flag==3),'co'); 
 plot(data.time(data.quality_flag==4), data.dp(data.quality_flag==4),'ro'); 
 datetick('x','dd-mmm');
 xlabel('Date'); 
@@ -106,6 +106,9 @@ set(fid, 'PaperPositionMode', 'manual','PaperUnits','centimeters','units','centi
 return
 %additional plots 
 
+finfo = ncinfo(ncfile);
+
+
 %temp data
 data.TEMP = ncread(ncfile,'TEMP'); 
 data.TEMP_quality_flag = ncread(ncfile,'TEMP_quality_flag'); 
@@ -115,14 +118,18 @@ figure()
 subplot(3,1,1)
 scatter((1:length(data.time)),data.TEMP)
 title('TEMP')
+
+xlim([0 length(data.time)])
 subplot(3,1,2)
 
 scatter((1:length(data.time)),data.TEMP_quality_flag)
 title('TEMP quality flag')
+xlim([0 length(data.time)])
 subplot(3,1,3)
 
 scatter((1:length(data.time)),data.TEMP_subflag)
 title('TEMP subflag')
+xlim([0 length(data.time)])
 
 % percentage of 4 and 3 flags
 
@@ -135,15 +142,24 @@ disp('fraction of data with flag 3')
 disp(num2str(flag_per.suspect))
 
 
-finfo = ncinfo(ncfile);
+
 
 %plot positions
 
 figure()
+subplot(2,1,1)
+plot(data.time,data.lon);
+title('longitude');
+subplot(2,1,2)
+plot(data.time,data.lat);
+title('latitude')
+
+
+figure()
 
 scatter(data.lon,data.lat,'r');
-xlim([mean(data.lon)-60 mean(data.lon)+60]);
-ylim([mean(data.lat)-60 mean(data.lat)+60]);
+xlim([mean(data.lon,'omitnan')-60 mean(data.lon,'omitnan')+60]);
+ylim([mean(data.lat,'omitnan')-60 mean(data.lat,'omitnan')+60]);
 hold on
 C = load('coastlines');
 plot(C.coastlon,C.coastlat,'k')
@@ -152,8 +168,8 @@ plot(C.coastlon,C.coastlat,'k')
 figure()
 
 scatter(data.lon,data.lat,'r');
-xlim([mean(data.lon)-0.1 mean(data.lon)+0.1]);
-ylim([mean(data.lat)-0.1 mean(data.lat)+0.1]);
+xlim([mean(data.lon,'omitnan')-0.1 mean(data.lon,'omitnan')+0.1]);
+ylim([mean(data.lat,'omitnan')-0.1 mean(data.lat,'omitnan')+0.1]);
 hold on
 C = load('coastlines');
 plot(C.coastlon,C.coastlat,'k')
@@ -201,7 +217,7 @@ ylabel('Tp (s)');
 ax(3) = subplot(3,1,3); 
 plot(data.dp); 
 hold on; grid on; 
-scatter(find(data.quality_flag==3),data.dp(data.quality_flag==3),'ro'); 
+scatter(find(data.quality_flag==3),data.dp(data.quality_flag==3),'co'); 
 scatter(find(data.quality_flag==4),data.dp(data.quality_flag==4),'ro'); 
 ylabel('Dp (deg from)'); 
 

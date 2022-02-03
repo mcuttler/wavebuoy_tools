@@ -19,16 +19,16 @@ parser = 'parser_v1.11.2.py';
 %% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1292'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-0551'; %spotter serial number, or just Datawell 
 buoy_info.version = 'Spotter-V2'; %or DWR4 for Datawell, for example
 buoy_info.site_code = 'GRBNK01';
 buoy_info.DeployLoc = 'GoodrichBank01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 90; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2021,11,12,00,00,00); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
-buoy_info.tend = datenum(2022,01,31,00,00,00); 
-buoy_info.DeployID = 'GRBNK0102'; %deployment number at this site
+buoy_info.tstart = datenum(2020,11,20,00,00,00); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
+buoy_info.tend = datenum(2021,03,28,00,00,00); 
+buoy_info.DeployID = 'GRBNK0101'; %deployment number at this site
 buoy_info.timezone = 9; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 2; 

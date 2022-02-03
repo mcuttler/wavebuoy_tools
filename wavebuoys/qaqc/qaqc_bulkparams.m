@@ -33,7 +33,7 @@ end
 
 %    User defined test criteria - absolute difference from preceding points
 %    to denote 'flatline' 
-check.WHTOL = 0.01; 
+check.WHTOL = 0.025; 
 check.WPTOL = 0.01;
 check.WDTOL = 0.5; 
 check.WSPTOL = 0.5; 
