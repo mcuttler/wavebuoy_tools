@@ -1,14 +1,14 @@
 %% qaqc subflag
 % This code determines the 'reason' that data received the primary qa flag
-% Only determines reason for bad or questionable data (primary flag of 3
+% Only determines reason for bad or questionable data (primary flag of 3)
 
 function [primary_flag, sub_flag] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests); 
 
 
 for i = 1:size(bulkparams.time,1)
-%build variable that compiles results of all qaqc tests for each time point
-    dum = [];   
-    
+	%% build variable that compiles results of all qaqc tests for each time point
+	% matrix is [r, c] = [tests, parameters] 
+    dum = [];        
     for j = 1:length(fields)
         for jj = 1:length(qaqc_tests)            
             if jj==3
@@ -29,10 +29,10 @@ for i = 1:size(bulkparams.time,1)
     %require mulitple time points 
     if i == 1
         test19 = find(strcmp(qaqc_tests,'19')==1); 
-        if sum(dum(test19,:))==length(fields); 
+        if sum(dum(test19,:))==length(fields); %everything is a value of 1 (pass)
             primary_flag(i,1)=1; 
             sub_flag(i,1) = -127; 
-        else
+        else %something not 1, so figure out which was outside range 
             check_idx = find(dum(test19,:)==max(dum(test19,:))); 
             primary_flag(i,1) = dum(test19,check_idx(1)); 
             %look at second column for test 19 to determine cause
@@ -45,9 +45,15 @@ for i = 1:size(bulkparams.time,1)
             end                       
         end
     else
-        dd = sum(dum,2); 
-        didx = find(dd==max(dd)); 
+		
+        dd = max(dum,[],2); %find max value in each row to determine which test has 'worst' fail/suspect 
+        didx = find(dd==max(dd)); %find the test that has most fails 
         if length(didx)>1
+            %sum across rows to see which test has most fails/suspect
+%             dd2 = sum(dum(didx,:),2); 
+%             didx2 = find(dd2==max(dd2)); 
+%             if didx
+           
             didx = didx(end);%assigns to last test, this could probably be better 
         end
         
