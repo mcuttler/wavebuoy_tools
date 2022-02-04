@@ -8,7 +8,7 @@ clc
 %set file path (wherever file downloaded to)
 filepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode\nc\CapeBridgewater01';
 %IMOS file name
-filename = 'IMOS_NTP-WAVE_TW_20200820T171107Z_CAPEBW01_WAVERIDER_FV01_timeseries_END-20210624T034220Z.nc';
+filename = 'IMOS_NTP-WAVE_TW_20210624T075916Z_CAPEBW01_WAVERIDER_FV01_timeseries_END-20211203T022843Z.nc';
 
 ncfile = fullfile(filepath, filename); 
 

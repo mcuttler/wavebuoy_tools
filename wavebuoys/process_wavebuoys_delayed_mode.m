@@ -8,41 +8,44 @@
 clear; clc
 
 %location of wavebuoy_tools repo
+
 homepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Matlab Codes\Github Repository\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\Data\SPOT0552_CapeBridgewaterDC_20200815_to_20210624'; 
+datapath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\Data\SPOT1109_CapeBridgewaterDC_20210624_to_20211203'; 
 
 
 %path of Sofar parser script
 parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\SofarParser\parser_v1.11.2'; 
 parser = 'parser_v1.11.2.py'; 
 
+
 %% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.name = 'SPOT-0552'; %spotter serial number, or just Datawell 
+buoy_info.name = 'SPOT-1109'; %spotter serial number, or just Datawell 
 buoy_info.version = 'Spotter-V2'; %or DWR4 for Datawell, for example
 buoy_info.site_code = 'CAPEBW01';
 buoy_info.DeployLoc = 'CapeBridgewater01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 69; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2020,04,14,0,0,0); 
-buoy_info.tend = datenum(2021,06,25,0,0,0); 
-buoy_info.DeployID = 'CAPEBW0102'; %deployment number at this site
+buoy_info.tstart = datenum(2021,06,24,07,59,15); 
+buoy_info.tend = datenum(2021,12,03,02,28,44); 
+buoy_info.DeployID = 'CAPEBW0103'; %deployment number at this site
 buoy_info.timezone = 10; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-buoy_info.MagDec = 10.2; 
+buoy_info.MagDec = 10.20; 
 
 
 %inputs for IMOS filename structure
 buoy_info.archive_path = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
+
 buoy_info.facility_code = 'NTP-WAVE';
 buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
-buoy_info.file_version = 1; 
+buoy_info.file_version = 1;   %Not sure what this is? or if I should change?
 buoy_info.product_type = 'timeseries'; 
 
 %% process delayed mode data
@@ -51,7 +54,7 @@ buoy_info.product_type = 'timeseries';
 if strcmp(buoy_info.type,'sofar')==1
     %set number of unique time poins to use for efficient processing (depends
     %on computer specifications) 
-    chunk = 10; 
+    chunk = 20; 
     
     %process delayed mode (from buoy memory card)
     if strcmp(buoy_info.version, 'Spotter-V2')
