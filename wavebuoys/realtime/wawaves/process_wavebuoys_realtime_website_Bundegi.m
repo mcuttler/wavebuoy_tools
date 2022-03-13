@@ -14,16 +14,16 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1608'; %spotter serial number, or just Datawell 
-buoy_info.name = 'CoralBay'; 
+buoy_info.serial = 'SPOT-1578'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Bundegi'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'CoralBay';
-buoy_info.DeployDepth = 25; 
-buoy_info.DeployLat = -23.8577; 
-buoy_info.DeployLon = 113.5500; 
+buoy_info.DeployLoc = 'Bundegi';
+buoy_info.DeployDepth = 20; 
+buoy_info.DeployLat = -21.9368;
+buoy_info.DeployLon = 114.13083; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
