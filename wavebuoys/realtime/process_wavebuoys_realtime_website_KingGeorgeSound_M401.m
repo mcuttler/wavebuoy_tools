@@ -22,8 +22,8 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'KingGeorgeSound_M401_1667';
 buoy_info.DeployDepth = 15; 
-buoy_info.DeployLat = -35.079750; 
-buoy_info.DeployLon = 117.979450; 
+buoy_info.DeployLat = -35.079450; 
+buoy_info.DeployLon = 117.977933; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
@@ -71,7 +71,14 @@ if strcmp(buoy_info.type,'sofar')==1
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
             [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
-            
+                        %check that it's new data
+            ind = find(SpotData.time>archive_data.time(end)); 
+            if ~isempty(ind)
+                fields = fieldnames(SpotData);             
+                for j = 1:length(fields)
+                    SpotData.(fields{j})=SpotData.(fields{j})(ind,:); 
+                end
+            end
             %check that it's new data
             if SpotData.time(1)>archive_data.time(end)
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
