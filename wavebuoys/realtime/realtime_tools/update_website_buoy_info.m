@@ -12,7 +12,7 @@
 function [] = update_website_buoy_info(buoy_info, data)
 
 %read in existing data - read everything as strings
-fid = fopen([buoy_info.archive_path '\buoys.csv'],'r'); 
+fid = fopen([buoy_info.archive_path '\' buoy_info.website_filename],'r'); 
 fmt = '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s'; 
 in_data = textscan(fid, fmt, 'Delimiter',','); 
 fclose(fid); 
