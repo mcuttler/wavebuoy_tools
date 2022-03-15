@@ -101,7 +101,7 @@ for i = 1:size(web_data,2)
     end
 end
 
-fid = fopen([buoy_info.archive_path '\buoys.csv'],'w'); 
+fid = fopen([buoy_info.archive_path '\' buoy_info.website_filename],'w'); 
 
 for i = 1:size(web_data,1)
     if i == 1
