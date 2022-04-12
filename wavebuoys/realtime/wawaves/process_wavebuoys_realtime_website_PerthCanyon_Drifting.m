@@ -27,6 +27,7 @@ buoy_info.DeployLon = 0;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
+buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 
@@ -55,12 +56,12 @@ if strcmp(buoy_info.type,'sofar')==1
     
     %PerthCanyon_drifting always seems to download more than limit through
     %API
-    if length(SpotData.time)>limit
-        fields = fieldnames(SpotData); 
-        for i = 1:length(fields)
-            SpotData.(fields{i}) = SpotData.(fields{i})(end-1:end,:); 
-        end
-    end
+%     if length(SpotData.time)>limit
+%         fields = fieldnames(SpotData); 
+%         for i = 1:length(fields)
+%             SpotData.(fields{i}) = SpotData.(fields{i})(end-1:end,:); 
+%         end
+%     end
     
     
     if flag == 1
@@ -76,7 +77,11 @@ if strcmp(buoy_info.type,'sofar')==1
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
             [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
-            
+            idx_w = find(SpotData.time>archive_data.time(end));             
+            ff = fieldnames(SpotData); 
+            for f = 1:length(ff)                
+                SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);                
+            end
             %check that it's new data
             if SpotData.time(1)>archive_data.time(end)
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
