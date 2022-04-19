@@ -160,7 +160,7 @@ for j = 1:size(fidx,2)
         else
             filenames = {'bulkparameters','location','displacement', 'a1','a2','b1','b2','Sxx','Syy','Szz'};
         end
-        
+ %%       
         for kk = 1:length(filenames)
             if exist([datapath '\tmp\' filenames{kk} '.csv'])
                 if strcmp(filenames{kk},'bulkparameters') | strcmp(filenames{kk},'location') | strcmp(filenames{kk},'displacement') | strcmp(filenames{kk},'sst')
@@ -198,8 +198,15 @@ for j = 1:size(fidx,2)
                     
                     if size(dumdata.data,2)~=size(spec.freq,2)
                         dumdata.data(:,end+1:size(spec.freq,2)+8)=nan; 
-                    end                          
-                    spec.(filenames{kk}) = [spec.(filenames{kk}); dumdata.data(:,9:end)];                                        
+                    end
+                    %add in check that all spectral data is 128 long
+                    if length(dumdata.data(1,9:end))<128
+                        dl = 128 - length(dumdata.data(1,9:end));                     
+                        dumdata.data(:,end:end+dl)=nan; 
+                        spec.(filenames{kk}) = [spec.(filenames{kk}); dumdata.data(:,9:end)];  
+                    else
+                        spec.(filenames{kk}) = [spec.(filenames{kk}); dumdata.data(:,9:end)];  
+                    end
                 end
             end
             
