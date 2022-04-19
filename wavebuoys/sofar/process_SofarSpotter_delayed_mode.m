@@ -99,7 +99,7 @@ for j = 1:size(fidx,2)
     disp(['Adding data for chunk ' num2str(j) ' to data arrays'])    
 
     %for some instances parser generates subdirectories
-    if exist([datapath '\tmp\bulkparameters.csv'])==0
+    if exist([datapath '\tmp\bulkparameters.csv'])
         %get list of subfolders
         subdir = dir([datapath '\tmp']); 
         subdir = subdir(3:end); 
