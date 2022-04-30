@@ -29,17 +29,19 @@ for i = 1:size(dum,1);
            %             ddum.data = [millis,GPS_Epoch_Time (s),x(mm), y(mm), z(mm)]
            
            ddum = importdata(fullfile(sofarpath, dum(i).name)); 
-           
-           %convert epoch time to matlab datenum
-           posixtime = ddum.data(:,2)+(ddum.data(:,1)./1000); 
-           dt = utcoffset./24; %needs to be in hours, + is east from UTC, - is west from UTC
-           displacements.timeutc = [displacements.timeutc; datenum(datetime(posixtime,'convertFrom','posixtime'))]; 
-           displacements.timelocal = [displacements.timelocal; datenum(datetime(posixtime,'convertFrom','posixtime'))+dt];
-           
-           %convert mm to m
-           displacements.x = [displacements.x; ddum.data(:,3)./1000]; 
-           displacements.y = [displacements.y; ddum.data(:,4)./1000]; 
-           displacements.z = [displacements.z; ddum.data(:,5)./1000]; 
+           %check that structure is right size
+           if size(ddum.data,2)==5
+               %convert epoch time to matlab datenum
+               posixtime = ddum.data(:,2)+(ddum.data(:,1)./1000); 
+               dt = utcoffset./24; %needs to be in hours, + is east from UTC, - is west from UTC
+               displacements.timeutc = [displacements.timeutc; datenum(datetime(posixtime,'convertFrom','posixtime'))]; 
+               displacements.timelocal = [displacements.timelocal; datenum(datetime(posixtime,'convertFrom','posixtime'))+dt];
+               
+               %convert mm to m
+               displacements.x = [displacements.x; ddum.data(:,3)./1000]; 
+               displacements.y = [displacements.y; ddum.data(:,4)./1000]; 
+               displacements.z = [displacements.z; ddum.data(:,5)./1000]; 
+           end
        end
    end
 end
