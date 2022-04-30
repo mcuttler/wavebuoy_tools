@@ -87,12 +87,19 @@ if strcmp(buoy_info.type,'sofar')==1
             %check that it's new data
             idx_w = find(SpotData.time>archive_data.time(end)); 
             idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
+            idx_p = find(SpotData.press_time>archive_data.press_time(end)); 
+            idx_pstd = find(SpotData.press_std_time>archive_data.press_std_time(end)); 
+
             if SpotData.time(1)>archive_data.time(end)
                 %if smart mooring, only keep new temp and wave data
                 ff = fieldnames(SpotData); 
                 for f = 1:length(ff)
                     if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
+                    elseif strcmp(ff{f},'press_time')|strcmp(ff{f},'pressure')
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_p,:); 
+                    elseif strcmp(ff{f},'press_std_time')|strcmp(ff{f},'press_std')
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_pstd,:); 
                     else
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:); 
                     end
@@ -118,10 +125,9 @@ if strcmp(buoy_info.type,'sofar')==1
         else
             SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
             if isfield(SpotData,'temp_time')
-                SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4; 
-                SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
-                
+                SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4;                             
             end
+
             realtime_archive_mat(buoy_info, SpotData);
             realtime_backup_mat(buoy_info, SpotData);
             realtime_archive_text(buoy_info, SpotData, limit); 
@@ -136,78 +142,7 @@ if strcmp(buoy_info.type,'sofar')==1
             update_website_buoy_info(buoy_info, SpotData); 
         end        
     end       
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- %Datawell DWR4 
-elseif strcmp(buoy_info.type,'datawell')==1
-    data.time = datenum(now); 
-    data.tnow = datevec(data.time); 
-    
-    data.file20 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF20}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
-    data.file21 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF21}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
-    data.file25 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF25}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
-    data.file28 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF28}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
-    data.file82 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF82}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];    
-    
-    %original code for Datawell buoys does all checking of directories and
-    %grabbing archived data
-    [dw_data, archive_data,check] = Process_Datawell_realtime_website(buoy_info, data, data.file20, data.file21, data.file25, data.file28, data.file82);
-    clear data; 
-    
-    %check that it's new data
-    
-    if all(check)~=0
-        if ~isempty(archive_data)
-            if size(dw_data.time,1)>size(archive_data.time,1)
-                %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-                [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, dw_data);                        
-                
-                %save data to different formats        
-                realtime_archive_mat(buoy_info, data);
-%                 realtime_backup_mat(buoy_info, data);
-                limit = 1;         
-                realtime_archive_text(buoy_info, data, limit);             
-                
-                %output MEM and SST plots 
-                plot_idx = find(data.time>archive_data.time(end)); 
-                if strcmp(buoy_info.DataType,'spectral')                        
-                    for ii = 1:size(plot_idx,1); 
-                        [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
-                        make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
-                    end
-                end
-                
-                %code to update the buoy info master file for website to read
-                update_website_buoy_info(buoy_info, data); 
-            end
-        end
-    else
-        dw_data.qf_waves = ones(size(dw_data.time,1),1).*4;
-        dw_data.qf_sst = ones(size(dw_data.temp_time,1),1).*4; 
-        dw_data.qf_bott_temp =ones(size(dw_data.temp_time,1),1).*4; 
-        realtime_archive_mat(buoy_info, dw_data); 
-%         realtime_backup_mat(buoy_info, dw_data);
-        limit = 1; 
-        realtime_archive_text(buoy_info, dw_data, limit); 
-        
-        %output MEM and SST plots 
-        if strcmp(buoy_info.DataType,'spectral')        
-            for ii = 1:size(dw_data.a1,1); 
-                [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
-                make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
-            end    
-        end
-        
-        %code to update the buoy info master file for website to read
-        update_website_buoy_info(buoy_info, dw_data); 
-    end
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Triaxys
-elseif strcmp(buoy_info.type,'triaxys')
-    disp('No Triaxys code yet'); 
 end
-
-%%
-% quit
 
 
 

@@ -126,6 +126,7 @@ end
 %assume surface and bottom sensor   
 Spotter.temp_time = []; 
 Spotter.surf_temp = []; 
+Spotter.bott_temp = []; 
 Spotter.pressure =[]; 
 Spotter.pressure_std = []; 
 Spotter.press_time = []; 
@@ -134,6 +135,7 @@ if ~isempty(resp_sensor.Body.Data.data)
     for j = 1:size(resp_sensor.Body.Data.data,1)
         if resp_sensor.Body.Data.data(j).sensorPosition==1
             Spotter.surf_temp = [Spotter.surf_temp; resp_sensor.Body.Data.data(j).value]; 
+            Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
             Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
         elseif resp_sensor.Body.Data.data(j).sensorPosition==2 
             %check whether mean or std
@@ -153,6 +155,7 @@ else
     Spotter.temp_time = Spotter.time; 
     Spotter.press_time=Spotter.time;
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure = ones(size(Spotter.time,1),1).*-9999;
 end        
 
