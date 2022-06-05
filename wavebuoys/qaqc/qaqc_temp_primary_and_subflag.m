@@ -15,7 +15,7 @@ if all(bulkparams.(tfield)<0)
     primary_flag(:,1) = ones(size(bulkparams.(tfield),1),1).*4; 
     sub_flag(:,1) = ones(size(bulkparams.(tfield),1),1).*2; 
 else
-    for i = 1:size(bulkparams.time,1)
+    for i = 1:size(bulkparams.temp_time,1)
         %build variable that compiles results of all qaqc tests for each time point
         dum = [];   
         

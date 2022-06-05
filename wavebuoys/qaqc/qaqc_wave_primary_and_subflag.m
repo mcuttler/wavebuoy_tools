@@ -40,7 +40,7 @@ for i = 1:size(bulkparams.time,1)
                 sub_flag(i,1) = 16; %hs
             elseif bulkparams.qf_19(i,2)==2
                 sub_flag(i,1) = 17; %tp
-            elseif bulkparams.qf_19(i,3) ==3
+            elseif bulkparams.qf_19(i,2) ==3
                 sub_flag(i,1) = 18; %dp
             end                       
         end

@@ -100,10 +100,10 @@
 
 %%
 
-function [imos_filename] = make_imos_ardc_filename(buoy_info)
+function [imos_filename] = make_imos_ardc_filename(buoy_info,product_type)
 
 %build file name
-filename = [buoy_info.institution '_' datestr(buoy_info.startdate,'yyyymmdd') '_' buoy_info.site_name '_' buoy_info.data_mode '_' buoy_info.product_type '_' datesr(buoy_info.enddate,'yyyymmdd') '.nc']; 
+filename = [buoy_info.institution '_' datestr(buoy_info.startdate,'yyyymmdd') '_' buoy_info.site_name '_' buoy_info.data_mode '_' product_type '_' datestr(buoy_info.enddate,'yyyymmdd') '.nc']; 
 imos_filename = fullfile(buoy_info.archive_path, filename); 
 
 end
