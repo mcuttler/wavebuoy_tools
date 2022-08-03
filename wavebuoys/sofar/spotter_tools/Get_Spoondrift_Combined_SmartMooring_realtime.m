@@ -139,14 +139,22 @@ if ~isempty(resp_sensor.Body.Data.data)
             Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
         elseif resp_sensor.Body.Data.data(j).sensorPosition==2 
             %check whether mean or std
-            if strcmp(resp_sensor.Body.Data.data(j).data_type_name(10:13),'mean')
+            if strcmp(resp_sensor.Body.Data.data(j).data_type_name(10:13),'mean')                
                 Spotter.press_time = [Spotter.press_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
                 %pressure recorded in micro-bar so divide by 1000000 to get to dbar
-                Spotter.pressure = [Spotter.pressure; resp_sensor.Body.Data.data(j).value/100000]; 
+                if ~isempty(resp_sensor.Body.Data.data(j).value)
+                    Spotter.pressure = [Spotter.pressure; resp_sensor.Body.Data.data(j).value/100000]; 
+                else
+                    Spotter.pressure = [Spotter.pressure; nan]; 
+                end
             else
                 Spotter.press_std_time = [Spotter.press_std_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
                 %pressure recorded in micro-bar so divide by 100000 to get to dbar
-                Spotter.pressure_std = [Spotter.pressure_std; resp_sensor.Body.Data.data(j).value/100000]; 
+                if ~isempty(resp_sensor.Body.Data.data(j).value)
+                    Spotter.pressure_std = [Spotter.pressure_std; resp_sensor.Body.Data.data(j).value/100000]; 
+                else
+                    Spotter.pressure_std = [Spotter.pressure_std; nan];
+                end
             end
         end
     end
@@ -157,6 +165,8 @@ else
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.pressure_std = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.press_std_time = Spotter.time;
 end        
 
 end

@@ -48,6 +48,7 @@ if strcmp(buoy_info.type,'sofar')==1
     elseif strcmp(buoy_info.version,'smart_mooring_combined')
         limit = buoy_info.UpdateTime*2;
         [SpotData] = Get_Spoondrift_Combined_SmartMooring_realtime(buoy_info,limit); 
+        flag=1; 
     else
         if strcmp(buoy_info.DataType,'parameters')
             limit = buoy_info.UpdateTime*2;     
@@ -68,7 +69,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+%         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
@@ -98,7 +99,7 @@ if strcmp(buoy_info.type,'sofar')==1
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
                     elseif strcmp(ff{f},'press_time')|strcmp(ff{f},'pressure')
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_p,:); 
-                    elseif strcmp(ff{f},'press_std_time')|strcmp(ff{f},'press_std')
+                    elseif strcmp(ff{f},'press_std_time')|strcmp(ff{f},'pressure_std')
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_pstd,:); 
                     else
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:); 
@@ -126,6 +127,7 @@ if strcmp(buoy_info.type,'sofar')==1
             SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
             if isfield(SpotData,'temp_time')
                 SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4;                             
+                SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
             end
 
             realtime_archive_mat(buoy_info, SpotData);

@@ -24,14 +24,29 @@ else
     for i = 1:size(ddv,1)
         dt = datevec(data.time); 
         idx = find(dt(:,1)==ddv(i,1)&dt(:,2)==ddv(i,2)); 
+        %account for temperature
         if isfield(data,'temp_time'); 
             dt_temp = datevec(data.temp_time);    
             idx_temp = find(dt_temp(:,1)==ddv(i,1)&dt_temp(:,2)==ddv(i,2)); 
         end
-        fields = fieldnames(data); 
+        %account for pressure std
+        if isfield(data,'press_std_time'); 
+            dt_press_std = datevec(data.press_std_time);    
+            idx_press_std = find(dt_press_std(:,1)==ddv(i,1)&dt_press_std(:,2)==ddv(i,2)); 
+        end
+        %account for pressure 
+        if isfield(data,'press_time'); 
+            dt_press = datevec(data.press_time);    
+            idx_press = find(dt_press(:,1)==ddv(i,1)&dt_press(:,2)==ddv(i,2)); 
+        end
+        fields = fieldnames(data);
         for j = 1:length(fields)
             if strcmp(fields{j},'qf_bott_temp') |strcmp(fields{j},'qf_sst') |strcmp(fields{j},'surf_temp') | strcmp(fields{j},'bott_temp')|strcmp(fields{j},'temp_time') | strcmp(fields{j},'curr_mag') | strcmp(fields{j},'curr_dir') | strcmp(fields{j},'curr_mag_std') | strcmp(fields{j},'curr_dir_std') | strcmp(fields{j},'w') | strcmp(fields{j},'w_std')                
                 buoy_data.(fields{j})=data.(fields{j})(idx_temp,:); 
+            elseif strcmp(fields{j},'press_std_time')|strcmp(fields{j},'pressure_std')
+                buoy_data.(fields{j}) = data.(fields{j})(idx_press_std,:); 
+            elseif strcmp(fields{j},'press_time')|strcmp(fields{j},'pressure')
+                buoy_data.(fields{j}) = data.(fields{j})(idx_press,:);                 
             else
                 if size(data.(fields{j}),1)>1
                     buoy_data.(fields{j})=data.(fields{j})(idx,:);

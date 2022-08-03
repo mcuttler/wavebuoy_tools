@@ -14,19 +14,20 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'datawell'; 
-buoy_info.serial = 'Datawell-74089';  
+buoy_info.serial = 'Datawell-XXXXX';  
 buoy_info.name = 'Torbay'; 
-buoy_info.datawell_name = 'Dev_Site'; 
+buoy_info.datawell_name = 'Dev_Site2'; 
 buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Torbay';
 buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -35.06858; 
-buoy_info.DeployLon = 117.76905; 
+buoy_info.DeployLat = -35.071057; 
+buoy_info.DeployLon = 117.775390; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
+buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup';
 buoy_info.backup_path2 = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\realtime_archive_backup';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs

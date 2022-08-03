@@ -69,7 +69,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+            [archive_data] = load_archived_data(buoy_info.backup_path, buoy_info, SpotData);                  
             %add serial ID and name if not already there
             if ~isfield(archive_data,'serialID')
                 for i = 1:size(archive_data.time,1)
