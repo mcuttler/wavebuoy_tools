@@ -15,14 +15,17 @@ addpath(genpath(mpath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
 buoy_info.datapath = 'C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Sofar\DM_data\SPOT0168_KingGeorgeSound_20201211_to_20210326'; 
+%path to matlab directory --- only needed for Spotter processing 
+% buoy_info.matpath = 'C:\Users\00084142\AppData\Local\Turbo.net\Sandbox\MATLAB\9.11.0.1687835\local\meta\@PROGRAMFILES@\MATLAB\R2021b\bin'; 
+% buoy_info.pypath = 'C:\Users\00084142\Anaconda3'; 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0168'; %
-buoy_info.instrument = 'Sofar Spotter-V1'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
+buoy_info.serial = 'SPOT-0559'; %
+buoy_info.instrument = 'Sofar Spotter-V2'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
 buoy_info.site_name = 'KING-GEORGE-SOUND'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
 buoy_info.DeployDepth = 15; 
-buoy_info.startdate = datenum(2021,1,1); 
-buoy_info.enddate = datenum(2021,2,1); 
+buoy_info.startdate = datenum(2021,7,1); 
+buoy_info.enddate = datenum(2021,8,1); 
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 10.20; 
@@ -54,16 +57,55 @@ if strcmp(buoy_info.type,'sofar')==1
     chunk = 10; 
     
     %process delayed mode (from buoy memory card)
-    if strcmp(buoy_info.instrument, 'Sofar Spotter-V2')
-        [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);       
-        %down sample temperature to be at same time stamp as wave data 
-        [bulkparams] = sofar_join_bulkparams_and_sst(bulkparams, sst); 
-    else
-         [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);
-         bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
-    end         
+%     if strcmp(buoy_info.instrument, 'Sofar Spotter-V2')
+%         [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);       
+%         %down sample temperature to be at same time stamp as wave data 
+%         [bulkparams] = sofar_join_bulkparams_and_sst(bulkparams, sst); 
+%     else
+%          [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);
+%          bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
+%     end         
 
     %re-organise so all parameters of interest are in one data structure
+    load('C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Sofar\Sofar_KGS_DM.mat'); 
+    %bulkparams
+    fields = fieldnames(bulkparams); 
+    for i = 1:length(fields)
+        if strcmp(fields{i},'temp')
+            data.surf_temp = bulkparams.(fields{i});
+            data.temp_time = data.time; 
+            data.bott_temp = bulkparams.(fields{i}).*-9999; 
+        else
+            data.(fields{i}) = bulkparams.(fields{i}); 
+        end
+    end
+    %displacements
+    fields = fieldnames(displacements); 
+    for i = 1:length(fields)
+        if strcmp(fields{i},'time'); 
+            data.disp_time = displacements.(fields{i}); 
+        else
+            data.(fields{i}) = displacements.(fields{i}); 
+        end
+    end
+    %spec
+    fields = fieldnames(spec);
+    for i =1 :length(fields); 
+        if strcmp(fields{i},'time')
+            continue
+        elseif strcmp(fields{i},'Szz')
+            data.energy = spec.(fields{i}); 
+        else
+            data.(fields{i}) = spec.(fields{i}); 
+        end
+    end 
+    %make frequency same size as other spec params
+    for i = 1:size(data.a1,1); 
+        data.frequency(i,:) = data.freq(1,:); 
+    end
+    data = rmfield(data,'freq'); 
+
+
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
@@ -145,10 +187,11 @@ elseif strcmp(buoy_info.type,'datawell')==1
      data_nc.temp_time= data.time; 
      data = data_nc; 
      clear data_nc
+     %save file
+     save('C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Datawell\Datawell_DM.mat','-v7.3'); 
 end
 
-%save file
-save('C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Datawell\Datawell_DM.mat','-v7.3'); 
+
 
 %%   QAQC data - following QARTOD
 %settings for QAQC
@@ -250,12 +293,14 @@ end
 %divide displacements into 2week blocks and may x, y, z and time single
 %column variables 
 disp_buoy_info = buoy_info; %create dum info variable as time needs to change in code below 
-%transpose so can stack in time 
-data.disp_time = data.disp_time'; data.x = data.x'; data.y = data.y'; data.z = data.z'; 
-data.disp_time = data.disp_time(:); 
-data.x = data.x(:); 
-data.y = data.y(:); 
-data.z = data.z(:); 
+if strcmp(buoy_info.type,'datawell')
+    %transpose so can stack in time 
+    data.disp_time = data.disp_time'; data.x = data.x'; data.y = data.y'; data.z = data.z'; 
+    data.disp_time = data.disp_time(:); 
+    data.x = data.x(:); 
+    data.y = data.y(:); 
+    data.z = data.z(:); 
+end
 
 ttdum = data.disp_time(1):14:data.disp_time(end); 
 for i = 1:length(ttdum)

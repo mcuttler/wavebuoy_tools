@@ -93,7 +93,7 @@ for j = 1:size(fidx,2)
     %running external executables from Matlab. To fix this, remove the
     %folder that it adds     
     system(['set path=%path:C:\Program Files\MATLAB\R2021a\bin\win64;=% & C:\ProgramData\Anaconda3\python ' parser]);   
-    
+%     system(['set path=%path:' matpath '\win64;=% & ' pypath '\python ' parser]);   
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %append data from parser to single output file 
     disp(['Adding data for chunk ' num2str(j) ' to data arrays'])    

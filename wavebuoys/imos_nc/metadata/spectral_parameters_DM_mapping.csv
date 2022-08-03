@@ -1,6 +1,6 @@
 ovarname,varname,standard_name,long_name,units,axis,calendar,sampling_period_timestamp_location,valid_min,valid_max,reference_datum,coordinates,comment
 time,TIME,time,time,days since 1950-01-01 00:00:00 UTC,T,gregorian,end,,,,,
-frequency,FREQUENCY,,frequency,Hz,,,,DATA PROVIDER TO FILL IN,DATA PROVIDER TO FILL IN,,,
+frequency,FREQUENCY,,frequency,Hz,,,,0,1,,,
 lat,LATITUDE,latitude,latitude of each observation,degrees_north,Y,,,-90,90,WGS84 coordinate reference system, EPSG:4326,
 lon,LONGITUDE,longitude,longitude of each observation,degrees_east,X,,,-180,180,WGS84 coordinate reference system, EPSG:4326,
 a1,A1,,first term of the Fourier cosine series,1,,,,-1,1,,TIME LATITUDE LONGITUDE,
