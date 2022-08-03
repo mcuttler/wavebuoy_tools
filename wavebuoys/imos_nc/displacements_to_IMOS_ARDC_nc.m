@@ -14,7 +14,7 @@
 
 %%
 
-function [] = spectral_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
+function [] = displacements_to_IMOS_ARDC_nc(displacements, disp_buoy_info, globfile, varsfile); 
 
 
 if ~exist(disp_buoy_info.archive_path)

@@ -12,16 +12,23 @@ function [bulkparams] = qaqc_bulkparams(bulkparams, check)
 % check.time = bulkparams.time; 
 
 if isfield(bulkparams,'meanspr')
-    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','surf_temp'};
 elseif isfield(bulkparams,'dmspr')
      fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
 end
 
-outfields={'hs_15','tm_15','tp_15','dm_15','dp_15','meanspr_15','pkspr_15','temp_15'}; 
+outfields={'hs_15','tm_15','tp_15','dm_15','dp_15','meanspr_15','pkspr_15','surf_temp_15'}; 
 
 for f = 1:length(fields)
     if isfield(bulkparams, fields{f}); 
-        [bulkparams.(outfields{f})] = qartod_15_mean_std(check, bulkparams.(fields{f})); 
+        if strcmp(fields{f},'surf_temp')
+            in.time = check.temp_time; 
+        else
+            in.time = check.time; 
+        end
+        in.time_window = check.time_window; 
+        in.STD = check.STD;             
+        [bulkparams.(outfields{f})] = qartod_15_mean_std(in, bulkparams.(fields{f})); 
     else
         bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
     end
@@ -42,13 +49,13 @@ end
 % check.rep_suspect = 144; % might be in hrs.
 
 if isfield(bulkparams,'meanspr')
-    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','surf_temp'};
 elseif isfield(bulkparams,'dmspr')
      fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
 end
 
 tol = {'WHTOL','WPTOL','WPTOL', 'WDTOL','WDTOL','WSPTOL','WSPTOL','TTOL'};
-outfields={'hs_16','tm_16','tp_16','dm_16','dp_16','meanspr_16','pkspr_16','temp_16'}; 
+outfields={'hs_16','tm_16','tp_16','dm_16','dp_16','meanspr_16','pkspr_16','surf_temp_16'}; 
 
 for f = 1:length(fields)
     if isfield(bulkparams, fields{f}); 
@@ -97,11 +104,11 @@ else
     field = 'surf_temp';
 end
 
-for i = 1:size(bulkparams.time,1)
+for i = 1:size(bulkparams.temp_time,1)
     if bulkparams.(field)(i,1)<check.MINT|bulkparams.(field)(i,1)>check.MAXT
-        bulkparams.temp_19(i,1) = 4;
+        bulkparams.surf_temp_19(i,1) = 4;
     else
-        bulkparams.temp_19(i,1) = 1; 
+        bulkparams.surf_temp_19(i,1) = 1; 
     end
 end
 
@@ -118,13 +125,13 @@ end
 % check.TROC = 2; 
 
 if isfield(bulkparams,'meanspr')
-    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','surf_temp'};
 elseif isfield(bulkparams,'dmspr')
      fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
 end
 
 roc = {'WHROC','WPROC','WPROC', 'WDROC','WDROC','WSPROC','WSPROC','TROC'}; 
-outfields={'hs_20','tm_20','tp_20','dm_20','dp_20','meanspr_20','pkspr_20','temp_20'}; 
+outfields={'hs_20','tm_20','tp_20','dm_20','dp_20','meanspr_20','pkspr_20','surf_temp_20'}; 
 
 for f = 1:length(fields)
     if isfield(bulkparams, fields{f}); 
@@ -141,17 +148,21 @@ end
 %UWA spike test 
 
 if isfield(bulkparams,'meanspr')
-    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','temp'};
+    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','surf_temp'};
 elseif isfield(bulkparams,'dmspr')
      fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
 end
 
 roc = {'WHROC','WPROC','WPROC', 'WDROC','WDROC','WSPROC','WSPROC','TROC'}; 
-outfields={'hs_spike','tm_spike','tp_spike','dm_spike','dp_spike','meanspr_spike','pkspr_spike','temp_spike'}; 
+outfields={'hs_spike','tm_spike','tp_spike','dm_spike','dp_spike','meanspr_spike','pkspr_spike','surf_temp_spike'}; 
 
 for f = 1:length(fields)
     if isfield(bulkparams, fields{f}); 
-        [bulkparams.(outfields{f})] = qaqc_uwa_spike(check.time, bulkparams.(fields{f}), check.(roc{f})); 
+        if strcmp(fields{f},'surf_temp')
+            [bulkparams.(outfields{f})] = qaqc_uwa_spike(check.temp_time, bulkparams.(fields{f}), check.(roc{f})); 
+        else
+            [bulkparams.(outfields{f})] = qaqc_uwa_spike(check.time, bulkparams.(fields{f}), check.(roc{f})); 
+        end
     else
         bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
     end  
