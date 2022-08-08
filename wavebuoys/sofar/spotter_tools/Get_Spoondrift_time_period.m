@@ -63,48 +63,44 @@ for ii =1:size(dumt,1)
             data.wind_time(j,1) = datenum(resp_waves.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
             data.wind_seasurfaceId(j,1) = resp_waves.Body.Data.data.wind(j).seasurfaceId;
         end
-    else
-        data.wind_speed = nan; 
-        data.wind_dir = nan;
-        data.wind_time = nan;
-        data.wind_seasurfaceId = nan; 
     end
     
     %check that wind and waves have same time and number of data points 
-    [m,~] = size(data.time); 
-    [n,~] = size(data.wind_time); 
-    
-    if m~=n       
-        if n>m %missing waves - so clip wind to waves
-            for j = 1:size(data.time,1)
-                ind(j,1) = find(data.wind_time==data.time(j)); 
-            end            
-            fields = {'wind_time';'wind_speed';'wind_dir';'wind_seasurfaceId'};
-            for j = 1:length(fields)
-                data.(fields{j}) = data.(fields{j})(ind,:); 
-            end  
-            clear j ind; 
-        elseif m>n %missing wind - add nan values to wind
-            dumdata = data; 
-            fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};
-            for j = 1:length(fields); 
-                dumdata.(fields{j}) = ones(size(data.time,1),1).*nan; 
-            end             
-            dumdata.wind_time = data.time; 
-            for j = 1:size(data.time,1)
-                ind = find(data.wind_time==data.time(j)); 
-                if isempty(ind)
-                    for jj = 1:length(fields)
-                        dumdata.(fields{jj})(j,1) = nan; 
-                    end
-                else
-                    for jj =1:length(fields)
-                        dumdata.(fields{jj})(j,1) = data.(fields{jj})(ind,1); 
+    if  ~isempty(resp_waves.Body.Data.data.wind) & ~isempty(resp_waves.Body.Data.data.waves)
+        [m,~] = size(data.time); 
+        [n,~] = size(data.wind_time);     
+        if m~=n       
+            if n>m %missing waves - so clip wind to waves
+                for j = 1:size(data.time,1)
+                    ind(j,1) = find(data.wind_time==data.time(j)); 
+                end            
+                fields = {'wind_time';'wind_speed';'wind_dir';'wind_seasurfaceId'};
+                for j = 1:length(fields)
+                    data.(fields{j}) = data.(fields{j})(ind,:); 
+                end  
+                clear j ind; 
+            elseif m>n %missing wind - add nan values to wind
+                dumdata = data; 
+                fields = {'wind_speed';'wind_dir';'wind_seasurfaceId'};
+                for j = 1:length(fields); 
+                    dumdata.(fields{j}) = ones(size(data.time,1),1).*nan; 
+                end             
+                dumdata.wind_time = data.time; 
+                for j = 1:size(data.time,1)
+                    ind = find(data.wind_time==data.time(j)); 
+                    if isempty(ind)
+                        for jj = 1:length(fields)
+                            dumdata.(fields{jj})(j,1) = nan; 
+                        end
+                    else
+                        for jj =1:length(fields)
+                            dumdata.(fields{jj})(j,1) = data.(fields{jj})(ind,1); 
+                        end
                     end
                 end
+                data = dumdata; 
+                clear dumdata j jj ind        
             end
-            data = dumdata; 
-            clear dumdata j jj ind        
         end
     end
     %% TEMPERATURE
