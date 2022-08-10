@@ -8,13 +8,13 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-homepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Matlab Codes\Github Repository\wavebuoy_tools\wavebuoys'; 
+homepath = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 
 %path of Sofar parser script
-parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\SofarParser\parser_v1.11.2'; 
-parser = 'parser_v1.11.2.py'; 
+parserpath = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\sofar\spotter_tools'; 
+parser = 'parser_v1.12.0.py'; 
 
 %% 
 %buoy type and deployment info number and deployment info 
@@ -26,7 +26,7 @@ buoy_info.DeployLoc = 'GoodrichBank01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 90; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2022,5,1,0,0,0); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
+buoy_info.tstart = datenum(2022,7,1,0,0,0); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
 buoy_info.tend = datenum(2022,8,1,0,0,0); 
 buoy_info.DeployID = 'GRBNK0101'; %deployment number at this site
 buoy_info.timezone = 9; %signed integer for UTC offset 
@@ -36,7 +36,7 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode';
+buoy_info.archive_path = 'Y:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\CodeTesting\Output_testing';
 buoy_info.facility_code = 'NTP-WAVE';
 buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
@@ -61,8 +61,39 @@ end
 
 disp('Performing QA/QC checks...');
 
-% double check parameter settings in '.\qaqc\qaqc_bulkparams.m' before
-% proceeding
+% double check parameter settings here 
+
+check.time = bulkparams.time; 
+check.temp_time = bulkparams.time; %for V2 buoys the timestamps are the same 
+bulkparams.temp_time = bulkparams.time; 
+check.WVHGT = bulkparams.hs;
+check.WVPD = bulkparams.tp; %parameter for range test (could also be mean) 
+check.WVDIR = bulkparams.dp; %parameter for range test (could also be mean)
+check.STD = 3; % mean + std test
+check.time_window = 72; %hours for calculating mean + std    
+check.WHTOL = 0.025; % flat line
+check.WPTOL = 0.01; % flat line
+check.WDTOL = 0.5;  %flat line
+check.WSPTOL = 0.5; %flat line
+check.TTOL = 0.01; %flat line 
+check.rep_fail = 240;  %  flat line (hrs)
+check.rep_suspect = 144; % flat line (hrs) 
+check.MINWH = 0.10; %min height 
+check.MAXWH = 10; %max height
+check.MINWP = 3; %min period
+check.MAXWP = 25; %max period
+check.MINSV = 0.07; %min spread
+check.MAXSV = 80.0; %max spread
+check.MINT = 5; %min temp
+check.MAXT = 55; %max temp
+check.WHROC= 2; %height rate of change
+check.WPROC= 10; %period rate of change
+check.WDROC= 50; %direction rate of change
+check.WSPROC= 25; %spreading rate of change
+check.TROC = 2; %temp rate of change
+check.wave_fields = {'hs','tp','dp'}; %fields for assigning primary/secondary subflags 
+check.temp_fields = {'surf_temp'}; %fields for assigning primary/secondary subflags 
+check.qaqc_tests = {'15','16','19','20','spike'}; % qaqc tests to use in assigning flags 
 
 [bulkparams] = qaqc_bulkparams(bulkparams,check);             
 
@@ -80,9 +111,7 @@ for i = 1:length(fields);
     end
     if strcmp(fields{i},'serialID')
         bulkparams_nc = rmfield(bulkparams_nc, fields{i}); 
-    end
-    
-    
+    end      
 end
 
 %rename surf_temp to temp for export **MC to fix this in future 
@@ -99,31 +128,45 @@ for i = 1:length(fields)
     end
 end
 
+%rename mean and peak spreading --- not sure what convention, but this is
+%based on the mapping file (varsfile below)
+bulkparams_nc.pkspr = bulkparams_nc.dpspr; 
+bulkparams_nc.meanspr = bulkparams_nc.dmspr; 
+
+
 %bulkparams
 %text files for IMOS-compliant netCDF generation
-globfile = [homepath '\imos_nc\metadata\glob_att_Spotter_bulkparams_timeSeries.txt']; 
-varsfile = [homepath '\imos_nc\metadata\bulk_wave_parameters_mapping.csv']; 
+globfile = [homepath '\imos_nc\metadata\ntp\glob_att_Spotter_bulkparams_timeSeries.txt']; 
+varsfile = [homepath '\imos_nc\metadata\ntp\bulk_wave_parameters_mapping.csv']; 
 
 bulkparams_to_IMOS_nc(bulkparams_nc, buoy_info.archive_path, buoy_info, globfile, varsfile); 
 
-%displacements
-%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_displacements_timeSeries.txt';     
-%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\displacements_parameters_mapping.csv';    
-%     displacements_to_IMOS_nc(displacements, buoy_info.archive_path, buoy_info, globfile, varsfile); 
-%     
-%    %gps
-%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_locations_timeSeries.txt';     
-%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\locations_parameters_mapping.csv';    
-%     locations_to_IMOS_nc(locations, buoy_info.archive_path, buoy_info, globfile, varsfile); 
-% 
-%     %spectral data
-%     globfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\glob_att_Spotter_spec_timeSeries.txt';     
-%     varsfile = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\imos_nc\metadata\spec_parameters_mapping.csv';    
-%     spec_to_IMOS_nc(spec, outpathNC, buoy_info, globfile, varsfile); 
-
-
 cd(homepath); 
-%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%% check the file you just created - checks most recent file in the archive directory  
+archive_path = fullfile(buoy_info.archive_path,'nc',buoy_info.DeployLoc); 
+files = dir(archive_path); files = files(3:end); 
+for j = 1:size(files,1)
+    dt(j,1) = datenum(files(j).date);
+end
+[~,I] = sort(dt,'descend');%sorts so most recently is first; 
+files = files(I); 
+
+ncfile = fullfile(files(1).folder, files(1).name); 
+data.time = ncread(ncfile,'TIME')+datenum(1950,1,1); 
+data.hs = ncread(ncfile,'WSSH'); 
+data.tp = ncread(ncfile,'WPPE');
+data.tm = ncread(ncfile,'WPFM'); 
+data.dp = ncread(ncfile,'WPDI'); 
+data.dm = ncread(ncfile,'SSWMD');
+data.pkspr = ncread(ncfile,'WPDS'); 
+data.meanspr = ncread(ncfile,'WMDS'); 
+data.quality_flag = ncread(ncfile,'wave_quality_flag'); 
+data.quality_subflag = ncread(ncfile,'wave_subflag'); 
+
+data.lon = ncread(ncfile,'LONGITUDE');
+data.lat = ncread(ncfile,'LATITUDE');
+
+
 
 
 
