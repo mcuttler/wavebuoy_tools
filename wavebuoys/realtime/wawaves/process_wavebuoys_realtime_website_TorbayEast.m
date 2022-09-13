@@ -59,6 +59,7 @@ if strcmp(buoy_info.type,'sofar')==1
     if flag == 1
         for i = 1:size(SpotData.time,1)
             SpotData.name{i,1} = buoy_info.name; 
+            SpotData.serialID{i,1} = buoy_info.serial ;
         end
         
         %load in any existing data for this site and combine with new

@@ -19,16 +19,16 @@ parser = 'parser_v1.12.0.py';
 %% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1294'; %spotter serial number, or just Datawell 
-buoy_info.version = 'Spotter-V2'; %or DWR4 for Datawell, for example
+buoy_info.serial = 'SPOT-0757'; %spotter serial number, or just Datawell 
+buoy_info.version = 'Spotter-V1'; %or DWR4 for Datawell, for example
 buoy_info.site_code = 'GRBNK01';
-buoy_info.DeployLoc = 'GoodrichBank01';%this is IMOS site_name and station_id
+buoy_info.DeployLoc = 'TorbayEast';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 90; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2022,7,1,0,0,0); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
-buoy_info.tend = datenum(2022,8,1,0,0,0); 
-buoy_info.DeployID = 'GRBNK0101'; %deployment number at this site
+buoy_info.tstart = datenum(2022,7,21,0,0,0); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
+buoy_info.tend = datenum(2022,9,13,0,0,0); 
+buoy_info.DeployID = 'TorbayEast'; %deployment number at this site
 buoy_info.timezone = 9; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 2; 
@@ -36,7 +36,8 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 
 
 %inputs for IMOS filename structure
-buoy_info.archive_path = 'Y:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\SofarSpotter\CodeTesting\Output_testing';
+buoy_info.archive_path = 'E:\wawaves';
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup';
 buoy_info.facility_code = 'NTP-WAVE';
 buoy_info.data_code = 'TW'; %T for temperature, W for wave
 buoy_info.platform_type = 'WAVERIDER';
