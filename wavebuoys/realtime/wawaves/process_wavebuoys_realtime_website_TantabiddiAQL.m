@@ -22,8 +22,8 @@ buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'TantabiddiAQL';
 buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -21.902200;
-buoy_info.DeployLon = 113.932533; 
+buoy_info.DeployLat = -21.901767;
+buoy_info.DeployLon = 113.930167; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
@@ -65,7 +65,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+%         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
