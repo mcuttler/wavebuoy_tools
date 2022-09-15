@@ -1,19 +1,12 @@
 %%  Process wave buoys (real time) for display on wawaves.org
 
-%MC to update prior to merging into master branch
-
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
+% Example script
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
 
 %location of wavebuoy_tools repo
-<<<<<<< HEAD:wavebuoys/process_wavebuoys_realtime_website.m
 buoycodes = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
-=======
-buoycodes = 'E:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
->>>>>>> wawaves_realtime:wavebuoys/realtime/process_wavebuoys_realtime_website.m
 addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
@@ -22,7 +15,7 @@ buoy_info.serial = 'SPOT-1040'; %spotter serial number, or just Datawell
 buoy_info.name = 'SharkBay'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %or DWR4 for Datawell, for example
-buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
+buoy_info.sofar_token = 'xxxx'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'CoralBay';
 buoy_info.DeployDepth = 30; 
