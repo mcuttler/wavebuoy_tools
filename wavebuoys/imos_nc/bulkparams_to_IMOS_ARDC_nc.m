@@ -76,6 +76,8 @@ for ii = 1:size(globatts{1,1},1);
         netcdf.putAtt(ncid,varid, attname, (nanmax(dlon))); 
     elseif strcmp(attname, 'watch_circle')       
         netcdf.putAtt(ncid,varid, attname, buoy_info.watch_circle); 
+    elseif strcmp(attname,'buoy_specification_url')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.buoy_specification_url); 
     else
         netcdf.putAtt(ncid,varid, attname, attvalue);
     end
@@ -93,6 +95,10 @@ dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);
 dimname = 'TEMP_TIME';
 dimlength = size(data.temp_time,1);
 dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+
+dimname = 'timeSeries';
+dimlength = 1;
+dimid_timeSeries = netcdf.defDim(ncid, dimname, dimlength); 
 
 % write variables     
 fid = fopen(varsfile); 
@@ -121,13 +127,24 @@ if strcmp(buoy_info.instrument, 'Sofar Spotter-V1')
     varinfo = dvarinfo; clear dvarinfo;
 end
 
-attnames = {'standard_name', 'long_name', 'units', 'calendar','axis', 'sampling_period_timestamp_location', 'valid_min', 'valid_max', 'reference_datum',...
+attnames = {'standard_name', 'long_name', 'units', 'axis', 'calendar', 'sampling_period_timestamp_location', 'valid_min', 'valid_max', 'reference_datum',...
     'positive','observation_type','coordinates','method','ancillary_variables','flag_values','flag_meanings','quality_control_convention','comment'}; 
 
 attinfo = varinfo(3:end);     
 
 [m,~] = size(varinfo{1,1}); 
 for ii = 1:m        
+    %add timeSeries variable in 
+    if ii == 1
+        netcdf.defVar(ncid, 'timeSeries', 'NC_INT',dimid_timeSeries);
+        varid = netcdf.inqVarID(ncid, 'timeSeries');
+        netcdf.defVarFill(ncid,varid,false,int32(-9999)); 
+        netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
+        netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
+        netcdf.putVar(ncid, varid, int32(1)); 
+        
+    end
+
     %create and define variable and attributes    
     if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        

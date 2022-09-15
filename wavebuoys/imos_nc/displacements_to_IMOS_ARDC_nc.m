@@ -1,16 +1,6 @@
 %% IMOS-compliant netCDF
 
 % Create an IMOS-compliant netCDF file for displacements parameters 
-%     
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
-% Code history
-% 
-%     Author          | Date             | Script Version     | Update
-% ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 06 Oct 2020  | 1.0                     | Initial creation
-% -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-% 
 
 %%
 
@@ -90,15 +80,14 @@ for ii = 1:size(globatts{1,1},1);
         netcdf.putAtt(ncid,varid, attname, (nanmax(dlon))); 
     elseif strcmp(attname, 'watch_circle')       
         netcdf.putAtt(ncid,varid, attname, disp_buoy_info.watch_circle); 
+    elseif strcmp(attname,'buoy_specification_url')
+        netcdf.putAtt(ncid, varid, attname, disp_buoy_info.buoy_specification_url); 
     else
         netcdf.putAtt(ncid,varid, attname, attvalue);
     end
     
 end
 netcdf.close(ncid);      
-%% make dum lat/lon that are same length as displacements
-displacements.lat = ones(size(displacements.time,1),1).*-9999; 
-displacements.lon = ones(size(displacements.time,1),1).*-9999; 
 
 %%
 % define dimensions         
@@ -107,6 +96,14 @@ ncid = netcdf.open(filenameNC,'WRITE');
 dimname = 'TIME';
 dimlength = size(displacements.time,1);
 dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
+
+dimname = 'TIME_LOCATION';
+dimlength = size(displacements.time_location,1);
+dimid_TIME_LOCATION = netcdf.defDim(ncid, dimname, dimlength);
+
+dimname = 'timeSeries';
+dimlength = 1;
+dimid_timeSeries = netcdf.defDim(ncid, dimname, dimlength); 
 
 % write variables     
 fid = fopen(varsfile); 
@@ -121,8 +118,12 @@ attinfo = varinfo(3:end);
 [m,~] = size(varinfo{1,1}); 
 for ii = 1:m        
     %create and define variable and attributes    
-    if strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
+    if strcmp(varinfo{1,2}{ii,1},'TIME') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,false,-9999);
+    elseif strcmp(varinfo{1,2}{ii,1},'TIME_LOCATION') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME_LOCATION);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,-9999);
     else
@@ -134,8 +135,12 @@ for ii = 1:m
     %add attributes
     for j = 1:length(attinfo); 
         if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')            
-            if ~isnan(attinfo{1,j}(ii))                                 
-                netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii))); 
+            if ~isnan(attinfo{1,j}(ii)) 
+                if strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
+                    netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii)); 
+                else
+                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii))); 
+                end
             end
         end    
     end
@@ -143,6 +148,9 @@ for ii = 1:m
     %put data to variable
     if strcmp(varinfo{1,1}{ii,1},'time')
         imos_time = displacements.time - datenum(1950,1,1,0,0,0); 
+        netcdf.putVar(ncid, varid, imos_time); 
+    elseif strcmp(varinfo{1,1}{ii,1},'time_location')
+        imos_time = displacements.time_location - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
         if isfield(displacements, varinfo{1,1}{ii,1})

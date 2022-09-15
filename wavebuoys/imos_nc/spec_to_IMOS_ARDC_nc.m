@@ -1,16 +1,7 @@
 %% IMOS-compliant netCDF
 
 % Create an IMOS-compliant netCDF file for spectral parameters 
-%     
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
-% Code history
-% 
-%     Author          | Date             | Script Version     | Update
-% ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-%     M. Cuttler     | 06 Oct 2020  | 1.0                     | Initial creation
-% -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-% 
+
 
 %%
 
@@ -90,6 +81,8 @@ for ii = 1:size(globatts{1,1},1);
         netcdf.putAtt(ncid,varid, attname, (nanmax(dlon))); 
     elseif strcmp(attname, 'watch_circle')       
         netcdf.putAtt(ncid,varid, attname, buoy_info.watch_circle); 
+    elseif strcmp(attname,'buoy_specification_url')
+        netcdf.putAtt(ncid,varid,attname,buoy_info.buoy_specification_url); 
     else
         netcdf.putAtt(ncid,varid, attname, attvalue);
     end
@@ -109,6 +102,10 @@ dimname = 'FREQUENCY';
 dimlength = size(data.frequency,2);
 dimid_FREQUENCY = netcdf.defDim(ncid, dimname, dimlength);     
 
+dimname = 'timeSeries';
+dimlength = 1;
+dimid_timeSeries = netcdf.defDim(ncid, dimname, dimlength); 
+
 % write variables     
 fid = fopen(varsfile); 
 varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%f%f%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
@@ -120,7 +117,17 @@ attnames = {'standard_name', 'long_name', 'units', 'axis','calendar', 'sampling_
 attinfo = varinfo(3:end);     
 
 [m,~] = size(varinfo{1,1}); 
-for ii = 1:m        
+for ii = 1:m       
+    %add timeSeries variable in 
+    if ii == 1
+        netcdf.defVar(ncid, 'timeSeries', 'NC_INT',dimid_timeSeries);
+        varid = netcdf.inqVarID(ncid, 'timeSeries');
+        netcdf.defVarFill(ncid,varid,false,int32(-9999)); 
+        netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
+        netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
+        netcdf.putVar(ncid, varid, int32(1)); 
+        
+    end
     %create and define variable and attributes    
     if strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
@@ -138,9 +145,21 @@ for ii = 1:m
     
     %add attributes
     for j = 1:length(attinfo); 
-        if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')            
-            if ~isnan(attinfo{1,j}(ii))                                 
-                    netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii));                 
+        if strcmp(attnames{j},'valid_min')      
+            if ~isnan(attinfo{1,j}(ii))
+                if strcmp(varinfo{1,1}{ii,1}, 'frequency')
+                    netcdf.putAtt(ncid, varid, 'min', single(min(data.frequency(data.frequency>-9999)))); 
+                else
+                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii)));                  
+                end
+            end
+        elseif strcmp(attnames{j},'valid_max')       
+            if ~isnan(attinfo{1,j}(ii))
+                if strcmp(varinfo{1,1}{ii,1}, 'frequency')
+                    netcdf.putAtt(ncid, varid, 'max', single(max(data.frequency(data.frequency>-9999)))); 
+                else
+                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii)));                  
+                end
             end
         else
             if ~isempty(attinfo{1,j}{ii})                

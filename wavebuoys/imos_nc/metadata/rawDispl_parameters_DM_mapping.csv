@@ -1,7 +1,8 @@
 ﻿ovarname,varname,standard_name,long_name,units,axis,calendar,valid_min,valid_max,reference_datum,coordinates,comment
 time,TIME,time,time,days since 1950-01-01 00:00:00 UTC,T,gregorian,,,,,
-lat,LATITUDE,latitude,latitude,degrees_north,Y,,-90,90,WGS84 coordinate reference system; EPSG:4326,,
-lon,LONGITUDE,longitude,longitude,degrees_east,X,,-180,180,WGS84 coordinate reference system; EPSG:4326,,
+time_location,TIME_LOCATION,time,location measurement time,days since 1950-01-01 00:00:00 UTC,T,gregorian,,,,,This is the time at which location information is sampled
+lat,LATITUDE,latitude,latitude,degrees_north,Y,,-90,90,WGS84 coordinate reference system; EPSG:4326,TIME_LOCATION,
+lon,LONGITUDE,longitude,longitude,degrees_east,X,,-180,180,WGS84 coordinate reference system; EPSG:4326,TIME_LOCATION,
 x,XDIS,,sea surface east displacement,m,,,-50,50,,TIME LATITUDE LONGITUDE,
 y,YDIS,,sea surface north displacement,m,,,-50,50,,TIME LATITUDE LONGITUDE,
 z,ZDIS,,sea surface vertical displacement,m,,,-50,50,,TIME LATITUDE LONGITUDE,

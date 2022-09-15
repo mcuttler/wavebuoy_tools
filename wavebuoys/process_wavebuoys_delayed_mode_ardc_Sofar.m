@@ -1,8 +1,8 @@
-%%  Process wave buoys (delayed mode)
+%%  Process Sofar wave buoys (delayed mode) following AODN-ARDC conventions
 
-%Process on-board (memory card) data from Sofar Spotter, Datawell, Triaxys
+%Process on-board (memory card) data from Sofar Spotter
 %Conducts quality control based on QARTOD manual
-%Outputs monthly netCDF file following IMOS conventions 
+%Outputs netCDF file following IMOS (AODN, 2022) conventions 
 
 %% set initial paths for Spotter data to process and parser script
 clear; clc
@@ -21,7 +21,7 @@ buoy_info.datapath = 'C:\Users\00084142\OneDrive - The University of Western Aus
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
 buoy_info.serial = 'SPOT-0559'; %
-buoy_info.instrument = 'Sofar Spotter-V2'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
+buoy_info.instrument = 'Sofar Spotter-V1'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
 buoy_info.site_name = 'KING-GEORGE-SOUND'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
 buoy_info.DeployDepth = 15; 
 buoy_info.startdate = datenum(2021,7,1); 
@@ -29,7 +29,11 @@ buoy_info.enddate = datenum(2021,8,1);
 buoy_info.timezone = 8; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 10.20; 
-buoy_info.watch_circle = 100; %radius of watch circle in meters; 
+buoy_info.watch_circle = 100; %radius of watch circle in meters;
+%spotter spec_sheet
+buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/Spotter_SpecSheet%20Expanded.pdf';
+%DWR4 spec sheet
+% buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/datawell_brochure_dwr4_acm_b-38-09.pdf'
 %inputs for IMOS-ARDC filename structure
 buoy_info.archive_path = 'C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\ExampleUWA_netcdf';
 
@@ -50,11 +54,11 @@ buoy_info.data_mode = 'DM'; %can be 'DM' (delayed mode) or 'RT' (real time)
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1
     %path of Sofar parser script
-    parserpath = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\sofar\spotter_tools'; 
-    parser = 'parser_v1.12.0.py'; 
-    %set number of unique time poins to use for efficient processing (depends
-    %on computer specifications) 
-    chunk = 10; 
+%     parserpath = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\sofar\spotter_tools'; 
+%     parser = 'parser_v1.12.0.py'; 
+%     %set number of unique time poins to use for efficient processing (depends
+%     %on computer specifications) 
+%     chunk = 10; 
     
     %process delayed mode (from buoy memory card)
 %     if strcmp(buoy_info.instrument, 'Sofar Spotter-V2')
@@ -191,8 +195,6 @@ elseif strcmp(buoy_info.type,'datawell')==1
      save('C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Datawell\Datawell_DM.mat','-v7.3'); 
 end
 
-
-
 %%   QAQC data - following QARTOD
 %settings for QAQC
 check.time = data.time;
@@ -317,6 +319,7 @@ for i = 1:length(ttdum)
     ind = find(data.time>=displacements.time(1) & data.time<=displacements.time(end)); 
     displacements.lat = data.lat(ind); 
     displacements.lon = data.lon(ind); 
+    displacements.time_location = data.time(ind); 
     disp_buoy_info.startdate = displacements.time(1); 
     disp_buoy_info.enddate = displacements.time(end);
 
