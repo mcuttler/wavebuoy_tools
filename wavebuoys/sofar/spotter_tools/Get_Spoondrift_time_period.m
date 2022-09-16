@@ -115,7 +115,11 @@ for ii =1:size(dumt,1)
         for j = 1:size(data.time,1)
             ind = find(temp_time == data.time(j)); 
             if ~isempty(ind)
-                data.surf_temp(j,1) = surf_temp(ind); 
+                if size(ind,1)>1
+                    data.surf_temp(j,1) = nanmean(surf_temp(ind)); 
+                else
+                    data.surf_temp(j,1) = surf_temp(ind);
+                end
             else
                 data.surf_temp(j,1) = nan;
             end
