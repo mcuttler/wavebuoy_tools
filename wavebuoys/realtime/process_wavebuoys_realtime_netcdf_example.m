@@ -77,6 +77,8 @@ end
 
 % add missing parameters for datawell
 if strcmp(buoy_info.type,'datawell')
+    archive_data.lat = ones(size(archive_data.time)).*-9999; 
+    archive_data.lon = ones(size(archive_data.time)).*-9999; 
     archive_data.tm = ones(size(archive_data.time)).*-9999; 
     archive_data.dm = ones(size(archive_data.time)).*-9999; 
     archive_data.dmspr = ones(size(archive_data.time)).*-9999; 
@@ -105,24 +107,31 @@ if size(tdum_unique,1)>1
                 archive_data.temp_time<datenum(tdum_unique(j+1,1),tdum_unique(j+1,2),1)); 
         end
         dataout = struct('time',[],'hsig',[],'tm',[],'tp',[],'dm',[],'dmspr',[],'dp',[],...
-            'dpspr',[],'qf_waves',[],'temp_time',[],'surf_temp',[],'qf_sst',[]); 
-        fields = fieldnames(dataout)
+            'dpspr',[],'qf_waves',[]); 
+        fields = fieldnames(dataout);
         for jj = 1:length(fields)
-            if strcmp(fields{jj},'temp_time') | strcmp(fields{jj},'surf_temp')|strcmp(fields{jj},'qf_sst')
-                dataout.(fields{jj}) = archive_data.(fields{jj})(ind_temp,:); 
-            else
-                dataout.(fields{jj}) = archive_data.(fields{jj})(ind_waves,:); 
-            end
+            dataout.(fields{jj}) = archive_data.(fields{jj})(ind_waves,:);         
         end
         
         %write monthly netCDF
         bulkparams_to_IMOS_ARDC_nc_RT(dataout, buoy_info, globfile, varsfile); 
+    end
+else
+    dataout = struct('time',[],'lat',[],'lon',[],'hsig',[],'tm',[],'tp',[],'dm',[],'dmspr',[],'dp',[],...
+        'dpspr',[],'qf_waves',[]); 
+    fields = fieldnames(dataout);
+    for jj = 1:length(fields)
+        dataout.(fields{jj}) = archive_data.(fields{jj});   
+    end    
+    bulkparams_to_IMOS_ARDC_nc_RT(dataout, buoy_info, globfile, varsfile);
+            
         
         
             
             
     
-else
+        
+    end
     
 
 

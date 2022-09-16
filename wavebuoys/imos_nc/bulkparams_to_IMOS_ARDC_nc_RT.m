@@ -85,6 +85,8 @@ for ii = 1:size(globatts{1,1},1);
         netcdf.putAtt(ncid,varid, attname, buoy_info.watch_circle); 
     elseif strcmp(attname,'buoy_specification_url')
         netcdf.putAtt(ncid,varid, attname, buoy_info.buoy_specification_url); 
+    elseif strcmp(attname,'transmission')
+        netcdf.putAtt(ncid, varid, attname, buoy_info.transmission); 
     else
         netcdf.putAtt(ncid,varid, attname, attvalue);
     end
