@@ -26,8 +26,8 @@ buoy_info.DeployLoc = 'TorbayEast';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 90; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2022,7,21,0,0,0); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
-buoy_info.tend = datenum(2022,9,15,0,0,0); 
+buoy_info.tstart = datenum(2022,5,3,0,0,0); %Note: 'Get_Spoondrift_time_period' fails with certain choices of tstart and tend (HH,MM,SS). for now just choose to nearest (HH=00,MM=00, SS=00). 
+buoy_info.tend = datenum(2022,9,16,0,0,0); 
 buoy_info.DeployID = 'TorbayEast'; %deployment number at this site
 buoy_info.timezone = 9; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
