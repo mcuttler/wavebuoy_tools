@@ -8,12 +8,15 @@ if ~exist(fullfile(buoy_info.archive_path, buoy_info.name, 'nc_archive', num2str
     mkdir(fullfile(buoy_info.archive_path, buoy_info.name, 'nc_archive', num2str(tinfo(1))));
 end        
 
-disp(['Saving bulkparams']);  
+%update archive path
+buoy_info.archive_path = fullfile(buoy_info.archive_path, buoy_info.name, 'nc_archive', num2str(tinfo(1)));
 
+%add start date (should just be month)
+buoy_info.startdate = data.time(1); 
 filenameNC = make_imos_ardc_filename_RT(buoy_info,'WAVE-PARAMETERS');         
 
 %delete existing monthly file if it exists
-if exist(filenameNC)
+if exist(filenameNC)>0
     delete(filenameNC)
     %create output netCDF4 file     
     ncid = netcdf.create(filenameNC,'NETCDF4'); 
@@ -22,6 +25,7 @@ else
 end
 netcdf.close(ncid); 
 
+disp(['Saving bulkparams']);  
 %% global attributes
 
 fid = fopen(globfile); 
@@ -101,9 +105,11 @@ dimname = 'TIME';
 dimlength = size(data.time,1);
 dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
 
-dimname = 'TEMP_TIME';
-dimlength = size(data.temp_time,1);
-dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+if isfield(data,'temp_time'); 
+    dimname = 'TEMP_TIME';
+    dimlength = size(data.temp_time,1);
+    dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+end
 
 dimname = 'timeSeries';
 dimlength = 1;

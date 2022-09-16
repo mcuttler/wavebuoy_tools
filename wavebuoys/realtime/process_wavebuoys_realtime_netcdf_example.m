@@ -5,14 +5,14 @@
 %%
 clear; clc
 %location of wavebuoy_tools repo
-mpath = 'C:\Data\wavebuoy_tools'; 
+mpath = 'C:\Data\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
  
 %% General attributes
 
 %general path to data files - use the 'realtime_archive_backup' as
 %sometimes AWS corrupts the .mat files 
-buoy_info.datapath = 'X:\CUTTLER_wawaves\Data\realtime_archive_backup'; 
+buoy_info.datapath = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'datawell'; %datawell or sofar
@@ -27,7 +27,7 @@ buoy_info.MagDec = 10.20;
 buoy_info.watch_circle = 200; %radius of watch circle in meters; 
 
 %inputs for IMOS-ARDC filename structure
-buoy_info.archive_path = 'X:\CUTTLER_wawaves\Data\realtime_archive_backup';
+buoy_info.archive_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup';
 
 %additional attributes for IMOS netCDF
 buoy_info.project = 'UWA Nearshore wave buoy program'; 
@@ -124,6 +124,9 @@ else
         dataout.(fields{jj}) = archive_data.(fields{jj});   
     end    
     bulkparams_to_IMOS_ARDC_nc_RT(dataout, buoy_info, globfile, varsfile);
+end
+
+
             
         
         
@@ -131,7 +134,7 @@ else
             
     
         
-    end
+    
     
 
 
