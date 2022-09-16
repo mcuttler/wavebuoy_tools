@@ -116,7 +116,16 @@ attnames = {'standard_name', 'long_name', 'units', 'axis','calendar', 'valid_min
 attinfo = varinfo(3:end);     
 
 [m,~] = size(varinfo{1,1}); 
-for ii = 1:m        
+for ii = 1:m      
+    %add timeSeries variable in 
+    if ii == 1
+        netcdf.defVar(ncid, 'timeSeries', 'NC_INT',dimid_timeSeries);
+        varid = netcdf.inqVarID(ncid, 'timeSeries');
+        netcdf.defVarFill(ncid,varid,false,int32(-9999)); 
+        netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
+        netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
+        netcdf.putVar(ncid, varid, int32(1));         
+    end
     %create and define variable and attributes    
     if strcmp(varinfo{1,2}{ii,1},'TIME') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
