@@ -15,15 +15,15 @@ clear; clc
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
 buoy_info.serial = 'SPOT-1294'; %spotter serial number, or just Datawell 
-buoy_info.name = 'GoodrichBank'; 
+buoy_info.name = 'GoodrichBank02'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'GoodrichBank';
+buoy_info.DeployLoc = 'GoodrichBank02';
 buoy_info.DeployDepth = 90; 
-buoy_info.DeployLat = -10.316733; 
-buoy_info.DeployLon = 129.952350; 
+buoy_info.DeployLat = -10.31738; 
+buoy_info.DeployLon = 129.95282; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
@@ -59,6 +59,7 @@ if strcmp(buoy_info.type,'sofar')==1
     if flag == 1
         for i = 1:size(SpotData.time,1)
             SpotData.name{i,1} = buoy_info.name; 
+            SpotData.serialID{i,1} = buoy_info.serial; 
         end
         
         %load in any existing data for this site and combine with new
