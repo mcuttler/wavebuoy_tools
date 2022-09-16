@@ -96,7 +96,7 @@ if strcmp(buoy_info.type,'sofar')==1
     fields = fieldnames(spec);
     for i =1 :length(fields); 
         if strcmp(fields{i},'time')
-            continue
+            data.spec_time = spec.(fields{i}); 
         elseif strcmp(fields{i},'Szz')
             data.energy = spec.(fields{i}); 
         else

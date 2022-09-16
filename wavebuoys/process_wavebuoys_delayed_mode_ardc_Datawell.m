@@ -10,7 +10,6 @@ clear; clc
 mpath = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
 
-
 %% General attributes 
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
@@ -39,6 +38,7 @@ buoy_info.instrument_burst_duration = 1800;
 buoy_info.instrument_burst_interval = 1800; 
 buoy_info.instrument_sampling_interval = 0.4; %sample frequency
 buoy_info.institution = 'UWA'; 
+buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/datawell_brochure_dwr4_acm_b-38-09.pdf';
 buoy_info.data_mode = 'DM'; %can be 'DM' (delayed mode) or 'RT' (real time)
 
 
@@ -148,7 +148,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
 end
 
 %save file
-save('C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Datawell\Datawell_DM.mat','-v7.3'); 
+% save('C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Datawell\Datawell_DM.mat','-v7.3'); 
 
 %%   QAQC data - following QARTOD
 %settings for QAQC
@@ -272,6 +272,7 @@ for i = 1:length(ttdum)
     ind = find(data.time>=displacements.time(1) & data.time<=displacements.time(end)); 
     displacements.lat = data.lat(ind); 
     displacements.lon = data.lon(ind); 
+    displacements.time_location = data.time(ind); 
     disp_buoy_info.startdate = displacements.time(1); 
     disp_buoy_info.enddate = displacements.time(end);
 
