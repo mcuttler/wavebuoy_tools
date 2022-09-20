@@ -150,7 +150,7 @@ for ii = 1:m
                 if strcmp(varinfo{1,1}{ii,1}, 'frequency')
                     netcdf.putAtt(ncid, varid, 'min', single(min(data.frequency(data.frequency>-9999)))); 
                 else
-                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii)));                  
+                    netcdf.putAtt(ncid, varid, attnames{j},double(attinfo{1,j}(ii)));                  
                 end
             end
         elseif strcmp(attnames{j},'valid_max')       
@@ -158,7 +158,7 @@ for ii = 1:m
                 if strcmp(varinfo{1,1}{ii,1}, 'frequency')
                     netcdf.putAtt(ncid, varid, 'max', single(max(data.frequency(data.frequency>-9999)))); 
                 else
-                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii)));                  
+                    netcdf.putAtt(ncid, varid, attnames{j},double(attinfo{1,j}(ii)));                  
                 end
             end
         else

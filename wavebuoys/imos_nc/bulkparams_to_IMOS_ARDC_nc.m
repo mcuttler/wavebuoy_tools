@@ -138,7 +138,7 @@ for ii = 1:m
     if ii == 1
         netcdf.defVar(ncid, 'timeSeries', 'NC_INT',dimid_timeSeries);
         varid = netcdf.inqVarID(ncid, 'timeSeries');
-        netcdf.defVarFill(ncid,varid,false,int32(-9999)); 
+        netcdf.defVarFill(ncid,varid,true,int32(-9999)); 
         netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
         netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
         netcdf.putVar(ncid, varid, int32(1)); 
@@ -170,6 +170,10 @@ for ii = 1:m
             if ~isempty(attinfo{1,j}{ii})
                 netcdf.putAtt(ncid, varid, attnames{j},int8(str2num(attinfo{1,j}{ii}))); 
             end
+        elseif strcmp(attnames{j},'comment')
+            if ~strcmp(attinfo{1,j}{ii},char(13))
+                netcdf.putAtt(ncid,varid, attnames{j}, attinfo{1,j}{ii}); 
+            end            
         else
             if ~isempty(attinfo{1,j}{ii})
                 if strcmp(attnames{j},'magnetic_dec')
