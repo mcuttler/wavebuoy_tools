@@ -49,7 +49,7 @@ for i = 1:size(files,1)
             %add waitbar so know it's progressing
             h = waitbar(0,'processing displacements time'); 
             for j = 2:size(dumdata.textdata,1)
-                waitbar(i/size(dumdata.data,1), h, ['processing step ' num2str(j) ' out of ' num2str(size(dumdata.data,1))]);              
+                waitbar(j/size(dumdata.data,1), h, ['processing step ' num2str(j) ' out of ' num2str(size(dumdata.data,1))]);              
                 if length(dumdata.textdata{j,1})>25
                     displacements.disp_time(j-1,1) = datenum(dumdata.textdata{j,1},'yyyy-mm-dd HH:MM:SS.FFF+00:00'); 
                 else
