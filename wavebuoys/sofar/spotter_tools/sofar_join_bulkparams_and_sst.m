@@ -18,14 +18,15 @@
 function [out] = sofar_join_bulkparams_and_sst(bulkparams, sst)
 out = bulkparams; 
 for i = 1:size(bulkparams.time,1)
-    idx = find(abs(bulkparams.time(i)-sst.time)==min(abs(bulkparams.time(i)-sst.time))); 
+    idx = find(abs(bulkparams.time(i)-sst.temp_time)==min(abs(bulkparams.time(i)-sst.temp_time))); 
+    out.temp_time(i,1) = bulkparams.time(i); 
     if isempty(idx)
         out.temp(i,1) = nan; 
     else
         if length(idx)>1
-            out.temp(i,1) = sst.sst(idx(1));
+            out.temp(i,1) = sst.surf_temp(idx(1));
         else
-            out.temp(i,1) = sst.sst(idx);
+            out.temp(i,1) = sst.surf_temp(idx);
         end
     end
 end
