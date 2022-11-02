@@ -141,8 +141,7 @@ for ii = 1:m
         netcdf.defVarFill(ncid,varid,true,int32(-9999)); 
         netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
         netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
-        netcdf.putVar(ncid, varid, int32(1)); 
-        
+        netcdf.putVar(ncid, varid, int32(1));         
     end
 
     %create and define variable and attributes    
@@ -150,6 +149,10 @@ for ii = 1:m
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,int8(-127));
+    elseif strcmp(varinfo{1,2}{ii,1},'TIME')
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,true,-9999);
     else
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
