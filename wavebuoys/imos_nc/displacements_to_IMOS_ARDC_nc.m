@@ -121,7 +121,7 @@ for ii = 1:m
     if ii == 1
         netcdf.defVar(ncid, 'timeSeries', 'NC_INT',dimid_timeSeries);
         varid = netcdf.inqVarID(ncid, 'timeSeries');
-        netcdf.defVarFill(ncid,varid,false,int32(-9999)); 
+        netcdf.defVarFill(ncid,varid,true,int32(-9999)); 
         netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
         netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
         netcdf.putVar(ncid, varid, int32(1));         
@@ -130,8 +130,12 @@ for ii = 1:m
     if strcmp(varinfo{1,2}{ii,1},'TIME') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
-        netcdf.defVarFill(ncid,varid,false,-9999);
-    elseif strcmp(varinfo{1,2}{ii,1},'TIME_LOCATION') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
+        netcdf.defVarFill(ncid,varid,true,-9999);
+    elseif  strcmp(varinfo{1,2}{ii,1},'TIME_LOCATION')
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME_LOCATION);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,true,-9999);
+    elseif strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME_LOCATION);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,-9999);
@@ -151,7 +155,15 @@ for ii = 1:m
                     netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii))); 
                 end
             end
-        end    
+        elseif strcmp(attnames{j},'comment')
+            if ~strcmp(attinfo{1,j}{ii},'NaN')
+                netcdf.putAtt(ncid,varid, attnames{j}, attinfo{1,j}{ii}); 
+            end    
+        else
+            if ~isempty(attinfo{1,j}{ii})                
+                netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
+            end
+        end
     end
     
     %put data to variable
@@ -159,8 +171,8 @@ for ii = 1:m
         imos_time = displacements.time - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'time_location')
-        imos_time = displacements.time_location - datenum(1950,1,1,0,0,0); 
-        netcdf.putVar(ncid, varid, imos_time); 
+        imos_time_loc = displacements.time_location - datenum(1950,1,1,0,0,0); 
+        netcdf.putVar(ncid, varid, imos_time_loc); 
     elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
         if isfield(displacements, varinfo{1,1}{ii,1})
             netcdf.putVar(ncid, varid, displacements.(varinfo{1,1}{ii,1}));  

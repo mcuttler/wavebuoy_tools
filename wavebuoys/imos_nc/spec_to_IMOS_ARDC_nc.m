@@ -122,14 +122,14 @@ for ii = 1:m
     if ii == 1
         netcdf.defVar(ncid, 'timeSeries', 'NC_INT',dimid_timeSeries);
         varid = netcdf.inqVarID(ncid, 'timeSeries');
-        netcdf.defVarFill(ncid,varid,false,int32(-9999)); 
+        netcdf.defVarFill(ncid,varid,true,int32(-9999)); 
         netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
         netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
         netcdf.putVar(ncid, varid, int32(1)); 
         
     end
     %create and define variable and attributes    
-    if strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
+    if strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,-9999);
@@ -137,6 +137,10 @@ for ii = 1:m
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_FLOAT', dimid_FREQUENCY);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,single(-9999)); 
+    elseif strcmp(varinfo{1,2}{ii,1},'TIME')
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,true,-9999);
     else
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_FLOAT', [dimid_TIME dimid_FREQUENCY]);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
@@ -149,18 +153,26 @@ for ii = 1:m
             if ~isnan(attinfo{1,j}(ii))
                 if strcmp(varinfo{1,1}{ii,1}, 'frequency')
                     netcdf.putAtt(ncid, varid, 'min', single(min(data.frequency(data.frequency>-9999)))); 
+                elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
+                    netcdf.putAtt(ncid, varid, attnames{j},double(attinfo{1,j}(ii)));          
                 else
-                    netcdf.putAtt(ncid, varid, attnames{j},double(attinfo{1,j}(ii)));                  
+                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii)));                           
                 end
             end
         elseif strcmp(attnames{j},'valid_max')       
             if ~isnan(attinfo{1,j}(ii))
                 if strcmp(varinfo{1,1}{ii,1}, 'frequency')
                     netcdf.putAtt(ncid, varid, 'max', single(max(data.frequency(data.frequency>-9999)))); 
+                elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
+                    netcdf.putAtt(ncid, varid, attnames{j},double(attinfo{1,j}(ii)));          
                 else
-                    netcdf.putAtt(ncid, varid, attnames{j},double(attinfo{1,j}(ii)));                  
+                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii)));                               
                 end
             end
+        elseif strcmp(attnames{j},'comment')
+            if ~strcmp(attinfo{1,j}{ii},char(13))
+                netcdf.putAtt(ncid,varid, attnames{j}, attinfo{1,j}{ii}); 
+            end   
         else
             if ~isempty(attinfo{1,j}{ii})                
                 netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
