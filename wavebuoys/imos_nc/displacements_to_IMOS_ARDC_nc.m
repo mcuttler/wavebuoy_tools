@@ -156,7 +156,7 @@ for ii = 1:m
                 end
             end
         elseif strcmp(attnames{j},'comment')
-            if ~strcmp(attinfo{1,j}{ii},'NaN')
+            if ~strcmp(attinfo{1,j}{ii},char(13))
                 netcdf.putAtt(ncid,varid, attnames{j}, attinfo{1,j}{ii}); 
             end    
         else

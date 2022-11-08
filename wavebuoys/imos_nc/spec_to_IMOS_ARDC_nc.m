@@ -136,7 +136,7 @@ for ii = 1:m
     elseif strcmp(varinfo{1,2}{ii,1},'FREQUENCY')
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_FLOAT', dimid_FREQUENCY);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
-        netcdf.defVarFill(ncid,varid,false,single(-9999)); 
+        netcdf.defVarFill(ncid,varid,true,-9999);   
     elseif strcmp(varinfo{1,2}{ii,1},'TIME')
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
