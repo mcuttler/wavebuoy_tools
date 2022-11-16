@@ -273,6 +273,11 @@ for i = 1:length(fields);
     end
 end    
 
+%remove temperature variables if all -9999/NaN
+if all(data.surf_temp<0) | all(isnan(data.surf_temp))
+    data = rmfield(data,{'surf_temp', 'bott_temp','temp_time','qc_subflag_temp','qc_flag_temp'}); 
+end
+
 %%  Integral Wave Parameters 
 
 globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 

@@ -84,29 +84,15 @@ for ii = 1:size(globatts{1,1},1);
     
 end
 netcdf.close(ncid);    
-%%
-% define dimensions         
+%% Write data to netCDF 
 
-ncid = netcdf.open(filenameNC,'WRITE'); 
-dimname = 'TIME';
-dimlength = size(data.time,1);
-dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
-
-dimname = 'TEMP_TIME';
-dimlength = size(data.temp_time,1);
-dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
-
-dimname = 'timeSeries';
-dimlength = 1;
-dimid_timeSeries = netcdf.defDim(ncid, dimname, dimlength); 
-
-% write variables     
+% read variable info from template 
 fid = fopen(varsfile); 
 varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s%s%s%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
 fclose(fid);      
 
-%get rid of temperature variables and attributes if not V2 buoy
-if strcmp(buoy_info.instrument, 'Sofar Spotter-V1')
+%get rid of temperature variables if no temperature included 
+if ~isfield(data, 'temp_time')
     %build mask
     tmask = [];
     for ii = 1:size(varinfo{1},1)
@@ -130,7 +116,26 @@ end
 attnames = {'standard_name', 'long_name', 'units', 'axis', 'calendar', 'sampling_period_timestamp_location', 'valid_min', 'valid_max', 'reference_datum',...
     'positive','observation_type','coordinates','method','ancillary_variables','flag_values','flag_meanings','quality_control_convention','comment'}; 
 
-attinfo = varinfo(3:end);     
+attinfo = varinfo(3:end);   
+
+% define dimensions         
+
+ncid = netcdf.open(filenameNC,'WRITE'); 
+dimname = 'TIME';
+dimlength = size(data.time,1);
+dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
+
+if isfield(data,'temp_time')
+    dimname = 'TEMP_TIME';
+    dimlength = size(data.temp_time,1);
+    dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+end
+
+dimname = 'timeSeries';
+dimlength = 1;
+dimid_timeSeries = netcdf.defDim(ncid, dimname, dimlength); 
+
+  
 
 [m,~] = size(varinfo{1,1}); 
 for ii = 1:m        
@@ -175,7 +180,7 @@ for ii = 1:m
             end
         elseif strcmp(attnames{j},'comment')
             if ~strcmp(attinfo{1,j}{ii},char(13))
-                netcdf.putAtt(ncid,varid, attnames{j}, attinfo{1,j}{ii}); 
+                netcdf.putAtt(ncid,varid, attnames{j}, strip(attinfo{1,j}{ii}));                
             end            
         else
             if ~isempty(attinfo{1,j}{ii})

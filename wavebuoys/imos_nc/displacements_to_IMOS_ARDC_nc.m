@@ -157,7 +157,7 @@ for ii = 1:m
             end
         elseif strcmp(attnames{j},'comment')
             if ~strcmp(attinfo{1,j}{ii},char(13))
-                netcdf.putAtt(ncid,varid, attnames{j}, attinfo{1,j}{ii}); 
+                netcdf.putAtt(ncid,varid, attnames{j}, strip(attinfo{1,j}{ii})); 
             end    
         else
             if ~isempty(attinfo{1,j}{ii})                

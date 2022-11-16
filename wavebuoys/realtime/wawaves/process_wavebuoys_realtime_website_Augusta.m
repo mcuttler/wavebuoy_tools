@@ -9,8 +9,8 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-% buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
-% addpath(genpath(buoycodes))
+buoycodes = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
