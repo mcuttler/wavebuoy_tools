@@ -125,11 +125,12 @@ dimname = 'TIME';
 dimlength = size(data.time,1);
 dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
 
-if isfield(data,'temp_time')
-    dimname = 'TEMP_TIME';
-    dimlength = size(data.temp_time,1);
-    dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
-end
+% temperature should be on same time as wave time 
+% if isfield(data,'temp_time')
+%     dimname = 'TEMP_TIME';
+%     dimlength = size(data.temp_time,1);
+%     dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+% end
 
 dimname = 'timeSeries';
 dimlength = 1;
