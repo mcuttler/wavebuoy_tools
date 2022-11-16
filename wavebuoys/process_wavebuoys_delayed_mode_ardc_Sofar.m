@@ -7,7 +7,7 @@
 %% set initial paths for Spotter data to process and parser script
 clear; clc
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+mpath = 'C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
 
 
