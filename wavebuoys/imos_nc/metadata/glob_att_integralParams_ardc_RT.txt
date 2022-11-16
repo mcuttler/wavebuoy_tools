@@ -32,6 +32,7 @@ site_name =
 time_coverage_end = 
 time_coverage_start = 
 title = Integral wave parameter data from Western Australia
+transmission = 
 watch_circle = 
 water_depth = 
 water_depth_units = m

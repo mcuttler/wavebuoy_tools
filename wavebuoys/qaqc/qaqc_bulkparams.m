@@ -168,7 +168,7 @@ for f = 1:length(fields)
     end  
 end
 
-%% assing primary and subflags
+%% assigning primary and subflags
 
 % fields = {'hs','tm','dm'};
 % qaqc_tests = {'15','16','19','20','spike'}; 

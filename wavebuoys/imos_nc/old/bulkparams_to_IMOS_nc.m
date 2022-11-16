@@ -124,11 +124,9 @@ if strcmp(buoy_info.version, 'Spotter-V1')
 end
 
 attnames = {'standard_name', 'long_name', 'units', 'calendar','axis','comments', 'ancillary_variables', 'valid_min', 'valid_max', 'reference_datum','magnetic_dec', 'positive',...
-    'observation_type','coordinates','flag_values','flag_meanings','quality_control_convention'}; 
+    'observation_type','coordinates','flag_values','flag_meanings','quality_control_convention','comment'}; 
 
 attinfo = varinfo(3:end);     
-
-
 
 [m,~] = size(varinfo{1,1}); 
 for ii = 1:m    
@@ -153,7 +151,7 @@ for ii = 1:m
     if ii==1
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
-        %netcdf.defVarFill(ncid,varid,false,-9999);
+        netcdf.defVarFill(ncid,varid,true,-9999);
     elseif strcmp(varinfo{1,2}{ii,1},'wave_quality_flag') | strcmp(varinfo{1,2}{ii,1},'wave_subflag') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_flag') | strcmp(varinfo{1,2}{ii,1},'TEMP_subflag')
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
@@ -175,6 +173,8 @@ for ii = 1:m
                     netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii)); 
                 end
             end
+        elseif strcmp(attnames{j},'comment')
+            continue
         elseif strcmp(attnames{j},'flag_values')
             if ~isempty(attinfo{1,j}{ii})
                 netcdf.putAtt(ncid, varid, attnames{j},int8(str2num(attinfo{1,j}{ii}))); 

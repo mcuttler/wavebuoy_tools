@@ -1,25 +1,31 @@
 %% IMOS-compliant netCDF
 
-% Create an IMOS-compliant netCDF file for spectral parameters 
+function [] = bulkparams_to_IMOS_ARDC_nc_RT(data, buoy_info, globfile, varsfile); 
 
-
-%%
-
-function [] = spec_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
-
-
-if ~exist(buoy_info.archive_path)
-    mkdir(buoy_info.archive_path)
+%need to check if path for output files exist
+tinfo = datevec(data.time(1)); 
+if ~exist(fullfile(buoy_info.archive_path, buoy_info.name, 'nc_archive', num2str(tinfo(1))))
+    mkdir(fullfile(buoy_info.archive_path, buoy_info.name, 'nc_archive', num2str(tinfo(1))));
 end        
 
-disp(['Saving spectral data']);  
+%update archive path
+buoy_info.archive_path = fullfile(buoy_info.archive_path, buoy_info.name, 'nc_archive', num2str(tinfo(1)));
 
-filenameNC = make_imos_ardc_filename(buoy_info,'WAVE-SPECTRA');         
+%add start date (should just be month)
+buoy_info.startdate = data.time(1); 
+filenameNC = make_imos_ardc_filename_RT(buoy_info,'WAVE-PARAMETERS');         
 
-%create output netCDF4 file     
-ncid = netcdf.create(filenameNC,'NETCDF4'); 
+%delete existing monthly file if it exists
+if exist(filenameNC)>0
+    delete(filenameNC)
+    %create output netCDF4 file     
+    ncid = netcdf.create(filenameNC,'NETCDF4'); 
+else
+    ncid = netcdf.create(filenameNC,'NETCDF4'); 
+end
 netcdf.close(ncid); 
 
+disp(['Saving bulkparams']);  
 %% global attributes
 
 fid = fopen(globfile); 
@@ -82,14 +88,15 @@ for ii = 1:size(globatts{1,1},1);
     elseif strcmp(attname, 'watch_circle')       
         netcdf.putAtt(ncid,varid, attname, buoy_info.watch_circle); 
     elseif strcmp(attname,'buoy_specification_url')
-        netcdf.putAtt(ncid,varid,attname,buoy_info.buoy_specification_url); 
+        netcdf.putAtt(ncid,varid, attname, buoy_info.buoy_specification_url); 
+    elseif strcmp(attname,'transmission')
+        netcdf.putAtt(ncid, varid, attname, buoy_info.transmission); 
     else
         netcdf.putAtt(ncid,varid, attname, attvalue);
     end
     
 end
-netcdf.close(ncid);      
-
+netcdf.close(ncid);    
 %%
 % define dimensions         
 
@@ -98,9 +105,11 @@ dimname = 'TIME';
 dimlength = size(data.time,1);
 dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
 
-dimname = 'FREQUENCY';
-dimlength = size(data.frequency,2);
-dimid_FREQUENCY = netcdf.defDim(ncid, dimname, dimlength);     
+if isfield(data,'temp_time'); 
+    dimname = 'TEMP_TIME';
+    dimlength = size(data.temp_time,1);
+    dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+end
 
 dimname = 'timeSeries';
 dimlength = 1;
@@ -108,96 +117,110 @@ dimid_timeSeries = netcdf.defDim(ncid, dimname, dimlength);
 
 % write variables     
 fid = fopen(varsfile); 
-varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%f%f%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
+varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s%s%s%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
 fclose(fid);      
 
-attnames = {'standard_name', 'long_name', 'units', 'axis','calendar', 'sampling_period_timestamp_location', 'valid_min', 'valid_max', 'reference_datum',...
-    'coordinates','comment'}; 
+%get rid of temperature variables and attributes if not V2 buoy
+if strcmp(buoy_info.instrument, 'Sofar Spotter-V1')
+    %build mask
+    tmask = [];
+    for ii = 1:size(varinfo{1},1)
+        if ~strcmp(varinfo{1}{ii},'surf_temp') & ~strcmp(varinfo{1}{ii}, 'qc_flag_temp') & ~strcmp(varinfo{1}{ii},'qc_subflag_temp')
+            tmask = [tmask; ii]; 
+        end
+    end
+    %now remove temp    
+    for ii = 1:size(varinfo,2)
+        for jj = 1:size(tmask,1)
+            try
+                dvarinfo{ii}{jj,1} = varinfo{ii}{tmask(jj)}; 
+            catch
+                dvarinfo{ii}(jj,1) = varinfo{ii}(tmask(jj));
+            end
+        end
+    end
+    varinfo = dvarinfo; clear dvarinfo;
+end
+
+attnames = {'standard_name', 'long_name', 'units', 'axis', 'calendar', 'sampling_period_timestamp_location', 'valid_min', 'valid_max', 'reference_datum',...
+    'positive','observation_type','coordinates','method','ancillary_variables','flag_values','flag_meanings','quality_control_convention','comment'}; 
 
 attinfo = varinfo(3:end);     
 
 [m,~] = size(varinfo{1,1}); 
-for ii = 1:m       
+for ii = 1:m        
     %add timeSeries variable in 
     if ii == 1
         netcdf.defVar(ncid, 'timeSeries', 'NC_INT',dimid_timeSeries);
         varid = netcdf.inqVarID(ncid, 'timeSeries');
-        netcdf.defVarFill(ncid,varid,true,int32(-9999)); 
+        netcdf.defVarFill(ncid,varid,false,int32(-9999)); 
         netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
         netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
         netcdf.putVar(ncid, varid, int32(1)); 
         
     end
+
     %create and define variable and attributes    
-    if strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
+    if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,false,int8(-127));
+    else
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,-9999);
-    elseif strcmp(varinfo{1,2}{ii,1},'FREQUENCY')
-        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_FLOAT', dimid_FREQUENCY);
-        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
-        netcdf.defVarFill(ncid,varid,true,-9999);   
-    elseif strcmp(varinfo{1,2}{ii,1},'TIME')
-        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
-        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
-        netcdf.defVarFill(ncid,varid,true,-9999);
-    else
-        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_FLOAT', [dimid_TIME dimid_FREQUENCY]);
-        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
-        netcdf.defVarFill(ncid,varid,false,single(-9999)); 
     end    
     
     %add attributes
     for j = 1:length(attinfo); 
-        if strcmp(attnames{j},'valid_min')      
-            if ~isnan(attinfo{1,j}(ii))
-                if strcmp(varinfo{1,1}{ii,1}, 'frequency')
-                    netcdf.putAtt(ncid, varid, 'min', single(min(data.frequency(data.frequency>-9999)))); 
-                elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
-                    netcdf.putAtt(ncid, varid, attnames{j},double(attinfo{1,j}(ii)));          
+        if strcmp(attnames{j},'valid_min') | strcmp(attnames{j},'valid_max')            
+            if ~isnan(attinfo{1,j}(ii))                                 
+                if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
+                    netcdf.putAtt(ncid, varid, attnames{j},int8(attinfo{1,j}(ii))); 
                 else
-                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii)));                           
+                    netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii)); 
                 end
             end
-        elseif strcmp(attnames{j},'valid_max')       
-            if ~isnan(attinfo{1,j}(ii))
-                if strcmp(varinfo{1,1}{ii,1}, 'frequency')
-                    netcdf.putAtt(ncid, varid, 'max', single(max(data.frequency(data.frequency>-9999)))); 
-                elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
-                    netcdf.putAtt(ncid, varid, attnames{j},double(attinfo{1,j}(ii)));          
-                else
-                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii)));                               
-                end
+        elseif strcmp(attnames{j},'flag_values')
+            if ~isempty(attinfo{1,j}{ii})
+                netcdf.putAtt(ncid, varid, attnames{j},int8(str2num(attinfo{1,j}{ii}))); 
             end
-        elseif strcmp(attnames{j},'comment')
-            if ~strcmp(attinfo{1,j}{ii},char(13))
-                netcdf.putAtt(ncid,varid, attnames{j}, strip(attinfo{1,j}{ii})); 
-            end   
         else
-            if ~isempty(attinfo{1,j}{ii})                
-                netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
+            if ~isempty(attinfo{1,j}{ii})
+                if strcmp(attnames{j},'magnetic_dec')
+                    netcdf.putAtt(ncid, varid, attnames{j}, buoy_info.MagDec)
+                elseif strcmp(attnames{j},'quality_control_conventions')
+                    if length(attinfo{1,j}{ii})>1
+                        netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
+                    end
+                else
+                    netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}{ii});
+                end
             end
         end
     end
     
     %put data to variable
+%     if strcmp(varinfo{1,1}{ii,1},'temp')
+%         %modify this for spotter v2, datawell 
+%         netcdf.putVar(ncid, varid, ones(size(bulkparams.time,1),1).*nan); 
     if strcmp(varinfo{1,1}{ii,1},'time')
-        
         imos_time = data.time - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
-    elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
+    elseif strcmp(varinfo{1,1}{ii,1},'qc_flag_wave') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_wave')| strcmp(varinfo{1,1}{ii,1},'qc_flag_temp') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_temp')
         if isfield(data, varinfo{1,1}{ii,1})
-            netcdf.putVar(ncid, varid, data.(varinfo{1,1}{ii,1}));  
+            netcdf.putVar(ncid, varid, int8(data.(varinfo{1,1}{ii,1})));  
         end
     else
         if isfield(data, varinfo{1,1}{ii,1})
-            netcdf.putVar(ncid, varid, single(data.(varinfo{1,1}{ii,1}))); 
+            netcdf.putVar(ncid, varid, data.(varinfo{1,1}{ii,1})); 
         end
     end
     
 end
 netcdf.close(ncid);
 end
+
 
 
 

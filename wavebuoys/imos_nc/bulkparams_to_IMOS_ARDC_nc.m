@@ -76,31 +76,23 @@ for ii = 1:size(globatts{1,1},1);
         netcdf.putAtt(ncid,varid, attname, (nanmax(dlon))); 
     elseif strcmp(attname, 'watch_circle')       
         netcdf.putAtt(ncid,varid, attname, buoy_info.watch_circle); 
+    elseif strcmp(attname,'buoy_specification_url')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.buoy_specification_url); 
     else
         netcdf.putAtt(ncid,varid, attname, attvalue);
     end
     
 end
 netcdf.close(ncid);    
-%%
-% define dimensions         
+%% Write data to netCDF 
 
-ncid = netcdf.open(filenameNC,'WRITE'); 
-dimname = 'TIME';
-dimlength = size(data.time,1);
-dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
-
-dimname = 'TEMP_TIME';
-dimlength = size(data.temp_time,1);
-dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
-
-% write variables     
+% read variable info from template 
 fid = fopen(varsfile); 
 varinfo = textscan(fid, '%s%s%s%s%s%s%s%s%f%f%s%s%s%s%s%s%s%s%s%s','delimiter',',','headerlines',1,'EndOfLine','\n'); 
 fclose(fid);      
 
-%get rid of temperature variables and attributes if not V2 buoy
-if strcmp(buoy_info.instrument, 'Sofar Spotter-V1')
+%get rid of temperature variables if no temperature included 
+if ~isfield(data, 'temp_time')
     %build mask
     tmask = [];
     for ii = 1:size(varinfo{1},1)
@@ -121,18 +113,52 @@ if strcmp(buoy_info.instrument, 'Sofar Spotter-V1')
     varinfo = dvarinfo; clear dvarinfo;
 end
 
-attnames = {'standard_name', 'long_name', 'units', 'calendar','axis', 'sampling_period_timestamp_location', 'valid_min', 'valid_max', 'reference_datum',...
+attnames = {'standard_name', 'long_name', 'units', 'axis', 'calendar', 'sampling_period_timestamp_location', 'valid_min', 'valid_max', 'reference_datum',...
     'positive','observation_type','coordinates','method','ancillary_variables','flag_values','flag_meanings','quality_control_convention','comment'}; 
 
-attinfo = varinfo(3:end);     
+attinfo = varinfo(3:end);   
+
+% define dimensions         
+
+ncid = netcdf.open(filenameNC,'WRITE'); 
+dimname = 'TIME';
+dimlength = size(data.time,1);
+dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
+
+% temperature should be on same time as wave time 
+% if isfield(data,'temp_time')
+%     dimname = 'TEMP_TIME';
+%     dimlength = size(data.temp_time,1);
+%     dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+% end
+
+dimname = 'timeSeries';
+dimlength = 1;
+dimid_timeSeries = netcdf.defDim(ncid, dimname, dimlength); 
+
+  
 
 [m,~] = size(varinfo{1,1}); 
 for ii = 1:m        
+    %add timeSeries variable in 
+    if ii == 1
+        netcdf.defVar(ncid, 'timeSeries', 'NC_INT',dimid_timeSeries);
+        varid = netcdf.inqVarID(ncid, 'timeSeries');
+        netcdf.defVarFill(ncid,varid,true,int32(-9999)); 
+        netcdf.putAtt(ncid, varid, 'long_name','Unique identifier for each feature instance'); 
+        netcdf.putAtt(ncid, varid, 'cf_role','timeseries_id');         
+        netcdf.putVar(ncid, varid, int32(1));         
+    end
+
     %create and define variable and attributes    
     if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,int8(-127));
+    elseif strcmp(varinfo{1,2}{ii,1},'TIME')
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,true,-9999);
     else
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
@@ -153,6 +179,10 @@ for ii = 1:m
             if ~isempty(attinfo{1,j}{ii})
                 netcdf.putAtt(ncid, varid, attnames{j},int8(str2num(attinfo{1,j}{ii}))); 
             end
+        elseif strcmp(attnames{j},'comment')
+            if ~strcmp(attinfo{1,j}{ii},char(13))
+                netcdf.putAtt(ncid,varid, attnames{j}, strip(attinfo{1,j}{ii}));                
+            end            
         else
             if ~isempty(attinfo{1,j}{ii})
                 if strcmp(attnames{j},'magnetic_dec')

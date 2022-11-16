@@ -10,14 +10,14 @@ clear; clc
 mpath = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
 
-
-%% General attributes 
+%% General attributes
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
 buoy_info.datapath = 'C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Datawell\DM_data'; 
+
 %buoy type and deployment info number and deployment info 
-buoy_info.type = 'datawell'; 
-buoy_info.serial = '74089'; %
+buoy_info.type = 'datawell'; %datawell or sofar
+buoy_info.serial = '74089'; %datawell hull serial or SPOT ID 
 buoy_info.instrument = 'Datawell DWR Mk4'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
 buoy_info.site_name = 'TORBAY'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
 buoy_info.DeployDepth = 30; 
@@ -27,6 +27,7 @@ buoy_info.timezone = 8; %signed integer for UTC offset
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 buoy_info.MagDec = 10.20; 
 buoy_info.watch_circle = 200; %radius of watch circle in meters; 
+
 %inputs for IMOS-ARDC filename structure
 buoy_info.archive_path = 'C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\ExampleUWA_netcdf';
 
@@ -37,15 +38,19 @@ buoy_info.wave_sensor_serial_number = buoy_info.serial;
 buoy_info.hull_serial_number = buoy_info.serial; 
 buoy_info.instrument_burst_duration = 1800; 
 buoy_info.instrument_burst_interval = 1800; 
-buoy_info.instrument_sampling_interval = 0.4; %sample frequency
+buoy_info.instrument_sampling_interval = 0.4; %0.4 for Spotter (2.5 Hz), 0.3906 for Datawell (2.56 Hz)
 buoy_info.institution = 'UWA'; 
 buoy_info.data_mode = 'DM'; %can be 'DM' (delayed mode) or 'RT' (real time)
-
+buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/datawell_brochure_dwr4_acm_b-38-09.pdf';
+%url for Spotter: 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/Spotter_SpecSheet%20Expanded.pdf';
+%url for Datawell:  'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/datawell_brochure_dwr4_acm_b-38-09.pdf';
 
 %% process delayed mode data
 
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1
+%     ----- NTP workflow for processing raw Spotter memory card ------------------------------------
+    
     %path of Sofar parser script
     parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\SofarParser\parser_v1.11.2'; 
     parser = 'parser_v1.11.2.py'; 
@@ -63,7 +68,64 @@ if strcmp(buoy_info.type,'sofar')==1
          bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
     end         
 
+% IF NTP workflow doesn't work, then process in Python and read in CSVs to same structure
+    [bulkparams, locations, spec, displacements, sst] = read_parser_results(datapath);
+
     %re-organise so all parameters of interest are in one data structure
+    %bulkparams
+    fields = fieldnames(bulkparams); 
+    for i = 1:length(fields)
+        if strcmp(fields{i},'temp')
+            data.surf_temp = bulkparams.(fields{i});
+            data.temp_time = data.time; 
+            data.bott_temp = bulkparams.(fields{i}).*-9999; 
+        else
+            data.(fields{i}) = bulkparams.(fields{i}); 
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %add this in later --- and probably remove 'join bulkparams and sst
+    %above'
+
+    %sst
+%     fields = fieldnames(sst); 
+%     for i = 1:length(fields)
+%         if strcmp(fields{i},'temp')
+%             data.surf_temp = bulkparams.(fields{i});
+%             data.temp_time = data.time; 
+%             data.bott_temp = bulkparams.(fields{i}).*-9999; 
+%         else
+%             data.(fields{i}) = bulkparams.(fields{i}); 
+%         end
+%     end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %displacements
+    fields = fieldnames(displacements); 
+    for i = 1:length(fields)
+        if strcmp(fields{i},'time'); 
+            data.disp_time = displacements.(fields{i}); 
+        else
+            data.(fields{i}) = displacements.(fields{i}); 
+        end
+    end
+    %spec
+    fields = fieldnames(spec);
+    for i =1 :length(fields); 
+        if strcmp(fields{i},'time')
+            continue
+        elseif strcmp(fields{i},'Szz')
+            data.energy = spec.(fields{i}); 
+        else
+            data.(fields{i}) = spec.(fields{i}); 
+        end
+    end 
+    %make frequency same size as other spec params
+    for i = 1:size(data.a1,1); 
+        data.frequency(i,:) = data.freq(1,:); 
+    end
+    data = rmfield(data,'freq'); 
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
@@ -147,9 +209,6 @@ elseif strcmp(buoy_info.type,'datawell')==1
      clear data_nc
 end
 
-%save file
-save('C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Datawell\Datawell_DM.mat','-v7.3'); 
-
 %%   QAQC data - following QARTOD
 %settings for QAQC
 check.time = data.time;
@@ -207,6 +266,8 @@ for i = 1:length(fields)
         data.(fields{i})(isnan(data.(fields{i}))) = -9999;
     end
 end     
+
+%% Save .mat file 
 
 %% Organise for netCDF following IMOS-ARDC conventions      
 
