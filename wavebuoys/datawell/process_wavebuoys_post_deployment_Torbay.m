@@ -11,6 +11,7 @@ clear; clc
 
 addpath(genpath('\\drive.irds.uwa.edu.au\SEE-PNP-001\ProcessingCodes\Wave_buoys\'));
 addpath(genpath('C:\Data\wavebuoy_tools\wavebuoys\datawell')); 
+addpath(genpath('C:\Data\wavebuoy_tools\wavebuoys\datawell\datawell_tools')); 
 %location of wavebuoy_tools repo
 % buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
 % addpath(genpath(buoycodes))
@@ -21,7 +22,7 @@ buoy_info.serial = 'Datawell-74089';
 buoy_info.name = 'Torbay'; 
 buoy_info.datawell_name = 'Dev_Site'; 
 buoy_info.version = 'DWR4'; %or DWR4 for Datawell, for example
-buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
+%buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Torbay';
 buoy_info.DeployDepth = 30; 
@@ -30,8 +31,8 @@ buoy_info.DeployLon = 117.772767;
 buoy_info.UpdateTime =  0.5; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 %folder where data to be processed is
-buoy_info.data_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\CSV_export\';
-buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\';
+buoy_info.data_path = 'p:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\20210212_to_20210712_dep03_Torbay_74103\CSV_export\';
+%buoy_info.archive_path = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\CF\WaveBuoyNearshore\74089_DevSite_DL20210219\';
 
 %% process realtime mode data
 %create blank array
@@ -113,7 +114,8 @@ for kk=8:length(files) %file 1 is bad 1970 file and avoid lab testing of buoy
          data.disp_h = [data.disp_h; temp.disp_h]; 
          data.disp_n = [data.disp_n; temp.disp_n]; 
          data.disp_w = [data.disp_w; temp.disp_w];         
-         
+         data.disp_flag = [data.disp_flag; temp.disp_flag];
+
          clear temp
          cnt=cnt+1;
     end
@@ -125,10 +127,10 @@ end
     
      t1=datevec(data.time(1));
      t2=datevec(data.time(end));
-     fname=['buoy_data_' num2str(t1(1)) '_' num2str(t1(2)) '_' num2str(t1(3)) '-' num2str(t2(1)) '_' num2str(t2(2)) '_' num2str(t2(3)) '_v2.mat'];
+     fname=['buoy_data_' num2str(t1(1)) '_' num2str(t1(2)) '_' num2str(t1(3)) '-' num2str(t2(1)) '_' num2str(t2(2)) '_' num2str(t2(3)) '_nov22.mat'];
 
      %output to the 'processed_CF_card' folder on PNP 
-   save(['P:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\Processed_CF_card\' fname],'data','-v7.3');
+   save(['P:\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\Datawell\Data\UWA\Processed_CF_card\' fname ],'data','-v7.3');
 %%
 
 
