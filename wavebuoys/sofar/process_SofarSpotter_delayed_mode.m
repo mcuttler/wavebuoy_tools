@@ -92,9 +92,13 @@ for j = 1:size(fidx,2)
     %apparently Matlab will add a folder the path that causes errors when
     %running external executables from Matlab. To fix this, remove the
     %folder that it adds     
-    system(['set path=%path:C:\Users\00084142\AppData\Local\Turbo.net\Sandbox\MATLAB\9.11.0.1687835\local\modified\@PROGRAMFILES@\MATLAB\R2021b\bin\win64; C:\Users\00084142\Anaconda3\bin=% '...
-        '& C:\Users\00084142\Anaconda3\python ' parser]);   
-%     system(['set path=%path:' matpath '\win64;=% & ' pypath '\python ' parser]);   
+  %  system(['set path=%path:C:\Users\00084142\AppData\Local\Turbo.net\Sandbox\MATLAB\9.11.0.1687835\local\modified\@PROGRAMFILES@\MATLAB\R2021b\bin\win64; C:\Users\00084142\Anaconda3\bin=% '...
+  %      '& C:\Users\00084142\Anaconda3\python ' parser]);   
+  
+   %  system(['set path=%path:' matpath '\win64;=% & ' pypath '\python ' parser]);  
+     
+     system(['set path=%path:C:\Program Files\MATLAB\R2019b\bin\win64;=% & C:\ProgramData\Anaconda3\python ' parser]);   
+     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %append data from parser to single output file 
     disp(['Adding data for chunk ' num2str(j) ' to data arrays'])    

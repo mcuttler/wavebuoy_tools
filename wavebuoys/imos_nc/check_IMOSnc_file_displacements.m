@@ -1,4 +1,4 @@
-%% Check IMOS-compliant netCDF file
+%% Check IMOS-compliant netCDF file for displacements
 
 close all
 clear all
@@ -8,7 +8,7 @@ clc
 %set file path (wherever file downloaded to)
 filepath = 'E:\wawaves\TorbayWest\delayedmode\ProcessedData_DelayedMode\dep03';
 %IMOS file name
-filename = 'UWA_20210712_TORBAY-WEST_DM_WAVE-PARAMETERS_20210827.nc';
+filename = 'UWA_20210712_TORBAY-WEST_DM_WAVE-RAW-DISPLACEMENTS_20210726.nc';
 
 ncfile = fullfile(filepath, filename); 
 

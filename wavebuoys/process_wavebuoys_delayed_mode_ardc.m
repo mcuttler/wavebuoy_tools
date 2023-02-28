@@ -7,33 +7,35 @@
 %% set initial paths for Spotter data to process and parser script
 clear; clc
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
 
 %% General attributes
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-buoy_info.datapath = 'C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\Datawell\DM_data'; 
+buoy_info.datapath = 'E:\wawaves\KingGeorgeSound\delayedmode\20221108_to_20230130_dep04_KingGeorgeSound_SPOT0093\raw'; 
 
 %buoy type and deployment info number and deployment info 
-buoy_info.type = 'datawell'; %datawell or sofar
-buoy_info.serial = '74089'; %datawell hull serial or SPOT ID 
-buoy_info.instrument = 'Datawell DWR Mk4'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
-buoy_info.site_name = 'TORBAY'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
-buoy_info.DeployDepth = 30; 
-buoy_info.startdate = datenum(2019,7,1); 
-buoy_info.enddate = datenum(2019,8,1); 
+buoy_info.type = 'sofar'; %datawell or sofar
+buoy_info.serial = 'SPOT-0093'; %datawell hull serial or SPOT ID 
+buoy_info.instrument = 'Sofar Spotter-V1'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
+buoy_info.site_name = 'King-George-Sound'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
+buoy_info.DeployDepth = 13.6; 
+buoy_info.startdate = datenum(2022,11,09); 
+buoy_info.enddate = datenum(2023,01,29); 
 buoy_info.timezone = 8; %signed integer for UTC offset 
-%use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-buoy_info.MagDec = 10.20; 
-buoy_info.watch_circle = 200; %radius of watch circle in meters; 
+% use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
+% (MH 20221209 no mag dec for spotters because their direction is relative
+% to T North
+buoy_info.MagDec = 0; 
+buoy_info.watch_circle = 30; %radius of watch circle in meters; 
 
 %inputs for IMOS-ARDC filename structure
-buoy_info.archive_path = 'C:\Users\00084142\OneDrive - The University of Western Australia\HANSEN_ARDC_WaveBuoys\Data\ExampleUWA_netcdf';
+buoy_info.archive_path = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep04_b';
 
 %additional attributes for IMOS netCDF
 buoy_info.project = 'UWA Nearshore wave buoy program'; 
-buoy_info.wave_motion_sensor_type = 'accelerometer';
+buoy_info.wave_motion_sensor_type = 'GPS';    % e.g. 'accelerometer' or 'GPS'
 buoy_info.wave_sensor_serial_number = buoy_info.serial; 
 buoy_info.hull_serial_number = buoy_info.serial; 
 buoy_info.instrument_burst_duration = 1800; 
@@ -41,7 +43,7 @@ buoy_info.instrument_burst_interval = 1800;
 buoy_info.instrument_sampling_interval = 0.4; %0.4 for Spotter (2.5 Hz), 0.3906 for Datawell (2.56 Hz)
 buoy_info.institution = 'UWA'; 
 buoy_info.data_mode = 'DM'; %can be 'DM' (delayed mode) or 'RT' (real time)
-buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/datawell_brochure_dwr4_acm_b-38-09.pdf';
+buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/Spotter_SpecSheet%20Expanded.pdf';
 %url for Spotter: 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/Spotter_SpecSheet%20Expanded.pdf';
 %url for Datawell:  'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/datawell_brochure_dwr4_acm_b-38-09.pdf';
 
@@ -52,24 +54,25 @@ if strcmp(buoy_info.type,'sofar')==1
 %     ----- NTP workflow for processing raw Spotter memory card ------------------------------------
     
     %path of Sofar parser script
-    parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\SofarParser\parser_v1.11.2'; 
-    parser = 'parser_v1.11.2.py'; 
+    parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\SofarParser\sd_file_parser_v3_dec2022'; 
+    parser = 'sd_file_parser.py'; 
     %set number of unique time poins to use for efficient processing (depends
     %on computer specifications) 
     chunk = 20; 
     
     %process delayed mode (from buoy memory card)
-    if strcmp(buoy_info.version, 'Spotter-V2')
-        [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);       
+    if strcmp(buoy_info.instrument, 'Spotter-V2')
+        [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);       
         %down sample temperature to be at same time stamp as wave data 
         [bulkparams] = sofar_join_bulkparams_and_sst(bulkparams, sst); 
     else
-         [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(datapath, parserpath, parser, chunk);
-         bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
+        [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);
+        bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
     end         
 
 % IF NTP workflow doesn't work, then process in Python and read in CSVs to same structure
-    [bulkparams, locations, spec, displacements, sst] = read_parser_results(datapath);
+
+%    [bulkparams, locations, spec, displacements, sst] = read_parser_results(buoy_info.datapath);
 
     %re-organise so all parameters of interest are in one data structure
     %bulkparams
@@ -333,6 +336,7 @@ for i = 1:length(ttdum)
     ind = find(data.time>=displacements.time(1) & data.time<=displacements.time(end)); 
     displacements.lat = data.lat(ind); 
     displacements.lon = data.lon(ind); 
+    displacements.time_location = data.time(ind);
     disp_buoy_info.startdate = displacements.time(1); 
     disp_buoy_info.enddate = displacements.time(end);
 
