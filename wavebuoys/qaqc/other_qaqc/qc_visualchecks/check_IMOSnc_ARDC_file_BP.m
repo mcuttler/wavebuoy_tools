@@ -6,7 +6,7 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep04_b';
+filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep04';
 %IMOS file name
 filename = 'UWA_20221109_King-George-Sound_DM_WAVE-PARAMETERS_20230129.nc';
 
@@ -141,137 +141,54 @@ datetick('x','dd-mmm');
 ylabel('WAVE quality control'); 
 
 
-return
-
-fid = figure;
-ax(1) = subplot(3,1,1); 
-h(1) = plot(data.time, data.hs);
-hold on; grid on;
-if any(data.quality_flag==3)
-h(2) = plot(data.time(data.quality_flag==3), data.hs(data.quality_flag==3),'co'); 
-end
-if any(data.quality_flag==4)
-h(3) = plot(data.time(data.quality_flag==4), data.hs(data.quality_flag==4),'ro'); 
-end
-datetick('x','dd-mmm'); 
-text(0.05, 0.95,'(a)','units','normalized'); 
-ylabel('Hs (m)'); 
-xlabel('Date'); 
-
-if any(data.quality_flag==3) & any(data.quality_flag==4)
-l = legend(h,{'Data','Suspect','Fail'}); 
-%     'Flagged Data (' num2str(round(length(find(data.quality_flag>1))./length(data.quality_flag)*100,2)) '%)']}); 
-end
-ax(2) = subplot(3,1,2); 
-plot(data.time, data.tp); 
-hold on; grid on; 
-plot(data.time(data.quality_flag==3), data.tp(data.quality_flag==3),'co'); 
-plot(data.time(data.quality_flag==4), data.tp(data.quality_flag==4),'ro'); 
-datetick('x','dd-mmm');
-xlabel('Date'); 
-ylabel('Tp (s)'); 
-
-
-ax(3) = subplot(3,1,3); 
-plot(data.time, data.dp); 
-hold on; grid on; 
-plot(data.time(data.quality_flag==3), data.dp(data.quality_flag==3),'co'); 
-plot(data.time(data.quality_flag==4), data.dp(data.quality_flag==4),'ro'); 
-datetick('x','dd-mmm');
-xlabel('Date'); 
-ylabel('Dp (deg from)'); 
-
-set(fid, 'PaperPositionMode', 'manual','PaperUnits','centimeters','units','centimeters',...
-'position',[1 1 24 18], 'PaperPosition', [0 0 24 18])
-
-% %% check sources of flags
-% [flag_source] =  qaqc_error_source(data.quality_subflag);
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%additional plots 
-
-
-
-%return
-
-
-
 %temp data, don;t include for non temp SPotters
+% Look at TEMP variables 
+
+
 data.TEMP = ncread(ncfile,'TEMP'); 
 data.TEMP_quality_control = ncread(ncfile,'TEMP_quality_control'); 
 
 
 figure()
-subplot(3,1,1)
-scatter((1:length(data.time)),data.TEMP)
+subplot(2,1,1)
+plot(data.TIME,data.TEMP)
 title('TEMP')
+datetick
 
-xlim([0 length(data.time)])
-subplot(3,1,2)
-
-scatter((1:length(data.time)),data.TEMP_quality_flag)
-title('TEMP quality flag')
-xlim([0 length(data.time)])
-subplot(3,1,3)
-
-scatter((1:length(data.time)),data.TEMP_subflag)
-title('TEMP subflag')
-xlim([0 length(data.time)])
-
+subplot(2,1,2)
+plot(data.TIME,data.TEMP_quality_control)
+title('TEMP quality control')
+datetick
 
 %%%%%%%%%%%         End Temp Data
 
-
 % percentage of 4 and 3 flags
 
-flag_per.bad = length(find(data.quality_flag==4))/length(data.quality_flag);
-flag_per.suspect = length(find(data.quality_flag==3))/length(data.quality_flag);
+QC_per.bad = length(find(data.WAVE_quality_control==4))/length(data.WAVE_quality_control);
+QC_per.suspect = length(find(data.WAVE_quality_control==3))/length(data.WAVE_quality_control);
 
 disp('fraction of data with flag 4')
-disp(num2str(flag_per.bad))
+disp(num2str(QC_per.bad))
 disp('fraction of data with flag 3')
-disp(num2str(flag_per.suspect))
+disp(num2str(QC_per.suspect))
 
-%Calc percentage of subflags
+QC_T_per.bad = length(find(data.TEMP_quality_control==4))/length(data.TEMP_quality_control);
+QC_T_per.suspect = length(find(data.TEMP_quality_control==3))/length(data.TEMP_quality_control);
 
-quality_subflag_ind = zeros(37,1);
-quality_subflag_per = zeros(37,1);
-
-for ii= 0:36
-    quality_subflag_ind(ii+1)=ii;
-    
-    quality_subflag_per(ii+1) = (sum(data.quality_subflag==ii)/(sum(not(isnan(data.quality_subflag)))))*100;
-    
-end
+disp('fraction TEMP of data with flag 4')
+disp(num2str(QC_T_per.bad))
+disp('fraction TEMP of data with flag 3')
+disp(num2str(QC_T_per.suspect))
 
 
 
 
-% plot subflag values
+return
 
-fid = figure; 
-ax(1) = subplot(2,1,1); 
-h(1) = scatter(data.time, data.quality_flag);
-hold on; grid on;
-datetick('x','dd-mmm'); 
-text(0.05, 0.95,'(a)','units','normalized'); 
-ylabel('Quality Flag (m)'); 
-xlabel('Date'); 
-
-ax(2) = subplot(2,1,2); 
-scatter(data.time, data.quality_subflag); 
-hold on; grid on; 
-datetick('x','dd-mmm');
-xlabel('Date'); 
-ylabel('Subflag'); 
-
-
-%Plot data and flag values against index, not time
+% Carry over from old code. Looking into more depth of Subflag values. Note
+% Subflag values not included in ARDC final NC version. So would need to go
+% back and reprocess to get subflag values. 
+% Plot data and flag values against index, not time
 
 fid = figure;
 ax(1) = subplot(3,1,1); 
@@ -324,42 +241,4 @@ title('percentage of subflag values')
 
 bar(quality_subflag_ind,quality_subflag_per)
 xticks(quality_subflag_ind);
-
-% plot other variables not yest looked at 
-
-%raw data figure
-fid = figure; 
-ax(1) = subplot(4,1,1); 
-h(1) = plot(data.time, data.tm);
-hold on; grid on;
-datetick('x','dd-mmm'); 
-text(0.05, 0.95,'(a)','units','normalized'); 
-ylabel('tm (s)'); 
-xlabel('Date'); 
-
-ax(2) = subplot(4,1,2); 
-plot(data.time, data.dm); 
-hold on; grid on; 
-datetick('x','dd-mmm');
-xlabel('Date'); 
-ylabel('dm (deg from)'); 
-
-
-ax(3) = subplot(4,1,3); 
-plot(data.time, data.pkspr); 
-hold on; grid on; 
-datetick('x','dd-mmm');
-xlabel('Date'); 
-ylabel('pkspr (deg)'); 
-
-ax(4) = subplot(4,1,4); 
-plot(data.time, data.meanspr); 
-hold on; grid on; 
-datetick('x','dd-mmm');
-xlabel('Date'); 
-ylabel('meanspr (deg)'); 
-
-set(fid, 'PaperPositionMode', 'manual','PaperUnits','centimeters','units','centimeters',...
-'position',[1 1 24 18], 'PaperPosition', [0 0 24 18])
-%%
 
