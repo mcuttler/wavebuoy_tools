@@ -55,11 +55,21 @@ end
 
 %check for wind data 
 if isfield(resp_waves.Body.Data.data,'wind')
-    for j = 1:size(resp_waves.Body.Data.data.wind)
-        Spotter.wind_speed(j,1) = resp_waves.Body.Data.data.wind(j).speed;
-        Spotter.wind_dir(j,1) = resp_waves.Body.Data.data.wind(j).direction;
-        Spotter.wind_time(j,1) = datenum(resp_waves.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
-        Spotter.wind_seasurfaceId(j,1) = resp_waves.Body.Data.data.wind(j).seasurfaceId;
+    if ~isempty(resp_waves.Body.Data.data.wind)
+        for j = 1:size(resp_waves.Body.Data.data.wind)
+            Spotter.wind_speed(j,1) = resp_waves.Body.Data.data.wind(j).speed;
+            Spotter.wind_dir(j,1) = resp_waves.Body.Data.data.wind(j).direction;
+            Spotter.wind_time(j,1) = datenum(resp_waves.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+            Spotter.wind_seasurfaceId(j,1) = resp_waves.Body.Data.data.wind(j).seasurfaceId;
+        end
+    else
+        for j = 1:size(resp_waves.Body.Data.data.waves)
+            Spotter.wind_speed(j,1) = nan;
+            Spotter.wind_dir(j,1) = nan;
+            %use wave timestamp
+            Spotter.wind_time(j,1) = datenum(resp_waves.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+            Spotter.wind_seasurfaceId(j,1) = nan;
+        end
     end
 end
 

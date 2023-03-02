@@ -83,15 +83,16 @@ if dist_dev>dev_watch %if development site buoy offsite
     props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
     props.setProperty('mail.smtp.socketFactory.port','465');
     
-    %send email
-    sendmail('jeff.hansen@uwa.edu.au',['Development site buoy offsite'],['Development site buoy is ' num2str(dist_dev) '  m from'...
-        ' deployment location. Current position is Lat=' num2str(lat_dev,9) ' Long=' num2str(long_dev,9) '.']) ;
-    sendmail('carlin.alerts@outlook.com.au',['Development site buoy offsite'],['Development site buoy is ' num2str(dist_dev) '  m from'...
-        ' deployment location. Current position is Lat=' num2str(lat_dev,9) ' Long=' num2str(long_dev,9) '.']) ;
-    sendmail('michael.cuttler@uwa.edu.au',['Development site buoy offsite'],['Development site buoy is ' num2str(dist_dev) '  m from'...
-        ' deployment location. Current position is Lat=' num2str(lat_dev,9) ' Long=' num2str(long_dev,9) '.']) ;
-    sendmail('matt.hatcher@uwa.edu.au',['Development site buoy offsite'],['Development site buoy is ' num2str(dist_dev) '  m from'...
-        ' deployment location. Current position is Lat=' num2str(lat_dev,9) ' Long=' num2str(long_dev,9) '.']) ;
+   
+        %send email
+    mail_title = [buoy_info.name ' buoy out of radius']; 
+    mail_message = [buoy_info.name ' buoy is ' num2str(dist_dev) ' m from deployment location. '...
+        'Current position is Lat=' num2str(lat_dev,9) ' Long=' num2str(long_dev,9) '.']; 
+    
+    sendmail('jeff.hansen@uwa.edu.au',mail_title, mail_message);
+    sendmail('carlin.alerts@outlook.com.au',mail_title, mail_message);
+    sendmail('michael.cuttler@uwa.edu.au',mail_title, mail_message);
+    sendmail('matt.hatcher@uwa.edu.au',mail_title, mail_message);
 else
     warning.gps = 0; 
 end

@@ -92,14 +92,19 @@ for j = 1:size(fidx,2)
     %apparently Matlab will add a folder the path that causes errors when
     %running external executables from Matlab. To fix this, remove the
     %folder that it adds     
-    system(['set path=%path:C:\Program Files\MATLAB\R2021a\bin\win64;=% & C:\ProgramData\Anaconda3\python ' parser]);   
-    
+  %  system(['set path=%path:C:\Users\00084142\AppData\Local\Turbo.net\Sandbox\MATLAB\9.11.0.1687835\local\modified\@PROGRAMFILES@\MATLAB\R2021b\bin\win64; C:\Users\00084142\Anaconda3\bin=% '...
+  %      '& C:\Users\00084142\Anaconda3\python ' parser]);   
+  
+   %  system(['set path=%path:' matpath '\win64;=% & ' pypath '\python ' parser]);  
+     
+     system(['set path=%path:C:\Program Files\MATLAB\R2019b\bin\win64;=% & C:\ProgramData\Anaconda3\python ' parser]);   
+     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %append data from parser to single output file 
     disp(['Adding data for chunk ' num2str(j) ' to data arrays'])    
 
     %for some instances parser generates subdirectories
-    if exist([datapath '\tmp\bulkparameters.csv'])==0
+    if ~exist([datapath '\tmp\bulkparameters.csv'])
         %get list of subfolders
         subdir = dir([datapath '\tmp']); 
         subdir = subdir(3:end); 
@@ -160,7 +165,7 @@ for j = 1:size(fidx,2)
         else
             filenames = {'bulkparameters','location','displacement', 'a1','a2','b1','b2','Sxx','Syy','Szz'};
         end
-        
+ %%       
         for kk = 1:length(filenames)
             if exist([datapath '\tmp\' filenames{kk} '.csv'])
                 if strcmp(filenames{kk},'bulkparameters') | strcmp(filenames{kk},'location') | strcmp(filenames{kk},'displacement') | strcmp(filenames{kk},'sst')
@@ -198,15 +203,22 @@ for j = 1:size(fidx,2)
                     
                     if size(dumdata.data,2)~=size(spec.freq,2)
                         dumdata.data(:,end+1:size(spec.freq,2)+8)=nan; 
-                    end                          
-                    spec.(filenames{kk}) = [spec.(filenames{kk}); dumdata.data(:,9:end)];                                        
+                    end
+                    %add in check that all spectral data is 128 long
+                    if length(dumdata.data(1,9:end))<128
+                        dl = 128 - length(dumdata.data(1,9:end));                     
+                        dumdata.data(:,end:end+dl)=nan; 
+                        spec.(filenames{kk}) = [spec.(filenames{kk}); dumdata.data(:,9:end)];  
+                    else
+                        spec.(filenames{kk}) = [spec.(filenames{kk}); dumdata.data(:,9:end)];  
+                    end
                 end
             end
             
         end
     end
     disp(['Finished chunk ' num2str(j) ' out of ' num2str(size(fidx,2))]);
-    clc
+%     clc
 %%    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %clean up tmp directory for next chunk

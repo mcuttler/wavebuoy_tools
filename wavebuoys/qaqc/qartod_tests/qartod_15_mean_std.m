@@ -1,35 +1,6 @@
 %%  Apply QARTOD QA/QC 
 %    
-%test19: Function to do Qartod test 19 on a time series -
-%min/max/acceptable range 
-% 
-%   See QARTOD manual for further details
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   inputs:
-% 
-% in.time - time vector : datenum format
-% in.WVHGT - timeseries wave height : WVHGT
-% in.WVPD - timeseries wave period : WVPD
-% in.WVDIR - timeseries wave direction : WVDIR
-% in.WVSP - timeseries wave spreading : WVSP
-
-%    User defined test criteria
-% in.STD - number of standard deviations values can be from mean 
-%
-%     Outputs:
-% out1 - QC test flag of same length of time vector. values 1,3,4. 
-%        1 = pass (see Qartod manual
-%        "QARTOD-IOOS_Manual_for_Real-Time_Quality_Control_of_Waves_v2.1.pdf"
-%        3 = suspect
-%        4 = fail 
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Example usage
-% 
-%           [qf_bulkparams] = qartod_bulkdparams_range(in) 
-%     
-% 
+% Test 15 --- MEAN - STD 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
 % Code history
 % 

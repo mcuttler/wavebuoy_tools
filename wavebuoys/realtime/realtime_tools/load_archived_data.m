@@ -4,7 +4,7 @@
 %note, this only runs after a site has been created - so data should exist
 %for current or preceding month 
 
-function [data] = load_archived_data(archive_path, buoy_info, SpotData); 
+function [data] = load_archived_data(archive_path, buoy_info)
 data  = []; 
 dyr = dir([archive_path '\' buoy_info.name '\mat_archive\']); 
 %only use latest
@@ -21,7 +21,11 @@ if exist(monthly_file)
         monthly_file = [buoy_info.backup_path '\' buoy_info.name '\mat_archive\' dyr.name '\' dmths.name];
         dum = load(monthly_file); 
     end
-    data = dum.SpotData;
+    if strcmp(buoy_info.type,'sofar')
+        data = dum.SpotData;
+    elseif strcmp(buoy_info.type,'datawell')
+        data = dum.dw_data;
+    end
 end
 
 

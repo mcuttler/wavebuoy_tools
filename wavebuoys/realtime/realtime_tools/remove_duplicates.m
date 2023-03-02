@@ -30,7 +30,7 @@ for i = 1:length(t_wave)
     dataout.time(i,1) = t_wave(i); 
     idx = find(data.time==t_wave(i));     
     for j = 1:length(fields)        
-        if strcmp(fields{j},'temp_time')|strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')|strcmp(fields{j},'time')|strcmp(fields{j},'curr_mag')|strcmp(fields{j},'curr_dir')|strcmp(fields{j},'curr_mag_std')|strcmp(fields{j},'curr_dir_std')|strcmp(fields{j},'w') | strcmp(fields{j},'w_std') 
+        if strcmp(fields{j},'temp_time')|strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp')|strcmp(fields{j},'time')|strcmp(fields{j},'curr_mag')|strcmp(fields{j},'curr_dir')|strcmp(fields{j},'curr_mag_std')|strcmp(fields{j},'curr_dir_std')|strcmp(fields{j},'w') | strcmp(fields{j},'w_std')|strcmp(fields{j},'press_time')|strcmp(fields{j},'press_std_time')|strcmp(fields{j},'pressure')|strcmp(fields{j},'pressure_std')
             dum = 1;
         elseif strcmp(fields{j},'spec_time')|strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')|strcmp(fields{j},'ndirec')            
             dum = 1;
@@ -79,6 +79,66 @@ if isfield(data,'temp_time')
                     end
                 else
                     dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+                end                            
+            end
+        end
+        clear idx t1 t2
+    end
+end
+%pressure data
+if isfield(data,'press_time')
+    p_temp = unique(data.press_time); 
+    for i = 1:length(p_temp)
+        dataout.press_time(i,1) = p_temp(i);         
+        idx = find(data.press_time==p_temp(i));     
+        for j = 1:length(fields)
+            if strcmp(fields{j},'pressure')
+                if length(idx)>1
+                    t1 = data.(fields{j})(idx(1));
+                    t2 = data.(fields{j})(idx(2));                 
+                    if isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
+                    elseif isnan(t1)&~isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
+                    elseif ~isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
+                    else
+                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
+                    end
+                else
+                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+                end                            
+            end
+        end
+        clear idx t1 t2
+    end
+end
+%pressure std data
+if isfield(data,'press_std_time')
+    p_temp = unique(data.press_std_time); 
+    for i = 1:length(p_temp)
+        dataout.press_std_time(i,1) = p_temp(i);         
+        idx = find(data.press_std_time==p_temp(i));     
+        for j = 1:length(fields)
+            if strcmp(fields{j},'pressure_std')
+                if length(idx)>1
+                    t1 = data.(fields{j})(idx(1));
+                    t2 = data.(fields{j})(idx(2));                 
+                    if isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
+                    elseif isnan(t1)&~isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
+                    elseif ~isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
+                    else
+                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
+                    end
+                else
+                    try
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+                    catch
+                        dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
+                    end
                 end                            
             end
         end
