@@ -1,4 +1,6 @@
 %% Make netCDF file name following IMOS-ARDC conventions
+% copied from 'make_imos_ardc_filename' to make MAT archive and not include the .nc in filename
+%
 % Filenaming convention for ARDC Wave data files 
 % The NetCDF file name format is:% 
 % <Institution>_<Start-Date>_<Site-Name>_<Data-Mode>_<Product-Type>_<End-Date>.nc
@@ -104,9 +106,8 @@ function [imos_filename] = make_imos_ardc_filename(buoy_info,product_type)
 
 %build file name
  
-filename = [buoy_info.institution '_' datestr(buoy_info.startdate,'yyyymmdd') '_' buoy_info.site_name '_' buoy_info.data_mode '_' product_type '_' datestr(buoy_info.enddate,'yyyymmdd') '.nc']; 
+filename = [buoy_info.institution '_' datestr(buoy_info.startdate,'yyyymmdd') '_' buoy_info.site_name '_' buoy_info.data_mode '_' product_type '_' datestr(buoy_info.enddate,'yyyymmdd')]; 
 imos_filename = fullfile(buoy_info.archive_path, filename); 
-
 
 
 end

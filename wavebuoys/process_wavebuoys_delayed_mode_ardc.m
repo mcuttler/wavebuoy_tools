@@ -354,10 +354,9 @@ data.frequency = data.frequency(1,:);
 spec_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile);
      
 
-    
+% Save all Matlab variables for future QC and checking
 
-
-
+save(make_imos_ardc_filename_mat(buoy_info,'MAT'));
 
 
 

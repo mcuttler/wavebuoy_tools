@@ -181,7 +181,7 @@ for ii = 1:m
     end
     
     %put data to variable
-    if strcmp(varinfo{1,1}{ii,1},'time')
+    if strcmp(varinfo{1,1}{ii,1},'spec_time')
         
         imos_time = data.time - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 

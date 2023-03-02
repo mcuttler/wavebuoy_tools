@@ -6,7 +6,7 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep04';
+filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep04_b';
 %IMOS file name
 filename = 'UWA_20221109_King-George-Sound_DM_WAVE-SPECTRA_20230129.nc';
 
@@ -16,7 +16,7 @@ ncfile = fullfile(filepath, filename);
 
 finfo = ncinfo(ncfile);
 %% read in variables
-data.TIME = ncread(ncfile,'TIME')
+
 data.TIME = ncread(ncfile,'TIME')+datenum(1950,1,1); 
 data.LONGITUDE = ncread(ncfile,'LONGITUDE');
 data.LATITUDE = ncread(ncfile,'LATITUDE');
