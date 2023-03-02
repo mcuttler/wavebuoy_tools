@@ -63,24 +63,15 @@ hold on
 C = load('coastlines');
 plot(C.coastlon,C.coastlat,'k')
 
-return
-
-%Plot all Displacements
+%Plots 
+% plot first and last ENERGY Spectra to see time start and time end
 
 figure()
-subplot(3,1,1)
-plot(data.TIME,data.ZDIS)
-datetick
-title('ZDIS')
+subplot(2,1,1)
+plot(data.FREQUENCY,data.ENERGY(1,:))
+title (datestr(data.TIME(1)));
 
+subplot(2,1,2)
+plot(data.FREQUENCY,data.ENERGY(end,:))
+title (datestr(data.TIME(end)));
 
-subplot(3,1,2)
-plot(data.TIME,data.XDIS)
-datetick
-title('XDIS')
-
-
-subplot(3,1,3)
-plot(data.TIME,data.YDIS)
-datetick
-title('YDIS')
