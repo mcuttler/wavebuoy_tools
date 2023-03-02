@@ -270,6 +270,17 @@ for i = 1:length(fields)
     end
 end     
 
+%frequency can't have FillValues, so cut last frequency if it's got -9999
+data.frequency = data.frequency(1,:);
+if data.frequency(end)==-9999
+    %find frequency that's not -9999
+    ind_f = find(data.frequency>-9999); 
+    fields = {'frequency','energy','a1','a2','b1','b2','Sxx','Syy'}; 
+    for i = 1:length(fields)
+        data.(fields{i}) = data.(fields{i})(:,ind_f); 
+    end
+end
+
 %% Save .mat file 
 
 %% Organise for netCDF following IMOS-ARDC conventions      
@@ -350,7 +361,7 @@ if strcmp(buoy_info.type,'datawell')
 else
     varsfile = [mpath '\imos_nc\metadata\spectral_parameters_DM_mapping.csv']; 
 end
-data.frequency = data.frequency(1,:);
+
 spec_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile);
      
 
