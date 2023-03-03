@@ -15,7 +15,7 @@ end
 disp(['Saving spectral data']);  
 
 filenameNC = make_imos_ardc_filename(buoy_info,'WAVE-SPECTRA');         
-filenameNC = [filenameNC(1:end-3) '_testMC.nc']; 
+
 %create output netCDF4 file     
 ncid = netcdf.create(filenameNC,'NETCDF4'); 
 netcdf.close(ncid); 
