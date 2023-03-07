@@ -54,7 +54,7 @@ qaqc.MAXWH = 12;
 qaqc.MINWP = 1; 
 qaqc.MAXWP = 25;
 qaqc.MAXT = 45; 
-qaqc.MINT = 0; 
+qaqc.MINT = 5; 
 
 %settings UWA 'master flag' test (combination of QARTOD19 and QARTOD20) -
 %requires 3 data points 

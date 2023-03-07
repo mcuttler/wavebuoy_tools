@@ -14,23 +14,23 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0162'; %spotter serial number, or just Datawell 
-buoy_info.name = 'KingGeorgeSound'; 
+buoy_info.serial = 'SPOT-1266'; %spotter serial number, or just Datawell 
+buoy_info.name = 'GoodrichBank02'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
+buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
-buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'KingGeorgeSound';
-buoy_info.DeployDepth = 15; 
-buoy_info.DeployLat = -35.079691; 
-buoy_info.DeployLon = 117.977988; 
+buoy_info.utc_offset = 9.5;    % matt changes 2022/11/02
+buoy_info.DeployLoc = 'GoodrichBank02';
+buoy_info.DeployDepth = 95; 
+buoy_info.DeployLat = -10.31873; 
+buoy_info.DeployLon = 129.95182; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
-buoy_info.backup_path2 = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\realtime_archive_backup';
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+
 %data for search radius and alert
 buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
@@ -48,7 +48,7 @@ if strcmp(buoy_info.type,'sofar')==1
         [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;      
+            limit = buoy_info.UpdateTime*2; 
             [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 
@@ -56,8 +56,8 @@ if strcmp(buoy_info.type,'sofar')==1
             [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);     
             flag = 1; 
         end                    
-    end   
-
+    end    
+    
     if flag == 1
         for i = 1:size(SpotData.time,1)
             SpotData.name{i,1} = buoy_info.name; 
@@ -66,8 +66,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-        %warning email
-%         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);  
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
@@ -80,7 +79,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
-                realtime_backup_mat(buoy_info, data);                
+                realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, limit); 
                 %output MEM and SST plots 
                 if strcmp(buoy_info.DataType,'spectral')        
@@ -138,8 +137,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, dw_data);                        
                 
                 %save data to different formats        
-                realtime_archive_mat(buoy_info, data);   
-%                 realtime_backup_mat(buoy_info, data);
+                realtime_archive_mat(buoy_info, data);     
+%                 realtime_backup_mat(buoy_info, data);  
                 limit = 1;         
                 realtime_archive_text(buoy_info, data, limit);             
                 
@@ -161,7 +160,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
         dw_data.qf_sst = ones(size(dw_data.temp_time,1),1).*4; 
         dw_data.qf_bott_temp =ones(size(dw_data.temp_time,1),1).*4; 
         realtime_archive_mat(buoy_info, dw_data); 
-%         realtime_backup_mat(buoy_info, dw_data);
+%         realtime_archive_mat(buoy_info, dw_data);  
         limit = 1; 
         realtime_archive_text(buoy_info, dw_data, limit); 
         
@@ -184,7 +183,6 @@ end
 
 %%
 % quit
-
 
 
 
