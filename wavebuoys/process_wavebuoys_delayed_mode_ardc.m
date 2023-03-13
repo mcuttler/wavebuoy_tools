@@ -5,7 +5,7 @@
 %Outputs monthly netCDF file following IMOS conventions 
 
 %% set initial paths for Spotter data to process and parser script
-clear; clc
+clear; clc; close all;
 %location of wavebuoy_tools repo
 mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
@@ -13,28 +13,28 @@ addpath(genpath(mpath))
 %% General attributes
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-buoy_info.datapath = 'E:\wawaves\KingGeorgeSound\delayedmode\20221108_to_20230130_dep04_KingGeorgeSound_SPOT0093\raw'; 
+buoy_info.datapath = 'E:\wawaves\TorbayEast\delayedmode\20200114_to_20200529_dep01_TorbayEast_SPOT0171\Raw'; 
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; %datawell or sofar
-buoy_info.serial = 'SPOT-0093'; %datawell hull serial or SPOT ID 
+buoy_info.serial = 'SPOT-0171'; %datawell hull serial or SPOT ID 
 buoy_info.instrument = 'Sofar Spotter-V1'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
-buoy_info.site_name = 'King-George-Sound'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
-buoy_info.DeployDepth = 13.6; 
-buoy_info.startdate = datenum(2022,11,09); 
-buoy_info.enddate = datenum(2023,01,29); 
+buoy_info.site_name = 'TORBAY-EAST'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
+buoy_info.DeployDepth = 32; 
+buoy_info.startdate = datenum(2019,01,01); 
+buoy_info.enddate = datenum(2022,12,12); 
 buoy_info.timezone = 8; %signed integer for UTC offset 
 % use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % (MH 20221209 no mag dec for spotters because their direction is relative
 % to T North
 buoy_info.MagDec = 0; 
-buoy_info.watch_circle = 30; %radius of watch circle in meters; 
+buoy_info.watch_circle = 1; %radius of watch circle in meters; 
 
 %inputs for IMOS-ARDC filename structure
-buoy_info.archive_path = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep04_b';
+buoy_info.archive_path = 'E:\wawaves\TorbayEast\delayedmode\ProcessedData_DelayedMode\dep01';
 
 %additional attributes for IMOS netCDF
-buoy_info.project = 'UWA Nearshore wave buoy program'; 
+buoy_info.project = 'UWA Nearshore wave buoy program - IMOS NTP'; 
 buoy_info.wave_motion_sensor_type = 'GPS';    % e.g. 'accelerometer' or 'GPS'
 buoy_info.wave_sensor_serial_number = buoy_info.serial; 
 buoy_info.hull_serial_number = buoy_info.serial; 
@@ -54,14 +54,14 @@ if strcmp(buoy_info.type,'sofar')==1
 %     ----- NTP workflow for processing raw Spotter memory card ------------------------------------
     
     %path of Sofar parser script
-    parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\SofarParser\sd_file_parser_v3_dec2022'; 
-    parser = 'sd_file_parser.py'; 
+    parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\SofarParser\parser_v1.12.0'; 
+    parser = 'parser_v1.12.0.py'; 
     %set number of unique time poins to use for efficient processing (depends
     %on computer specifications) 
     chunk = 20; 
     
     %process delayed mode (from buoy memory card)
-    if strcmp(buoy_info.instrument, 'Spotter-V2')
+    if strcmp(buoy_info.instrument, 'Sofar Spotter-V2')
         [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);       
         %down sample temperature to be at same time stamp as wave data 
         [bulkparams] = sofar_join_bulkparams_and_sst(bulkparams, sst); 
@@ -81,7 +81,7 @@ if strcmp(buoy_info.type,'sofar')==1
         if strcmp(fields{i},'temp')
             data.surf_temp = bulkparams.(fields{i});
             data.temp_time = data.time; 
-            data.bott_temp = bulkparams.(fields{i}).*-9999; 
+            data.bott_temp = ones(length(bulkparams.(fields{i})),1)*-9999; 
         else
             data.(fields{i}) = bulkparams.(fields{i}); 
         end
@@ -283,6 +283,39 @@ end
 
 %% Save .mat file 
 
+
+%% Graphical input on Lat and Lon data to find Start of Stop Time of Deployment Click on Start time and then Stop time
+%% Disable if confident in start and end time recorded metadata.
+
+figure();
+yyaxis left;
+plot(data.time,data.lat);
+
+yyaxis right;
+plot(data.time,data.lon);
+
+xlim([(data.time(1)-5) data.time(floor(length(data.time)/5))]);
+datetick;
+[xinp1,yinp1]=ginput(1);
+
+buoy_info.startdate= xinp1;
+clf;
+
+yyaxis left;
+plot(data.time,data.lat);
+
+yyaxis right;
+plot(data.time,data.lon);
+
+xlim([data.time(end-floor(length(data.time)/5)) (data.time(end)+5)]);
+datetick;
+[xinp2,yinp2]=ginput(1);
+
+buoy_info.enddate= xinp2;
+
+clearvars xinp1 yinp1 xinp2 yinp2;
+clf;
+
 %% Organise for netCDF following IMOS-ARDC conventions      
 
 %Clip data to start/stop time of interest 
@@ -298,10 +331,30 @@ for i = 1:length(fields);
          data.(fields{i}) = data.(fields{i})(ind_tempcurr,:); 
     elseif strcmp(fields{i},'curr_mag') | strcmp(fields{i},'curr_dir') | strcmp(fields{i},'curr_mag_std') | strcmp(fields{i},'curr_dir_std') | strcmp(fields{i},'w') | strcmp(fields{i},'w_std')  
         data.(fields{i}) = data.(fields{i})(ind_tempcurr,:); 
+    elseif strcmp(fields{i},'frequency')
+        data.(fields{i}) = data.(fields{i})(1,:);
     else
         data.(fields{i}) = data.(fields{i})(ind_wave,:); 
     end
 end    
+
+
+%% Graphical input to calculate watch circle. Disable if confident in recorded metadata watch circle. 
+%% ONLY GO VERTICALLY (i.e. choose only latitude)
+%% because longitude to meteres conversion changes with latitude. source of Latitude conversion:
+%% https://www.usgs.gov/faqs/how-much-distance-does-degree-minute-and-second-cover-your-maps
+
+
+figure()
+scatter(data.lon,data.lat)
+
+[xinp,yinp] = ginput(2);
+
+buoy_info.watch_circle = round((1/2) *(abs(yinp(2) - yinp(1))) * (1849.5/(1/60)));
+
+clearvars xinp yinp;
+clf;
+close all;
 
 %%  Integral Wave Parameters 
 

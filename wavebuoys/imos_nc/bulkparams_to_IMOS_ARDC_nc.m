@@ -159,8 +159,12 @@ for ii = 1:m
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,true,-9999);
-    else
+    elseif strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,false,-9999);
+    else
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_FLOAT', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,-9999);
     end    
@@ -171,8 +175,10 @@ for ii = 1:m
             if ~isnan(attinfo{1,j}(ii))                                 
                 if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
                     netcdf.putAtt(ncid, varid, attnames{j},int8(attinfo{1,j}(ii))); 
-                else
+                elseif strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE')
                     netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii)); 
+                else
+                    netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii))); 
                 end
             end
         elseif strcmp(attnames{j},'flag_values')

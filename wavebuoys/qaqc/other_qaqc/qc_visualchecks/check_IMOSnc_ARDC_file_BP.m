@@ -8,7 +8,7 @@ clc
 %set file path (wherever file downloaded to)
 filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep04_b';
 %IMOS file name
-filename = 'UWA_20221109_King-George-Sound_DM_WAVE-PARAMETERS_20230129.nc';
+filename = 'UWA_20221109_KING-GEORGE-SOUND_DM_WAVE-PARAMETERS_20230129.nc';
 
 ncfile = fullfile(filepath, filename); 
 
