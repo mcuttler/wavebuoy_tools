@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'E:\wawaves\TorbayEast\delayedmode\ProcessedData_DelayedMode\dep02';
+filepath = 'E:\wawaves\Hilarys\delayedmode\ProcessedData_DelayedMode\dep01';
 %IMOS file name
-filename = 'UWA_20210223_TORBAY-EAST_DM_WAVE-SPECTRA_20210712.nc';
+filename = 'UWA_20180208_HILARYS_DM_WAVE-SPECTRA_20180412.nc';
 
 ncfile = fullfile(filepath, filename); 
 
@@ -69,9 +69,41 @@ plot(C.coastlon,C.coastlat,'k')
 figure()
 subplot(2,1,1)
 plot(data.FREQUENCY,data.ENERGY(1,:))
+hold on
+plot(data.FREQUENCY,data.ENERGY(2,:))
+plot(data.FREQUENCY,data.ENERGY(3,:))
+plot(data.FREQUENCY,data.ENERGY(4,:))
 title (datestr(data.TIME(1)));
 
 subplot(2,1,2)
+plot(data.FREQUENCY,data.ENERGY(end-3,:))
+hold on
+plot(data.FREQUENCY,data.ENERGY(end-2,:))
+plot(data.FREQUENCY,data.ENERGY(end-1,:))
 plot(data.FREQUENCY,data.ENERGY(end,:))
 title (datestr(data.TIME(end)));
+
+
+% plot two other interior specs, at 1/3 and 2/3 of record
+figure()
+subplot(2,1,1)
+plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)/3),:))
+hold on
+plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)/3)+1,:))
+plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)/3)+2,:))
+plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)/3)+3,:))
+title (datestr(data.TIME(floor(length(data.TIME)/3))));
+
+subplot(2,1,2)
+plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)*2/3),:))
+hold on
+plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)*2/3)+1,:))
+plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)*2/3)+2,:))
+plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)*2/3)+3,:))
+title (datestr(data.TIME(floor(length(data.TIME)*2/3))));
+
+
+%polar plot spectrum
+
+
 

@@ -13,16 +13,17 @@ addpath(genpath(mpath))
 %% General attributes
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-buoy_info.datapath = 'E:\wawaves\TorbayEast\delayedmode\20200114_to_20200529_dep01_TorbayEast_SPOT0171\Raw'; 
+buoy_info.datapath = 'E:\wawaves\Hilarys\delayedmode\SPOT1266_Hillarys_20210617_to_20210725'; 
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; %datawell or sofar
-buoy_info.serial = 'SPOT-0171'; %datawell hull serial or SPOT ID 
-buoy_info.instrument = 'Sofar Spotter-V1'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
-buoy_info.site_name = 'TORBAY-EAST'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
-buoy_info.DeployDepth = 32; 
-buoy_info.startdate = datenum(2019,01,01); 
-buoy_info.enddate = datenum(2022,12,12); 
+buoy_info.serial = 'SPOT-1266'; %datawell hull serial or SPOT ID 
+buoy_info.instrument = 'Sofar Spotter-V2'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
+buoy_info.mooring_type = 'unkown'; % e.g. smart mooring, single catenary, double catenary, other.
+buoy_info.site_name = 'HILARYS'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
+buoy_info.DeployDepth = 30; 
+buoy_info.startdate = datenum(2018,01,01); 
+buoy_info.enddate = datenum(2023,12,12); 
 buoy_info.timezone = 8; %signed integer for UTC offset 
 % use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % (MH 20221209 no mag dec for spotters because their direction is relative
@@ -31,16 +32,22 @@ buoy_info.MagDec = 0;
 buoy_info.watch_circle = 1; %radius of watch circle in meters; 
 
 %inputs for IMOS-ARDC filename structure
-buoy_info.archive_path = 'E:\wawaves\TorbayEast\delayedmode\ProcessedData_DelayedMode\dep01';
-
+buoy_info.archive_path = 'E:\wawaves\Hilarys\delayedmode\ProcessedData_DelayedMode\dep02';
 %additional attributes for IMOS netCDF
-buoy_info.project = 'UWA Nearshore wave buoy program - IMOS NTP'; 
+% wording for project UWA: "UWA Nearshore wave buoy program (- IMOS NTP)"
+% VIC: "VIC-DEAKIN-UNI Nearshore wave buoy program (- IMOS NTP)"
+buoy_info.project = 'UWA Nearshore wave buoy program'; 
 buoy_info.wave_motion_sensor_type = 'GPS';    % e.g. 'accelerometer' or 'GPS'
 buoy_info.wave_sensor_serial_number = buoy_info.serial; 
 buoy_info.hull_serial_number = buoy_info.serial; 
 buoy_info.instrument_burst_duration = 1800; 
 buoy_info.instrument_burst_interval = 1800; 
 buoy_info.instrument_sampling_interval = 0.4; %0.4 for Spotter (2.5 Hz), 0.3906 for Datawell (2.56 Hz)
+% UWA
+% VIC-DEAKIN-UNI
+% IMOS_NTP-WAVE: think institution should stay UWA or VIC but prefix of
+% Filename must be IMOS_NTP-WAVE. So currently changing filename once nc's
+% are produced, could be automated in the filenmae creation function.
 buoy_info.institution = 'UWA'; 
 buoy_info.data_mode = 'DM'; %can be 'DM' (delayed mode) or 'RT' (real time)
 buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/Spotter_SpecSheet%20Expanded.pdf';
@@ -59,6 +66,7 @@ if strcmp(buoy_info.type,'sofar')==1
     %set number of unique time poins to use for efficient processing (depends
     %on computer specifications) 
     chunk = 20; 
+    buoy_info.parser=parser;
     
     %process delayed mode (from buoy memory card)
     if strcmp(buoy_info.instrument, 'Sofar Spotter-V2')
@@ -74,7 +82,13 @@ if strcmp(buoy_info.type,'sofar')==1
 
 %    [bulkparams, locations, spec, displacements, sst] = read_parser_results(buoy_info.datapath);
 
-    %re-organise so all parameters of interest are in one data structure
+% to clear all variables created after this point, so as to reprocess with
+% different start stop time or QC check parameters
+%   clearvars -except buoy_info mpath parserpath parser bulkparams displacements locations spec sst chunk
+%   buoy_info.startdate= datenum(2018,01,01); buoy_info.enddate = datenum(2023,12,12); 
+%   displacements = rmfield(displacements,{'lat','lon','time_location'});
+
+%re-organise so all parameters of interest are in one data structure
     %bulkparams
     fields = fieldnames(bulkparams); 
     for i = 1:length(fields)
@@ -231,7 +245,7 @@ check.rep_fail = 240;  %  flat line (hrs)
 check.rep_suspect = 144; % flat line (hrs) 
 check.MINWH = 0.10; %min height 
 check.MAXWH = 10; %max height
-check.MINWP = 3; %min period
+check.MINWP = 1; %min period
 check.MAXWP = 25; %max period
 check.MINSV = 0.07; %min spread
 check.MAXSV = 80.0; %max spread
@@ -281,7 +295,7 @@ if data.frequency(end)==-9999
     end
 end
 
-%% Save .mat file 
+
 
 
 %% Graphical input on Lat and Lon data to find Start of Stop Time of Deployment Click on Start time and then Stop time
@@ -294,8 +308,16 @@ plot(data.time,data.lat);
 yyaxis right;
 plot(data.time,data.lon);
 
-xlim([(data.time(1)-5) data.time(floor(length(data.time)/5))]);
-datetick;
+%--------------------------------------------------------------------------
+figure();
+yyaxis left;
+plot(data.time,data.lat);
+
+yyaxis right;
+plot(data.time,data.lon);
+
+xlim([(data.time(1)-5) data.time(floor(length(data.time)/8))]);
+
 [xinp1,yinp1]=ginput(1);
 
 buoy_info.startdate= xinp1;
@@ -307,14 +329,21 @@ plot(data.time,data.lat);
 yyaxis right;
 plot(data.time,data.lon);
 
-xlim([data.time(end-floor(length(data.time)/5)) (data.time(end)+5)]);
-datetick;
+xlim([data.time(end-floor(length(data.time)/10)) (data.time(end)+5)]);
+
 [xinp2,yinp2]=ginput(1);
 
 buoy_info.enddate= xinp2;
 
 clearvars xinp1 yinp1 xinp2 yinp2;
 clf;
+
+%% Save mat file for internal Use
+
+
+save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_internal'));
+
+% If re-processing from above mat file. start re running code from here.
 
 %% Organise for netCDF following IMOS-ARDC conventions      
 
@@ -356,15 +385,21 @@ clearvars xinp yinp;
 clf;
 close all;
 
+%---------------------------------------------------------------------------------------------------
+% NEED TO ADD _vic for the global parameters for the 3 types of netCDF
+%--------------------------------------------------------------------------------------------------
+
 %%  Integral Wave Parameters 
 
 globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
+
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
 else
     varsfile = [mpath '\imos_nc\metadata\bulkwave_parameters_DM_mapping.csv']; 
 end
-
+globfile_Int = globfile;
+varsfile_Int = varsfile;
 bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
 
 %% displacements
@@ -406,7 +441,11 @@ for i = 1:length(ttdum)
 
     displacements_to_IMOS_ARDC_nc(displacements, disp_buoy_info, globfile, varsfile); 
 end
-%     
+
+globfile_Disp = globfile;
+varsfile_Disp = varsfile;
+
+
 %% spectral data
 globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
 if strcmp(buoy_info.type,'datawell')
@@ -416,14 +455,13 @@ else
 end
 
 spec_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile);
-     
 
-% Save all Matlab variables for future QC and checking
+globfile_Spec = globfile;
+varsfile_Spec = varsfile;
 
-save(make_imos_ardc_filename_mat(buoy_info,'MAT'));
+% save mat file with metadata associated with this netCDF file production 
 
-
-
+save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_ncmetadata'),"globfile_Spec","globfile_Disp","globfile_Int","varsfile_Spec","varsfile_Disp","varsfile_Int","buoy_info","check","disp_buoy_info","mpath","parser","parserpath");
 
 
 
