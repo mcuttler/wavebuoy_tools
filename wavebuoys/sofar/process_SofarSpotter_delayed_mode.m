@@ -141,6 +141,9 @@ for j = 1:size(fidx,2)
                                 displacements.x = [displacements.x; data(:,8)];
                                 displacements.y = [displacements.y; data(:,9)];
                                 displacements.z = [displacements.z; data(:,10)]; 
+                            elseif kk == 4
+                                sst.time = [sst.time; datenum(data(:,1:6))+(data(:,7)/(8.64*10^7))]; 
+                                sst.sst = [sst.sst; data(:,8)];
                             end
                         else
                             dumdata = importdata([datapath '\tmp\' subdir(k).name '\' filenames{kk} '.csv'],',',1);                               

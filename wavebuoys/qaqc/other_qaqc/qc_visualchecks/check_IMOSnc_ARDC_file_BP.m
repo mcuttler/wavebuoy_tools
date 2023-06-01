@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep04_b';
+filepath = 'E:\wawaves\Hilarys\delayedmode\ProcessedData_DelayedMode\dep02';
 %IMOS file name
-filename = 'UWA_20221109_King-George-Sound_DM_WAVE-PARAMETERS_20230129.nc';
+filename = 'UWA_20210617_HILARYS_DM_WAVE-PARAMETERS_20210715.nc';
 
 ncfile = fullfile(filepath, filename); 
 
@@ -181,7 +181,10 @@ disp('fraction TEMP of data with flag 3')
 disp(num2str(QC_T_per.suspect))
 
 
+% print start and end date
 
+disp(datestr(data.TIME(1)));
+disp(datestr(data.TIME(end)));
 
 return
 
