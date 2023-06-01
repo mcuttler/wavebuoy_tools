@@ -83,16 +83,16 @@ end
 %Spectral variables
 if isfield(resp.Body.Data.data,'frequencyData')
     for j = 1:size(resp.Body.Data.data.frequencyData)
-        Spotter.spec_time = datenum(resp.Body.Data.data.frequencyData(j).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
-        Spotter.a1 = resp.Body.Data.data.frequencyData.a1';
-        Spotter.a2 = resp.Body.Data.data.frequencyData.a2';
-        Spotter.b1 = resp.Body.Data.data.frequencyData.b1';
-        Spotter.b2 = resp.Body.Data.data.frequencyData.b2';
-        Spotter.varianceDensity = resp.Body.Data.data.frequencyData.varianceDensity';
-        Spotter.frequency = resp.Body.Data.data.frequencyData.frequency';
-        Spotter.df = resp.Body.Data.data.frequencyData.df';
-        Spotter.directionalSpread = resp.Body.Data.data.frequencyData.directionalSpread';
-        Spotter.direction = resp.Body.Data.data.frequencyData.direction';
+        Spotter.spec_time(j,1) = datenum(resp.Body.Data.data.frequencyData(j).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
+        Spotter.a1(j,:) = resp.Body.Data.data.frequencyData(j).a1';
+        Spotter.a2(j,:) = resp.Body.Data.data.frequencyData(j).a2';
+        Spotter.b1(j,:) = resp.Body.Data.data.frequencyData(j).b1';
+        Spotter.b2(j,:) = resp.Body.Data.data.frequencyData(j).b2';
+        Spotter.varianceDensity(j,:) = resp.Body.Data.data.frequencyData(j).varianceDensity';
+        Spotter.frequency(j,:) = resp.Body.Data.data.frequencyData(j).frequency';
+        Spotter.df(j,:) = resp.Body.Data.data.frequencyData(j).df';
+        Spotter.directionalSpread(j,:) = resp.Body.Data.data.frequencyData(j).directionalSpread';
+        Spotter.direction(j,:) = resp.Body.Data.data.frequencyData(j).direction';
     end
 end
 

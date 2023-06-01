@@ -24,7 +24,7 @@ status = resp_waves.StatusCode;
 disp([status]); 
 
 
-tstart = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,12,0,0),30); 
+tstart = datestr(datenum(resp_waves.Body.Data.data.waves(1).timestamp,'yyyy-mm-ddTHH:MM:SS') - datenum(0,0,0,12,0,0),30); 
 tend = datestr(datenum(resp_waves.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS')+ datenum(0,0,0,2,0,0),30); 
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
@@ -119,8 +119,8 @@ if m~=n
         end      
     end
 end
-%% Get smart mooring data
-%hard coded such that sensor1 = surface temp and sensor2 = bottom pressure 
+%% Get smart mooring data --- temperature 
+ 
 
 %check for temperature data
 %assume surface and bottom sensor   
@@ -131,15 +131,23 @@ Spotter.pressure =[];
 Spotter.pressure_std = []; 
 Spotter.press_time = []; 
 Spotter.press_std_time=[]; 
+
 if ~isempty(resp_sensor.Body.Data.data)    
     for j = 1:size(resp_sensor.Body.Data.data,1)
-        if resp_sensor.Body.Data.data(j).sensorPosition==1
-            Spotter.surf_temp = [Spotter.surf_temp; resp_sensor.Body.Data.data(j).value]; 
-            Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
-            Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
-        elseif resp_sensor.Body.Data.data(j).sensorPosition==2 
+        if strcmp(resp_sensor.Body.Data.data(j).unit_type,'temperature')
+            if resp_sensor.Body.Data.data(j).sensorPosition==1
+                Spotter.surf_temp = [Spotter.surf_temp; resp_sensor.Body.Data.data(j).value];                 
+                Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
+            elseif resp_sensor.Body.Data.data(j).sensorPosition==2
+                Spotter.bott_temp = [Spotter.bott_temp; resp_sensor.Body.Data.data(j).value]; 
+            else
+                Spotter.surf_temp = [Spotter.surf_temp; NaN];
+                Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
+                Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
+            end
+        elseif strcmp(resp_sensor.Body.Data.data(j).unit_type,'pressure')
             %check whether mean or std
-            if strcmp(resp_sensor.Body.Data.data(j).data_type_name(10:13),'mean')                
+            if contains(resp_sensor.Body.Data.data(j).data_type_name,'mean')                
                 Spotter.press_time = [Spotter.press_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
                 %pressure recorded in micro-bar so divide by 1000000 to get to dbar
                 if ~isempty(resp_sensor.Body.Data.data(j).value)
@@ -158,16 +166,23 @@ if ~isempty(resp_sensor.Body.Data.data)
             end
         end
     end
-%if no temperature data, act like normal wave buoy
+%if no sensor data, act like normal wave buoy
 else
     Spotter.temp_time = Spotter.time; 
     Spotter.press_time=Spotter.time;
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
-    Spotter.pressure = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.pressure_std = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.press_std_time = Spotter.time;
+    Spotter.pressure = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.pressure_std =ones(size(Spotter.time,1),1).*-9999; 
 end        
+
+%just check that temperature is full (might be pressure only 
+if isempty(Spotter.temp_time)
+    Spotter.temp_time = Spotter.time; 
+    Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
+end
+
 
 end
 

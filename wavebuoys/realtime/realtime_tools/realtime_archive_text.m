@@ -116,9 +116,6 @@ for ii = 1:length(num)
             fprintf(fid,'Time (UNIX/UTC), Timestamp (UTC), Site, BuoyID, Hsig (m), Tp (s), Tm (s), Dp (deg), DpSpr (deg), Dm (deg), DmSpr (deg), QF_waves, SST (degC), QF_sst, Bottom Temp (degC), QF_bott_temp, WindSpeed (m/s), WindDirec (deg), CurrmentMag (m/s), CurrentDir (deg), Latitude (deg), Longitude (deg) \n');                             
             fmt = {'%d,','%s,','%s,', '%s,', '%.2f,', '%.2f,', '%.2f,', '%.2f,','%.2f,', '%.2f,', '%.2f,', '%d,', '%.1f,' ,'%d,', '%.1f,','%d,','%.2f,','%.2f,','%.2f,','%.2f,','%.4f,','%.4f \n'};        
             fields = {'time','timestamp','sitename','buoy_id','hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','bott_temp','qf_bott_temp','wind_speed','wind_dir','curr_mag','curr_dir', 'lat','lon'}; 
-        for j = 1:length(fields); 
-            fprintf(fid, fmt{j}, dataout.(fields{j}));
-        end
             for j = 1:length(fields); 
                 fprintf(fid, fmt{j}, dataout.(fields{j}));
             end

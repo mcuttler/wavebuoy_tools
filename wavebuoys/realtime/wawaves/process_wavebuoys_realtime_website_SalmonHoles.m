@@ -47,6 +47,7 @@ if strcmp(buoy_info.type,'sofar')==1
         flag = 1; %ignore flag in Smart mooring code 
     elseif strcmp(buoy_info.version,'smart_mooring_combined')
         limit = buoy_info.UpdateTime*2;
+%         limit = 500; 
         [SpotData] = Get_Spoondrift_Combined_SmartMooring_realtime(buoy_info,limit); 
         flag=1; 
     else
@@ -69,11 +70,11 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-%         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
-        if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+        if all(check)~=0      
+            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info);                  
             %add serial ID and name if not already there
             if ~isfield(archive_data,'serialID')
                 for i = 1:size(archive_data.time,1)
@@ -89,23 +90,24 @@ if strcmp(buoy_info.type,'sofar')==1
             idx_w = find(SpotData.time>archive_data.time(end)); 
             idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
             idx_p = find(SpotData.press_time>archive_data.press_time(end)); 
-            idx_pstd = find(SpotData.press_std_time>archive_data.press_std_time(end)); 
-
-            if SpotData.time(1)>archive_data.time(end)
-                %if smart mooring, only keep new temp and wave data
-                ff = fieldnames(SpotData); 
-                for f = 1:length(ff)
-                    if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
-                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
-                    elseif strcmp(ff{f},'press_time')|strcmp(ff{f},'pressure')
-                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_p,:); 
-                    elseif strcmp(ff{f},'press_std_time')|strcmp(ff{f},'pressure_std')
-                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_pstd,:); 
-                    else
-                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:); 
-                    end
+            idx_pstd = find(SpotData.press_std_time>archive_data.press_std_time(end));            
+            
+            %if smart mooring, only keep new temp and wave data
+            ff = fieldnames(SpotData); 
+            for f = 1:length(ff)
+                if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
+                    SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
+                elseif strcmp(ff{f},'press_time')|strcmp(ff{f},'pressure')
+                    SpotData.(ff{f}) = SpotData.(ff{f})(idx_p,:); 
+                elseif strcmp(ff{f},'press_std_time')|strcmp(ff{f},'pressure_std')
+                    SpotData.(ff{f}) = SpotData.(ff{f})(idx_pstd,:); 
+                else
+                    SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
                 end
-                clear ff idx_w idx_t f
+            end
+            clear ff idx_w idx_t f
+            
+            if SpotData.time(1)>archive_data.time(end)
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                        
 

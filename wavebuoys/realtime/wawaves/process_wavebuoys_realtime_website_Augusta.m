@@ -9,8 +9,8 @@
 clear; clc
 
 %location of wavebuoy_tools repo
-buoycodes = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
-addpath(genpath(buoycodes))
+% buoycodes = 'C:\Users\00084142\OneDrive - The University of Western Australia\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+% addpath(genpath(buoycodes))
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
@@ -42,12 +42,13 @@ buoy_info.search_rad = 200; %meters for watch circle radius
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
     if strcmp(buoy_info.version,'smart_mooring')
-        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time       
+        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time             
         [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
         if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;           
-            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
+            limit = buoy_info.UpdateTime*2; 
+%             limit = 60; 
+            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);             
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 
             limit = buoy_info.UpdateTime; 
@@ -59,20 +60,26 @@ if strcmp(buoy_info.type,'sofar')==1
     if flag == 1
         for i = 1:size(SpotData.time,1)
             SpotData.name{i,1} = buoy_info.name; 
-        end
-        
+        end        
+  
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-%         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         %Matt alters 2021-11-18
         
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info, SpotData);                  
+            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info);                  
             
             %check that it's new data
+            ind_w = SpotData.time>archive_data.time(end); 
+            fields = fieldnames(SpotData); 
+            for i = 1:length(fields)
+                SpotData.(fields{i}) = SpotData.(fields{i})(ind_w,:); 
+            end            
+            
             if SpotData.time(1)>archive_data.time(end)
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        

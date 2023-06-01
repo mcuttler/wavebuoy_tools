@@ -46,7 +46,7 @@ if isfield(resp.Body.Data.data,'waves')
 end
 
 %check for temperature data
-if isfield(resp.Body.Data.data,'surfaceTemp')
+if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfaceTemp)
     for j = 1:size(resp.Body.Data.data.surfaceTemp)
         Spotter.surf_temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
         Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
@@ -60,11 +60,12 @@ if isfield(resp.Body.Data.data,'surfaceTemp')
         for j = 1:size(resp.Body.Data.data.surfaceTemp)
             Spotter.bott_temp(j,1)= -9999; 
         end
-    end               
+    end
+else
+    Spotter.temp_time = Spotter.time; 
+    Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
 end
-
-
-%
 
 %check for wind data 
 if isfield(resp.Body.Data.data,'wind')
