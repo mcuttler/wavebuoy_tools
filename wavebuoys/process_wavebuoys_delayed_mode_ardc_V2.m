@@ -2,7 +2,11 @@
 
 %Process on-board (memory card) data from Sofar Spotter, Datawell, Triaxys
 %Conducts quality control based on QARTOD manual
-%Outputs monthly netCDF file following IMOS conventions 
+%Outputs monthly netCDF file following IMOS conventions for upload to AODN
+%Ouput formats as from ARDC project. This version2 _V2 is a version that looks at Sofar parser results run separatley in python. 
+%For no Smart moorings these results are:
+%a1,a2,b1,b2,bulkparameters,Cxy,displacement,location,Qxz,Qyz,Sxx,system,Syy,Szz,sst(if
+%so equippped)
 
 %% set initial paths for Spotter data to process and parser script
 clear; clc; close all;
@@ -13,7 +17,7 @@ addpath(genpath(mpath))
 %% General attributes
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-buoy_info.datapath = 'E:\wawaves\KingGeorgeSound\delayedmode\20230517_to_20230606_dep06_KingGeorgeSound_SPOT0162_b'; 
+buoy_info.datapath = 'E:\wawaves\KingGeorgeSound\delayedmode\20230517_to_20230606_dep06_KingGeorgeSound_SPOT0162'; 
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; %datawell or sofar
@@ -32,7 +36,7 @@ buoy_info.MagDec = 0;
 buoy_info.watch_circle = 1; %radius of watch circle in meters; 
 
 %inputs for IMOS-ARDC filename structure
-buoy_info.archive_path = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep06_b';
+buoy_info.archive_path = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep06';
 %additional attributes for IMOS netCDF
 % wording for project UWA: "UWA Nearshore wave buoy program (- IMOS NTP)"
 % VIC: "VIC-DEAKIN-UNI Nearshore wave buoy program (- IMOS NTP)"
@@ -58,29 +62,16 @@ buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/cont
 
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1
-%     ----- NTP workflow for processing raw Spotter memory card ------------------------------------
-    
-    %path of Sofar parser script
-    parserpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\spotter-sd-parser'; 
-    parser = 'sd_file_parser.py'; 
-    %set number of unique time poins to use for efficient processing (depends
-    %on computer specifications) 
-    chunk = 100; 
-    buoy_info.parser=parser;
-    
-    %process delayed mode (from buoy memory card)
+
+%    read in CSVs previously processed in Python 
+
     if strcmp(buoy_info.instrument, 'Sofar Spotter-V2')
-        [bulkparams, displacements, locations, spec, sst] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);       
-        %down sample temperature to be at same time stamp as wave data 
-        [bulkparams] = sofar_join_bulkparams_and_sst(bulkparams, sst); 
-    else
-        [bulkparams, displacements, locations, spec, ~] = process_SofarSpotter_delayed_mode(buoy_info.datapath, parserpath, parser, chunk);
-        bulkparams.temp = ones(size(bulkparams.time,1),1).*-9999; 
-    end         
+        [bulkparams, locations, spec, displacements, sst] = read_parser_results_V2(buoy_info.datapath);
+    elseif strcmp(buoy_info.instrument, 'Sofar Spotter-V1')
+        [bulkparams, locations, spec, displacements] = read_parser_results_V2(buoy_info.datapath);
+    end    
 
-% IF NTP workflow doesn't work, then process in Python and read in CSVs to same structure
 
-%    [bulkparams, locations, spec, displacements, sst] = read_parser_results(buoy_info.datapath);
 
 % to clear all variables created after this point, so as to reprocess with
 % different start stop time or QC check parameters
@@ -391,7 +382,7 @@ close all;
 
 %%  Integral Wave Parameters 
 
-globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc_vic.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
@@ -403,7 +394,7 @@ varsfile_Int = varsfile;
 bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
 
 %% displacements
-globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc_vic.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
 else
@@ -447,7 +438,7 @@ varsfile_Disp = varsfile;
 
 
 %% spectral data
-globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc_vic.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
 else
@@ -461,7 +452,7 @@ varsfile_Spec = varsfile;
 
 % save mat file with metadata associated with this netCDF file production 
 
-save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_ncmetadata'),"globfile_Spec","globfile_Disp","globfile_Int","varsfile_Spec","varsfile_Disp","varsfile_Int","buoy_info","check","disp_buoy_info","mpath","parser","parserpath");
+save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_ncmetadata'),"globfile_Spec","globfile_Disp","globfile_Int","varsfile_Spec","varsfile_Disp","varsfile_Int","buoy_info","check","disp_buoy_info","mpath");
 
 
 

@@ -7,7 +7,7 @@ files = dir(dpath); files = files(3:end);
 %loop over files and read in data - parse into
 %'bulkparams','locs','spec','displacements','sst' structures
 for i = 1:size(files,1)
-    if strcmp(files(i).name(end-2:end),'csv')
+    if strcmp(files(i).name(end-2:end),'CSV')
         %all files should be of the naming convention 'SPOT-XXXX_Sxx.csv', so
         %split to figure out variable of interest
         C = strsplit(files(i).name,'_'); 
