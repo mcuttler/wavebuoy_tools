@@ -14,16 +14,16 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-30115R'; %spotter serial number, or just Datawell 
-buoy_info.name = 'SalmonHoles'; 
+buoy_info.serial = 'SPOT-30320R'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Hillarys'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring_combined'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'SalmonHoles';
+buoy_info.DeployLoc = 'Hillarys';
 buoy_info.DeployDepth = 30; 
-buoy_info.DeployLat = -35.109850;
-buoy_info.DeployLon = 117.977350; 
+buoy_info.DeployLat = -31.8520;
+buoy_info.DeployLon = 115.6466;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
@@ -71,10 +71,11 @@ if strcmp(buoy_info.type,'sofar')==1
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData); 
         % Think this warning is the email function
-        % [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         
         % check>0 means that directory already exists (and monthly file should
         % exist); otherwise, this is the first data for this location 
+        
         if all(check)~=0      
             [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info);                  
             %add serial ID and name if not already there

@@ -1,34 +1,33 @@
 %% Get Spoondrift Buoy Data
 
-% Accesses Spoondrift API to get most recent data from specified Spotter
+% Accesses SoFar Ocean API to get most recent data from specified Spotter
 % SpotterID is string of Spotter name - i.e. 'SPOT-0093'
 
 %v1 Nov 2018
+
+%v2 April 2019 - updated from Get_Spoondrift_Data_realtime to include
+%spectral data
+
 %M Cuttler
 
-% AQL token: a1b3c0dbaa16bb21d5f0befcbcca51
-% Please don't use the latest-data endpoint
-% Instead use the sensor-data endpoint rather than the wave-data endpoint
-
-
 %%
-function [Spotter] = Get_Spoondrift_Data_realtime(buoy_info,limit);
+function [Spotter] = Get_Spoondrift_Data_realtime_fullwaves_hdr(buoy_info, limit);
 
 import matlab.net.*
 import matlab.net.http.*
 header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
 r = RequestMessage('GET', header);
 
-
+%get frequency data from HDR mode 
 uri = URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial...
-    '&includeSurfaceTempData=true&includeWindData=true&limit=' num2str(limit)]);
+    '&includeSurfaceTempData=true&includeWindData=true&includeFrequencyData=true&includeDirectionalMoments=true&'...
+    'processingSources=all&limit=' num2str(limit)]);
 
 resp = send(r,uri);
 status = resp.StatusCode;
 
 disp(status);
 
-%check for wave parameters
 if isfield(resp.Body.Data.data,'waves')
     for j = 1:size(resp.Body.Data.data.waves)
         Spotter.serialID{j,1} = buoy_info.serial; 
@@ -68,20 +67,23 @@ else
 end
 
 %check for wind data 
-if isfield(resp.Body.Data.data,'wind')&~isempty(resp.Body.Data.data.wind)
-    for j = 1:size(resp.Body.Data.data.wind)
-        Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
-        Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;
-        Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;        
-        Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(j).seasurfaceId;
+if isfield(resp.Body.Data.data,'wind')
+    if isempty(resp.Body.Data.data.wind)
+        for j = 1:size(resp.Body.Data.data.waves)
+            Spotter.wind_speed(j,1) = nan;
+            Spotter.wind_dir(j,1) = nan;
+            Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+            Spotter.wind_seasurfaceId(j,1) = nan;
+        end
+    else
+        for j = 1:size(resp.Body.Data.data.wind)
+            Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;    
+            Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;
+            Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+            Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(j).seasurfaceId;
+        end
     end
-else
-    Spotter.wind_time = Spotter.time;
-    Spotter.wind_speed = ones(size(Spotter.time,1),1).*-9999; 
-    Spotter.wind_dir = ones(size(Spotter.time,1),1).*-9999; 
-    Spotter.wind_seasurfaceId = ones(size(Spotter.time,1),1).*-9999; 
 end
-
 %check that wind and waves have same time, duplicate temp for the hour so
 %it matches timestamps of wind and waves
 [m,~] = size(Spotter.time); 
@@ -144,6 +146,21 @@ if m~=n
     end
 end
 
+%Spectral variables
+if isfield(resp.Body.Data.data,'frequencyData')
+    for j = 1:size(resp.Body.Data.data.frequencyData)
+        Spotter.spec_time(j,1) = datenum(resp.Body.Data.data.frequencyData(j).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
+        Spotter.a1(j,:) = resp.Body.Data.data.frequencyData(j).a1';
+        Spotter.a2(j,:) = resp.Body.Data.data.frequencyData(j).a2';
+        Spotter.b1(j,:) = resp.Body.Data.data.frequencyData(j).b1';
+        Spotter.b2(j,:) = resp.Body.Data.data.frequencyData(j).b2';
+        Spotter.varianceDensity(j,:) = resp.Body.Data.data.frequencyData(j).varianceDensity';
+        Spotter.frequency(j,:) = resp.Body.Data.data.frequencyData(j).frequency';
+        Spotter.df(j,:) = resp.Body.Data.data.frequencyData(j).df';
+        Spotter.directionalSpread(j,:) = resp.Body.Data.data.frequencyData(j).directionalSpread';
+        Spotter.direction(j,:) = resp.Body.Data.data.frequencyData(j).direction';
+    end
+end
 
 end
 

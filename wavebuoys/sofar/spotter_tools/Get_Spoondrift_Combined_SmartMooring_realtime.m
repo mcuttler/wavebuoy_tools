@@ -169,19 +169,22 @@ if ~isempty(resp_sensor.Body.Data.data)
 %if no sensor data, act like normal wave buoy
 else
     Spotter.temp_time = Spotter.time; 
-    Spotter.press_time=Spotter.time;
+    Spotter.press_time = Spotter.time;
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure_std =ones(size(Spotter.time,1),1).*-9999; 
 end        
 
-%just check that temperature is full (might be pressure only 
-if isempty(Spotter.temp_time)
+%check temperature 
+if isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
     Spotter.temp_time = Spotter.time; 
-    Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999;    
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
+elseif ~isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
+    Spotter.bott_temp = ones(size(Spotter.temp_time,1),1).*-9999; 
 end
+
 
 
 end

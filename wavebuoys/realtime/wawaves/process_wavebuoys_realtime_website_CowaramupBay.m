@@ -47,7 +47,7 @@ if strcmp(buoy_info.type,'sofar')==1
     else
         if strcmp(buoy_info.DataType,'parameters')
             limit = buoy_info.UpdateTime*2;      
-            limit = 24; 
+            limit = 100; 
             [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);             
             flag = 1; 
         elseif strcmp(buoy_info.DataType,'spectral'); 

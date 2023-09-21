@@ -14,7 +14,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1578'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-1724'; %spotter serial number, or just Datawell 
 buoy_info.name = 'Bundegi'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
@@ -65,11 +65,11 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
-%         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.backup_path, buoy_info, SpotData);                  
+            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info);                    
             %add serial ID and name if not already there
             if ~isfield(archive_data,'serialID')
                 for i = 1:size(archive_data.time,1)
@@ -81,21 +81,25 @@ if strcmp(buoy_info.type,'sofar')==1
                     archive_data.name{i,1} = buoy_info.name;
                 end
             end                
-            %check that it's new data
-            idx_w = find(SpotData.time>archive_data.time(end)); 
-            idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
-            %if smart mooring, only keep new temp and wave data
-            ff = fieldnames(SpotData); 
-            for f = 1:length(ff)
-                if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
-                    SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
-                else
-                    SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
+            
+            %SpotData needs to be newer wave data, but the temperature time
+            %also needs to end after the wave data for other codes to work
+            %correctly (this is for Aqualink only !!)
+            if SpotData.time(1)>archive_data.time(end) && SpotData.temp_time(end)>SpotData.time(end) 
+                %check that it's new data
+                idx_w = find(SpotData.time>archive_data.time(end)); 
+                idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
+                %if smart mooring, only keep new temp and wave data
+                ff = fieldnames(SpotData); 
+                for f = 1:length(ff)
+                    if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
+                    else
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
+                    end
                 end
-            end
-            clear ff idx_w idx_t f
-            if SpotData.time(1)>archive_data.time(end)
-
+                clear ff idx_w idx_t f
+                
                 %perform some QA/QC --- QARTOD 19 and QARTOD 20        
                 [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                        
 
