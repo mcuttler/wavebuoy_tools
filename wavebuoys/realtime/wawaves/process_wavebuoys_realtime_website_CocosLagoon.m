@@ -15,12 +15,12 @@ clear; clc
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
 buoy_info.serial = 'SPOT-1724'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Cocos'; 
+buoy_info.name = 'CocosLagoon'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'Cocos';
+buoy_info.DeployLoc = 'CocosLagoon';
 buoy_info.DeployDepth = 14;
 buoy_info.DeployLat = -12.14402;
 buoy_info.DeployLon = 96.86583; 
@@ -85,7 +85,10 @@ if strcmp(buoy_info.type,'sofar')==1
             %SpotData needs to be newer wave data, but the temperature time
             %also needs to end after the wave data for other codes to work
             %correctly (this is for Aqualink only !!)
-            if SpotData.time(1)>archive_data.time(end) && SpotData.temp_time(end)>SpotData.time(end) 
+            
+            %%uncomment below when running on Aqualink schedule
+%             if SpotData.time(1)>archive_data.time(end) && SpotData.temp_time(end)>SpotData.time(end) 
+            if SpotData.time(1)>archive_data.time(end)    
                 %check that it's new data
                 idx_w = find(SpotData.time>archive_data.time(end)); 
                 idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 

@@ -14,7 +14,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1724'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-1578'; %spotter serial number, or just Datawell 
 buoy_info.name = 'Bundegi'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
