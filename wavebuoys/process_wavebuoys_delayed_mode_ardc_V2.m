@@ -17,15 +17,15 @@ addpath(genpath(mpath))
 %% General attributes
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-buoy_info.datapath = 'E:\wawaves\KingGeorgeSound\delayedmode\20230517_to_20230606_dep06_KingGeorgeSound_SPOT0162'; 
+buoy_info.datapath = 'E:\wawaves\CapeBridgewater\delayedmode\20230510_SPOT1590_CapeBridgewater_Data'; 
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; %datawell or sofar
-buoy_info.serial = 'SPOT-0162'; %datawell hull serial or SPOT ID 
-buoy_info.instrument = 'Sofar Spotter-V1'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
-buoy_info.mooring_type = 'single catenary screw anchor'; % e.g. smart mooring, single catenary, double catenary, other.
-buoy_info.site_name = 'KING-GEORGE-SOUND'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
-buoy_info.DeployDepth = 13.6; 
+buoy_info.serial = 'SPOT-1590'; %datawell hull serial or SPOT ID 
+buoy_info.instrument = 'Sofar Spotter-V2'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
+buoy_info.mooring_type = 'double catenary'; % e.g. smart mooring, single catenary, double catenary, other.
+buoy_info.site_name = 'CAPE-BRIDGEWATER'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
+buoy_info.DeployDepth = 69; 
 buoy_info.startdate = datenum(2018,01,01); 
 buoy_info.enddate = datenum(2023,12,12); 
 buoy_info.timezone = 8; %signed integer for UTC offset 
@@ -36,11 +36,11 @@ buoy_info.MagDec = 0;
 buoy_info.watch_circle = 1; %radius of watch circle in meters; 
 
 %inputs for IMOS-ARDC filename structure
-buoy_info.archive_path = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep06';
+buoy_info.archive_path = 'E:\wawaves\CapeBridgewater\delayedmode\ProcessedData_DelayedMode\dep04';
 %additional attributes for IMOS netCDF
 % wording for project UWA: "UWA Nearshore wave buoy program (- IMOS NTP)"
 % VIC: "VIC-DEAKIN-UNI Nearshore wave buoy program (- IMOS NTP)"
-buoy_info.project = 'UWA Nearshore wave buoy program'; 
+buoy_info.project = 'VIC-DEAKIN-UNI Nearshore wave buoy program - IMOS NTP'; 
 buoy_info.wave_motion_sensor_type = 'GPS';    % e.g. 'accelerometer' or 'GPS'
 buoy_info.wave_sensor_serial_number = buoy_info.serial; 
 buoy_info.hull_serial_number = buoy_info.serial; 
@@ -52,7 +52,7 @@ buoy_info.instrument_sampling_interval = 0.4; %0.4 for Spotter (2.5 Hz), 0.3906 
 % IMOS_NTP-WAVE: think institution should stay UWA or VIC but prefix of
 % Filename must be IMOS_NTP-WAVE. So currently changing filename once nc's
 % are produced, could be automated in the filenmae creation function.
-buoy_info.institution = 'UWA'; 
+buoy_info.institution = 'VIC-DEAKIN-UNI'; 
 buoy_info.data_mode = 'DM'; %can be 'DM' (delayed mode) or 'RT' (real time)
 buoy_info.buoy_specification_url = 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/Spotter_SpecSheet%20Expanded.pdf';
 %url for Spotter: 'https://s3-ap-southeast-2.amazonaws.com/content.aodn.org.au/Documents/AODN/Waves/Instruments_manuals/Spotter_SpecSheet%20Expanded.pdf';
@@ -382,7 +382,7 @@ close all;
 
 %%  Integral Wave Parameters 
 
-globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc_vic.txt']; 
 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
@@ -394,7 +394,7 @@ varsfile_Int = varsfile;
 bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
 
 %% displacements
-globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc_vic.txt']; 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
 else
@@ -438,7 +438,7 @@ varsfile_Disp = varsfile;
 
 
 %% spectral data
-globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc_vic.txt']; 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
 else

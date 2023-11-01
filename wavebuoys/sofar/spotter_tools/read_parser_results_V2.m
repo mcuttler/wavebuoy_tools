@@ -66,20 +66,54 @@ for i = 1:size(files,1)
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
          elseif strcmp(pname,'displacement')   
-             dumdata = importdata(fullfile(files(i).folder, files(i).name));
-             % Make displacement time vector correct size
-             displacements.time = zeros(size(dumdata.data,1),1);
-             displacements.x = zeros(size(dumdata.data,1),1);
-             displacements.y = zeros(size(dumdata.data,1),1);
-             displacements.z = zeros(size(dumdata.data,1),1);
-             displacements.x = dumdata.data(:,8); 
-             displacements.y = dumdata.data(:,9); 
-             displacements.z = dumdata.data(:,10); 
+            
+%FroM Online example of loading large CSV's
+
+cd(dpath)
+ chunk_nRows = 2e4 ;
+ % - Open file.
+ fId  = fopen( 'displacement.csv' ) ;
+ % - Read first line, convert to double, determine #columns.
+ line  = fgetl( fId ) ;
+ line2 = fgetl( fId ) ;
+ row   = sscanf( line2, '%f,' )' ;
+ nCols = numel( row ) ;
+ % - Prealloc data, copy first row, init loop counter.
+ data      = zeros( chunk_nRows, nCols ) ;
+ data(1,:) = row ;
+ rowCnt    = 1 ;
+ % - Loop over rest of the file.
+ while ~feof( fId )
+    rowCnt = rowCnt + 1 ;
+    % - Realloc + a chunk if rowCnt larger than data array.
+    if rowCnt > size( data, 1 )
+        fprintf(strcat( 'Realloc ..\n',num2str(rowCnt)));
+        data(size(data, 1)+chunk_nRows, nCols) = 0 ;
+    end
+    % - Read line, convert and store.
+    line = fgetl( fId ) ;
+    data(rowCnt,:) = sscanf( line, '%f,' )' ;
+ end
+ % - Truncate data to last row (truncate last chunk).
+ data = data(1:rowCnt,:) ;
+ % - Close file.
+ fclose( fId ) ;
+ 
+ displacements.time = zeros(size(dumdata.data,1),1);
+ displacements.x = zeros(size(dumdata.data,1),1);
+ displacements.y = zeros(size(dumdata.data,1),1);
+ displacements.z = zeros(size(dumdata.data,1),1);
+ 
+ displacements.x = data(:,8); 
+ displacements.y = data(:,9); 
+ displacements.z = data(:,10); 
                          
-             displacements.time = datenum(dumdata.data(:,1),dumdata.data(:,2),dumdata.data(:,3),dumdata.data(:,4),...
-                 dumdata.data(:,5),dumdata.data(:,6) + dumdata.data(:,7)/1000); 
-                                
-             clearvars dumdata
+ displacements.time = datenum(data(:,1),data(:,2),data(:,3),data(:,4),...
+    data(:,5),data(:,6) + data(:,7)/1000); 
+
+ clearvars chunk_nRows data fId line line2 nCols row rowCnt
+ 
+ 
              
              %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
@@ -101,7 +135,7 @@ for i = 1:size(files,1)
             sst.sst = dumdata.data(:,8);  
             
             %Add downsampled temps to bulkparams
-            bulkparams.temp = interp1(sst.temp_time,sst.surf_temp,bulkparams.time); 
+            bulkparams.temp = interp1(sst.time,sst.sst,bulkparams.time); 
                                               
         end
     end

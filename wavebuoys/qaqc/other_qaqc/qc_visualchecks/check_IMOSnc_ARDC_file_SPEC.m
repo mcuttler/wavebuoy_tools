@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'E:\wawaves\Central\delayedmode\ProcessedData_DelayedMode\dep04';
+filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep06';
 %IMOS file name
-filename = 'VIC-DEAKIN-UNI_20210930_CENTRAL_DM_WAVE-SPECTRA_20220126.nc';
+filename = 'UWA_20230517_KING-GEORGE-SOUND_DM_WAVE-SPECTRA_20230601.nc';
 
 ncfile = fullfile(filepath, filename); 
 
@@ -102,8 +102,16 @@ plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)*2/3)+2,:))
 plot(data.FREQUENCY,data.ENERGY(floor(length(data.TIME)*2/3)+3,:))
 title (datestr(data.TIME(floor(length(data.TIME)*2/3))));
 
+%Plot Spectograms for Szz (Energy) 
+figure()
+imagesc(data.TIME,data.FREQUENCY,data.ENERGY');
+set(gca,'YDIR','normal');
+caxis([nanmean(nanmean(data.ENERGY))-0.07 nanmean(nanmean(data.ENERGY))+0.4])
+ylim([0 0.8]);
+datetick
 
 %polar plot spectrum
+return
 
-
+[NS, NE, ndirec] = lygre_krogstad(data.A1,data.A2,data.B1,data.B2,data.ENERGY);
 
