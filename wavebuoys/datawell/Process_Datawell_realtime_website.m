@@ -183,8 +183,12 @@ else
 
     dw_vars = {'serialID','E','theta','s','m2','n2','time','a1','a2','b1','b2','frequency','ndirec','hsig','tp','dp','dpspr', 'curr_mag','curr_dir','curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std'}; 
     for i = 1:length(dw_vars)
-        data.(dw_vars{i}) = []; 
-    end
+        if strcmp(dw_vars{i},'serialID')
+           data.(dw_vars{i}) = {}; 
+        else
+           data.(dw_vars{i}) = []; 
+        end
+    end  
     
     
     data = process_datawell_realtime_wave_temp_current(buoy_info, E, theta, s, m2, n2, spec_params, time20, data82.data, time82, data);     
