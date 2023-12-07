@@ -14,7 +14,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-30848C'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-31396C'; %spotter serial number, or just Datawell 
 buoy_info.name = 'TESTING'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
@@ -22,12 +22,13 @@ buoy_info.processingSource = 'all'; %for new Spotters, this can be: embedded, HD
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'TESTING';
-buoy_info.DeployDepth = 0; 
-buoy_info.DeployLat = -35.048535; 
-buoy_info.DeployLon = 117.366168; 
+buoy_info.DeployDepth = 10; 
+buoy_info.DeployLat = -31.676875; 
+buoy_info.DeployLon = 115.670672; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.web_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
@@ -35,6 +36,7 @@ buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
+
 
 %% process realtime mode data
 
@@ -57,12 +59,12 @@ if strcmp(buoy_info.type,'sofar')==1
         
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
-        [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
+        [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info);                  
+            [archive_data] = load_archived_data(buoy_info);                  
             idx_w = find(SpotData.time>archive_data.time(end));   
             idx_t = find(SpotData.temp_time>archive_data.temp_time(end));    
             %add spectral data if it exists in archive
@@ -90,6 +92,10 @@ if strcmp(buoy_info.type,'sofar')==1
                 for f = 1:length(ff)                
                     if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
+                    elseif (contains(ff{f},'swell')|contains(ff{f},'sea')|strcmp(ff{f},'part_time'))&~strcmp(ff{f},'wind_seasurfaceId')
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_part,:); 
+                    elseif strcmp(ff{f},'spec_time')|size(SpotData.(ff{f}),2)>1
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_s,:); 
                     else
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
                     end                

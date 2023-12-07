@@ -56,7 +56,7 @@ function [] = make_MEM_plot(ndirec, freq, NE, hs, tp, dp, time, buoy_info)
         mo = num2str(time2(2),'%02d');
         %---------------------------------------------------------------------------
         %save MEMplot figure
-        mempath = [buoy_info.archive_path '\' buoy_info.name '\mem_plot']; 
+        mempath = [buoy_info.web_path '\' buoy_info.name '\mem_plot']; 
         if exist([mempath '\' yr])
             if exist([mempath '\' yr '\' mo])
                 export_fig([mempath '\' yr '\' mo '\' buoy_info.name '_MEMplot_' datestr(time,'yyyymmdd_HHMM') 'UTC'],'-jpg','-r200','-painters')

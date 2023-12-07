@@ -163,7 +163,7 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
     %isolate HDR and embedded 
     indHDR = []; 
     indEmbedded = []; 
-    for j = 1:size(resp.Body.Data.data.wind)
+    for j = 1:size(resp.Body.Data.data.surfaceTemp)
         if strcmp(resp.Body.Data.data.surfaceTemp(j).processing_source,'hdr')
             indHDR = [indHDR; j]; 
         elseif strcmp(resp.Body.Data.data.surfaceTemp(j).processing_source,'embedded')

@@ -27,6 +27,7 @@ buoy_info.DeployLon = 117.775390;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.archive_path = 'E:\wawaves';
+buoy_info.web_path = 'E:\wawaves';
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup';
 buoy_info.backup_path2 = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\realtime_archive_backup';
@@ -130,8 +131,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
     [dw_data, archive_data,check] = Process_Datawell_realtime_website(buoy_info, data, data.file20, data.file21, data.file25, data.file28, data.file82);
     clear data;        
     
-    [check] = check_archive_path(buoy_info.archive_path, buoy_info, dw_data);   
-    
+    [check] = check_archive_path(buoy_info, dw_data);   
+
     %check that it's new data
     if all(check)~=0
         if ~isempty(archive_data)
@@ -142,13 +143,13 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data); 
                 realtime_backup_mat(buoy_info, data);
-                limit = 1;             
+                limit = size(dw_data.time,1) - size(archive_data.time,1);             
                 realtime_archive_text(buoy_info, data, limit);             
                 
                 %output MEM and SST plots 
                 plot_idx = find(data.time>archive_data.time(end)); 
                 if strcmp(buoy_info.DataType,'spectral')                        
-                    for ii = 1:size(plot_idx,1); 
+                    for ii = 1:size(plot_idx,1) 
                         [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
                         make_MEM_plot(ndirec, data.frequency', NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
                     end

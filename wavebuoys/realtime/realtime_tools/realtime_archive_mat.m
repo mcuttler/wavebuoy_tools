@@ -21,7 +21,7 @@ if size(ddv,1)==1
     
 else
     data = buoy_data; 
-    for i = 1:size(ddv,1)
+    for i = 1:size(ddv,1)        
         dt = datevec(data.time); 
         idx = find(dt(:,1)==ddv(i,1)&dt(:,2)==ddv(i,2)); 
         %account for temperature
@@ -45,18 +45,39 @@ else
             idx_spec = find(dt_spec(:,1)==ddv(i,1) & dt_spec(:,2)==ddv(i,2)); 
         end
         
+        %account for partitioned
+        if isfield(data,'part_time'); 
+            dt_part = datevec(data.part_time); 
+            idx_part = find(dt_part(:,1)==ddv(i,1) & dt_part(:,2)==ddv(i,2)); 
+        end
+        
         fields = fieldnames(data);
-        for j = 1:length(fields)
+        for j = 1:length(fields)              
             if strcmp(fields{j},'qf_bott_temp') |strcmp(fields{j},'qf_sst') |strcmp(fields{j},'surf_temp') | strcmp(fields{j},'bott_temp')|strcmp(fields{j},'temp_time') | strcmp(fields{j},'curr_mag') | strcmp(fields{j},'curr_dir') | strcmp(fields{j},'curr_mag_std') | strcmp(fields{j},'curr_dir_std') | strcmp(fields{j},'w') | strcmp(fields{j},'w_std')                
                 buoy_data.(fields{j})=data.(fields{j})(idx_temp,:); 
+                
             elseif strcmp(fields{j},'press_std_time')|strcmp(fields{j},'pressure_std')
                 buoy_data.(fields{j}) = data.(fields{j})(idx_press_std,:); 
+                
             elseif strcmp(fields{j},'press_time')|strcmp(fields{j},'pressure')
                 buoy_data.(fields{j}) = data.(fields{j})(idx_press,:);  
+                
             elseif strcmp(fields{j},'spec_time')|strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|...
                     strcmp(fields{j},'b2')|strcmp(fields{j},'direction')|strcmp(fields{j},'directionalSpread')|...
                     strcmp(fields{j},'frequency')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'df')
-                buoy_data.(fields{j}) = data.(fields{j})(idx_spec,:);                     
+                if strcmp(buoy_info.type,'datawell')
+                    if strcmp(fields{j},'frequency')
+                        buoy_data.(fields{j}) = data.(fields{j}); 
+                    else
+                        buoy_data.(fields{j}) = data.(fields{j})(idx,:); 
+                    end
+                    
+                else
+                    buoy_data.(fields{j}) = data.(fields{j})(idx_spec,:);
+                end
+                
+            elseif strcmp(fields{j},'part_time')|(contains(fields{j},'sea')&~contains(fields{j},'wind'))|contains(fields{j},'swell')
+                buoy_data.(fields{j}) = data.(fields{j})(idx_part,:);  
             else
                 if size(data.(fields{j}),1)>1
                     buoy_data.(fields{j})=data.(fields{j})(idx,:);
