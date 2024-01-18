@@ -116,8 +116,9 @@ if strcmp(buoy_info.type,'sofar')==1
 
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
-                realtime_backup_mat(buoy_info, data);
                 realtime_archive_text(buoy_info, data, limit); 
+                realtime_backup_mat(buoy_info, data);
+               
                 %output MEM and SST plots 
                 if strcmp(buoy_info.DataType,'spectral')        
                     [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
@@ -136,9 +137,9 @@ if strcmp(buoy_info.type,'sofar')==1
             end
 
             realtime_archive_mat(buoy_info, SpotData);
-            realtime_backup_mat(buoy_info, SpotData);
             realtime_archive_text(buoy_info, SpotData, limit); 
-            
+            realtime_backup_mat(buoy_info, SpotData);
+                    
             %output MEM and SST plots 
             if strcmp(buoy_info.DataType,'spectral')        
                 [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);

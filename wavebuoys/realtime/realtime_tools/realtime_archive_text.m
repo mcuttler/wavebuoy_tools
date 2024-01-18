@@ -12,7 +12,7 @@ end
 %loop through each time point
 for ii = 1:length(num)
     dv = datevec(data.time(num(ii)));         
-    archive_path =  [buoy_info.archive_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
+    archive_path =  [buoy_info.web_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
     
     dataout.time = posixtime(datetime(dv));
     dataout.timestamp = datestr(dv); 
@@ -32,6 +32,7 @@ for ii = 1:length(num)
         end
     end        
     
+    %temperature data for text file 
     if isfield(data, 'temp_time')       
         tidx = find(data.temp_time==data.time(num(ii))); 
         if isempty(tidx)
@@ -65,57 +66,127 @@ for ii = 1:length(num)
         dataout.qf_bott_temp = 4; 
     end
     
+    %partitioned wavedata for text file
+    pfields = {'hsig_swell','hsig_sea','tm_swell','tm_sea','dm_swell','dm_sea','dmspr_swell','dmspr_sea'}; 
+    if isfield(data, 'part_time')       
+        tidx = find(data.part_time==data.time(num(ii))); 
+        if isempty(tidx)
+            tidx1 = find(abs(data.part_time-data.time(num(ii)))==min(abs(data.part_time-data.time(num(ii)))));
+            if length(tidx1)>1
+                tidx1 = tidx1(1); 
+            end            
+            max_diff = 30/(60*24); 
+            if abs(data.part_time(tidx1)-data.time(num(ii))) < max_diff
+                tidx = tidx1;
+            else
+                tidx = [];
+            end
+        end
+        
+        
+        if isempty(tidx)   
+            for k = 1:length(pfields)
+                dataout.(pfields{k}) = -9999; 
+            end      
+        else
+            for k = 1:length(pfields)
+                dataout.(pfields{k}) = data.(pfields{k})(tidx,:);
+            end
+        end
+    else
+        for k = 1:length(pfields)
+            dataout.(pfields{k}) = -9999; 
+        end
+    end
     
-    %file format:
-    %         1. timestamp, 
-    %         2. site name, 
-    %         3. buoy id, 
-    %         4. hs, 
-    %         5. tp, 
-    %         6. tm, 
-    %         7. dp, 
-    %         8. dpspr, 
-    %         9. dm, 
-    %         10. dmspr, 
-    %         11. qf_waves, 
-    %         12. sst, 
-    %         13. qf_sst, 
-    %         14. bott_temp,
-    %         15. qf_bott_temp
-    %         16. wind_speed
-    %         17. wind_direction,
-    %         18. current_magnitude,
-    %         19. current_direction,
-    %         20. latitude,
-    %         21. longitude,
+    
+    %file format: 
+    %         1. time %d, 
+    %         2. timestamp %s,     
+    %         3. site name %s, 
+    %         4. buoy id %s, 
+    %         5. hs %.2f, 
+    %         6. hs_swell, 
+    %         7. hs_sea, 
+    %         8. tp %.2f, 
+    %         9. tm_swell,
+    %         10. tm_sea,
+    %         11. tm %.2f,
+    %         12. dp %.2f, 
+    %         13. dpspr %.2f, 
+    %         14. dm %.2f, 
+    %         15. dm_swell, 
+    %         16. dm_sea, 
+    %         17. dmspr %.2f,
+    %         18. dmspr_swell,
+    %         19. dmspr_sea,
+    %         20. qf_waves %d, 
+    %         21. sst %.1f, 
+    %         22. qf_sst %d, 
+    %         23. bott_temp %.1f,
+    %         24. qf_bott_temp %d,
+    %         25. wind_speed %.2f,
+    %         26. wind_direction %.2f,
+    %         27. current_magnitude %.2f,
+    %         28. current_direction %.2f,
+    %         29. latitude %.4f,
+    %         30. longitude %.4f,
             
     
     if ~exist(archive_path)
         mkdir(archive_path); 
         day_file = [archive_path '\' buoy_info.name '_' num2str(dv(1)) num2str(dv(2),'%02d') num2str(dv(3),'%02d') '.csv'];     
         fid = fopen(day_file,'a'); 
-        fprintf(fid,'Time (UNIX/UTC), Timestamp (UTC), Site, BuoyID, Hsig (m), Tp (s), Tm (s), Dp (deg), DpSpr (deg), Dm (deg), DmSpr (deg), QF_waves, SST (degC), QF_sst, Bottom Temp (degC), QF_bott_temp, WindSpeed (m/s), WindDirec (deg), CurrmentMag (m/s), CurrentDir (deg), Latitude (deg), Longitude (deg) \n');                             
-        fmt = {'%d,','%s,','%s,', '%s,', '%.2f,', '%.2f,', '%.2f,', '%.2f,','%.2f,', '%.2f,', '%.2f,', '%d,', '%.1f,' ,'%d,', '%.1f,','%d,','%.2f,','%.2f,','%.2f,','%.2f,','%.4f,','%.4f \n'};        
-        fields = {'time','timestamp','sitename','buoy_id','hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','bott_temp','qf_bott_temp','wind_speed','wind_dir','curr_mag','curr_dir', 'lat','lon'}; 
-        for j = 1:length(fields); 
+        fprintf(fid,['Time (UNIX/UTC), Timestamp (UTC), Site, BuoyID, Hsig (m), Hsig_swell (m), Hsig_sea (m), Tp (s),'...
+            'Tm (s), Tm_swell (s), Tm_sea (s), Dp (deg), DpSpr (deg), Dm (deg), Dm_swell (deg), Dm_sea (deg), DmSpr (deg), DmSpr_swell (deg), DmSpr_sea (deg),'...
+            'QF_waves, SST (degC), QF_sst, Bottom Temp (degC), QF_bott_temp, WindSpeed (m/s), WindDirec (deg), CurrmentMag (m/s),'...
+            'CurrentDir (deg), Latitude (deg), Longitude (deg) \n']);                             
+        fmt = {'%d,','%s,','%s,', '%s,', '%.2f,', '%.2f,', '%.2f,', '%.2f,',...
+            '%.2f,', '%.2f,', '%.2f,', '%.2f,','%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,',...
+            '%d,', '%.1f,' ,'%d,', '%.1f,','%d,','%.2f,','%.2f,','%.2f,','%.2f,','%.4f,','%.4f \n'};       
+        fields = {'time','timestamp','sitename','buoy_id','hsig','hsig_swell','hsig_sea','tp',...
+            'tm','tm_swell','tm_sea','dp','dpspr','dm','dm_swell','dm_sea','dmspr','dmspr_swell','dmspr_sea',...
+            'qf_waves','sst','qf_sst','bott_temp','qf_bott_temp','wind_speed','wind_dir','curr_mag',...
+            'curr_dir', 'lat','lon'}; 
+        for j = 1:length(fields) 
             fprintf(fid, fmt{j}, dataout.(fields{j}));
         end
         fclose(fid);
+        
     else
         day_file = [archive_path '\' buoy_info.name '_' num2str(dv(1)) num2str(dv(2),'%02d') num2str(dv(3),'%02d') '.csv'];
         if exist(day_file)
             fid = fopen(day_file,'a'); 
-            fmt = {'%d,','%s,','%s,', '%s,', '%.2f,', '%.2f,', '%.2f,', '%.2f,','%.2f,', '%.2f,', '%.2f,', '%d,', '%.1f,' ,'%d,', '%.1f,','%d,','%.2f,','%.2f,','%.2f,','%.2f,','%.4f,','%.4f \n'};        
-            fields = {'time','timestamp','sitename','buoy_id','hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','bott_temp','qf_bott_temp','wind_speed','wind_dir','curr_mag','curr_dir', 'lat','lon'}; 
+            
+            fmt = {'%d,','%s,','%s,', '%s,', '%.2f,', '%.2f,', '%.2f,', '%.2f,',...
+                '%.2f,', '%.2f,', '%.2f,', '%.2f,','%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,',...
+                '%d,', '%.1f,' ,'%d,', '%.1f,','%d,','%.2f,','%.2f,','%.2f,','%.2f,','%.4f,','%.4f \n'};               
+            
+            fields = {'time','timestamp','sitename','buoy_id','hsig','hsig_swell','hsig_sea','tp',...
+                'tm','tm_swell','tm_sea','dp','dpspr','dm','dm_swell','dm_sea','dmspr','dmspr_swell','dmspr_sea',...
+                'qf_waves','sst','qf_sst','bott_temp','qf_bott_temp','wind_speed','wind_dir','curr_mag',...
+                'curr_dir', 'lat','lon'};                  
+            
             for j = 1:length(fields); 
                 fprintf(fid, fmt{j}, dataout.(fields{j}));
             end
             fclose(fid);
+            
         else
-            fid = fopen(day_file,'a');
-            fprintf(fid,'Time (UNIX/UTC), Timestamp (UTC), Site, BuoyID, Hsig (m), Tp (s), Tm (s), Dp (deg), DpSpr (deg), Dm (deg), DmSpr (deg), QF_waves, SST (degC), QF_sst, Bottom Temp (degC), QF_bott_temp, WindSpeed (m/s), WindDirec (deg), CurrmentMag (m/s), CurrentDir (deg), Latitude (deg), Longitude (deg) \n');                             
-            fmt = {'%d,','%s,','%s,', '%s,', '%.2f,', '%.2f,', '%.2f,', '%.2f,','%.2f,', '%.2f,', '%.2f,', '%d,', '%.1f,' ,'%d,', '%.1f,','%d,','%.2f,','%.2f,','%.2f,','%.2f,','%.4f,','%.4f \n'};        
-            fields = {'time','timestamp','sitename','buoy_id','hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','sst','qf_sst','bott_temp','qf_bott_temp','wind_speed','wind_dir','curr_mag','curr_dir', 'lat','lon'}; 
+            fid = fopen(day_file,'a');            
+            fprintf(fid,['Time (UNIX/UTC), Timestamp (UTC), Site, BuoyID, Hsig (m), Hsig_swell (m), Hsig_sea (m), Tp (s),'...
+                'Tm (s), Tm_swell (s), Tm_sea (s), Dp (deg), DpSpr (deg), Dm (deg), Dm_swell (deg), Dm_sea (deg), DmSpr (deg), DmSpr_swell (deg), DmSpr_sea (deg),'...
+                'QF_waves, SST (degC), QF_sst, Bottom Temp (degC), QF_bott_temp, WindSpeed (m/s), WindDirec (deg), CurrmentMag (m/s),'...
+                'CurrentDir (deg), Latitude (deg), Longitude (deg) \n']);   
+            
+            fmt = {'%d,','%s,','%s,', '%s,', '%.2f,', '%.2f,', '%.2f,', '%.2f,',...
+                '%.2f,', '%.2f,', '%.2f,', '%.2f,','%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,', '%.2f,',...
+                '%d,', '%.1f,' ,'%d,', '%.1f,','%d,','%.2f,','%.2f,','%.2f,','%.2f,','%.4f,','%.4f \n'};       
+            fields = {'time','timestamp','sitename','buoy_id','hsig','hsig_swell','hsig_sea','tp',...
+                'tm','tm_swell','tm_sea','dp','dpspr','dm','dm_swell','dm_sea','dmspr','dmspr_swell','dmspr_sea',...
+                'qf_waves','sst','qf_sst','bott_temp','qf_bott_temp','wind_speed','wind_dir','curr_mag',...
+                'curr_dir', 'lat','lon'};             
+ 
             for j = 1:length(fields); 
                 fprintf(fid, fmt{j}, dataout.(fields{j}));
             end

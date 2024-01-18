@@ -4,13 +4,13 @@
 %note, this only runs after a site has been created - so data should exist
 %for current or preceding month 
 
-function [data] = load_archived_data(archive_path, buoy_info)
+function [data] = load_archived_data(buoy_info)
 data  = []; 
-dyr = dir([archive_path '\' buoy_info.name '\mat_archive\']); 
+dyr = dir([buoy_info.archive_path '\' buoy_info.name '\mat_archive\']); 
 %only use latest
 dyr = dyr(end); 
 %now get all files in each year                
-dmths = dir([archive_path '\' buoy_info.name '\mat_archive\' dyr.name]); 
+dmths = dir([buoy_info.archive_path '\' buoy_info.name '\mat_archive\' dyr.name]); 
 %only keep latest
 dmths = dmths(end); 
 monthly_file = fullfile(dmths.folder, dmths.name); 
