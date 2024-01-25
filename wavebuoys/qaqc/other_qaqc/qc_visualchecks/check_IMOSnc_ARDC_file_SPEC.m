@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep06';
+filepath = 'E:\wawaves\TorbayWest\delayedmode\ProcessedData_DelayedMode\dep06';
 %IMOS file name
-filename = 'UWA_20230517_KING-GEORGE-SOUND_DM_WAVE-SPECTRA_20230601.nc';
+filename = 'IMOS_NTP-WAVE_20221018_TORBAY-WEST_DM_WAVE-SPECTRA_20230902.nc';
 
 ncfile = fullfile(filepath, filename); 
 
@@ -106,9 +106,12 @@ title (datestr(data.TIME(floor(length(data.TIME)*2/3))));
 figure()
 imagesc(data.TIME,data.FREQUENCY,data.ENERGY');
 set(gca,'YDIR','normal');
-caxis([nanmean(nanmean(data.ENERGY))-0.07 nanmean(nanmean(data.ENERGY))+0.4])
-ylim([0 0.8]);
+caxis([nanmean(nanmean(data.ENERGY))-0.07 nanmean(nanmean(data.ENERGY))+10])
+ylim([0 0.4]);
 datetick
+ylabel('frequency');
+
+
 
 %polar plot spectrum
 return

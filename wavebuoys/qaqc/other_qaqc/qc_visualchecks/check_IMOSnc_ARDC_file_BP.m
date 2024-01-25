@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'E:\wawaves\KingGeorgeSound\delayedmode\ProcessedData_DelayedMode\dep06';
+filepath = 'E:\wawaves\TorbayWest\delayedmode\ProcessedData_DelayedMode\dep06';
 %IMOS file name
-filename = 'UWA_20230517_KING-GEORGE-SOUND_DM_WAVE-PARAMETERS_20230601.nc';
+filename = 'IMOS_NTP-WAVE_20221018_TORBAY-WEST_DM_WAVE-PARAMETERS_20230902.nc';
 
 ncfile = fullfile(filepath, filename); 
 
