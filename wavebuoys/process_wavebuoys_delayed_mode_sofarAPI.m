@@ -34,6 +34,8 @@ buoy_info.timezone = 9; %signed integer for UTC offset
 buoy_info.MagDec = 2; 
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 
+%UWA Token:   e0eb70b6d9e0b5e00450929139ea34
+%VIC Token:   ae7abf179e2b697c24fea513aae16e
 
 %inputs for IMOS filename structure
 buoy_info.archive_path = 'E:\wawaves';
