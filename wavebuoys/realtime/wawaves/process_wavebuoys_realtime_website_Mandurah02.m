@@ -27,40 +27,28 @@ buoy_info.DeployLat = -32.61413;
 buoy_info.DeployLon = 115.57992; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.web_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-buoy_info.time_cutoff = 6; %hours
+buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
-%use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-% buoy_info.MagDec = 1.98; 
 
 %% process realtime mode data
 
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
+    %check whether smart mooring or normal mooring
     if strcmp(buoy_info.version,'smart_mooring')
         limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
         [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
-        if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;             
-            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
-            flag = 1; 
-        elseif strcmp(buoy_info.DataType,'spectral'); 
-            
-            if strcmp(buoy_info.processingSource,'hdr')   
-                limit = buoy_info.UpdateTime*2;
-                [SpotData] = Get_Spoondrift_Data_realtime_fullwaves_hdr(buoy_info, limit);               
-            else
-                limit = buoy_info.UpdateTime;
-                [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);
-            end                
-            flag = 1; 
-        end                    
-    end       
+        limit = buoy_info.UpdateTime*2; %not used in v2 code
+        [SpotData] = Get_Spoondrift_Data_realtime_v2(buoy_info, limit);         
+        flag = 1;                         
+    end        
       
     if flag == 1
         for i = 1:size(SpotData.time,1)
@@ -69,12 +57,12 @@ if strcmp(buoy_info.type,'sofar')==1
         
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
-        [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
+        [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info);                  
+            [archive_data] = load_archived_data(buoy_info);                  
             idx_w = find(SpotData.time>archive_data.time(end));   
             idx_t = find(SpotData.temp_time>archive_data.temp_time(end));             
             if ~isempty(idx_w)&~isempty(idx_t)
@@ -94,7 +82,7 @@ if strcmp(buoy_info.type,'sofar')==1
                     %save data to different formats        
                     realtime_archive_mat(buoy_info, data);
                     realtime_backup_mat(buoy_info, data);
-                    realtime_archive_text(buoy_info, data, limit); 
+                    realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
                     %output MEM and SST plots --- only most recent time
                     %point 
                     if strcmp(buoy_info.DataType,'spectral')                        
