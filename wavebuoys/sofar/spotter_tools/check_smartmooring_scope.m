@@ -4,7 +4,7 @@
 
 %% read in bathy
 %read in bathymetry - Geoscience Australia 250m resolution (2023)
-bpath = 'C:\Users\00084142\Data\Australian Bathymetry and Topography 2023 250m';
+bpath = 'X:\CUTTLER_wawaves\Data\Bathy\Australian Bathymetry and Topography 2023 250m';
 bname = 'Australian_Bathymetry_and_Topography_2023_250m_MSL_cog.tif'; 
 bfile= fullfile(bpath,bname); 
 [bathy,binfo] = readgeoraster(bfile); 
@@ -19,11 +19,10 @@ bathy_lon = bathy_lon(ind_lat, ind_lon);
 bathy_lat = bathy_lat(ind_lat, ind_lon); 
 clear ind_lat ind_lon 
 
-%% optional: read in bathymetry and find closest point to deployment location 
+%% optional: find closest point to deployment location 
 %proposed deployment coordinates in decimal degrees
 deploy_lat = -22.167030;
-deploy_lon = 114.325180; 
-
+deploy_lon = 114.335; 
 
 %find closest bathy point
 ind_lat = find(abs(bathy_lat(:,1) - deploy_lat)==min(abs(bathy_lat(:,1) - deploy_lat))); 
