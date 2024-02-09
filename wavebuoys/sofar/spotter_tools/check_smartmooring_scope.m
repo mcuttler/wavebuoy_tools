@@ -1,33 +1,36 @@
 %% Calculate scope and plot for smart moorings 
 
 %MC to add info 
+
+%% read in bathy
+%read in bathymetry - Geoscience Australia 250m resolution (2023)
+bpath = 'C:\Users\00084142\Data\Australian Bathymetry and Topography 2023 250m';
+bname = 'Australian_Bathymetry_and_Topography_2023_250m_MSL_cog.tif'; 
+bfile= fullfile(bpath,bname); 
+[bathy,binfo] = readgeoraster(bfile); 
+bathy = double(bathy); 
+[bathy_lat, bathy_lon] = geographicGrid(binfo); 
+
+%crop bathy grid 
+ind_lat = find(bathy_lat(:,1)<-15); 
+ind_lon = find(bathy_lon(1,:)<125); 
+bathy = bathy(ind_lat, ind_lon); 
+bathy_lon = bathy_lon(ind_lat, ind_lon); 
+bathy_lat = bathy_lat(ind_lat, ind_lon); 
+clear ind_lat ind_lon 
+
 %% optional: read in bathymetry and find closest point to deployment location 
 %proposed deployment coordinates in decimal degrees
-% deploy_lat = -22.183333;
-% deploy_lon = 114.265000;
-% 
-% %read in bathymetry - Geoscience Australia 250m resolution (2023)
-% bpath = 'C:\Users\00084142\Data\Australian Bathymetry and Topography 2023 250m';
-% bname = 'Australian_Bathymetry_and_Topography_2023_250m_MSL_cog.tif'; 
-% bfile= fullfile(bpath,bname); 
-% [bathy,binfo] = readgeoraster(bfile); 
-% bathy = double(bathy); 
-% [bathy_lat, bathy_lon] = geographicGrid(binfo); 
-% 
-% %crop bathy grid 
-% ind_lat = find(bathy_lat(:,1)<-15); 
-% ind_lon = find(bathy_lon(1,:)<125); 
-% bathy = bathy(ind_lat, ind_lon); 
-% bathy_lon = bathy_lon(ind_lat, ind_lon); 
-% bathy_lat = bathy_lat(ind_lat, ind_lon); 
-% clear ind_lat ind_lon 
-% 
-% %find closest bathy point
-% ind_lat = find(abs(bathy_lat(:,1) - deploy_lat)==min(abs(bathy_lat(:,1) - deploy_lat))); 
-% ind_lon = find(abs(bathy_lon(1,:) - deploy_lon)==min(abs(bathy_lon(1,:) - deploy_lon))); 
-% 
-% %approximate depth - relative to MSL 
-% deploy_depth = bathy(ind_lat, ind_lon)*-1; %GA has bathy as negative, so make it positive for calculations below
+deploy_lat = -22.167030;
+deploy_lon = 114.325180; 
+
+
+%find closest bathy point
+ind_lat = find(abs(bathy_lat(:,1) - deploy_lat)==min(abs(bathy_lat(:,1) - deploy_lat))); 
+ind_lon = find(abs(bathy_lon(1,:) - deploy_lon)==min(abs(bathy_lon(1,:) - deploy_lon))); 
+
+%approximate depth - relative to MSL 
+deploy_depth = bathy(ind_lat, ind_lon)*-1 %GA has bathy as negative, so make it positive for calculations below
 
 %% set up info about the mooring 
 clc; 
@@ -38,9 +41,9 @@ clc;
 %your depth) by half of your tidal range. So, for example, if you have a
 %proposed site that is 12m LAT and a tidal range of 3m, your depth MSL
 %would be 13.5m. 
-deploy_depth = 14;
+% deploy_depth = 11;
 %length of line connecting surface float to surface temperature sensor
-B = 0; %in meters
+B = 1; %in meters
 
 %length of smart mooring bottom section
 C = 15; %in meters
@@ -52,7 +55,7 @@ D = 1; %in meters
 tidal_range = 3; %in meters
 
 %max swell height
-hs = 1.5; %in meters 
+hs = 2; %in meters 
 
 %calculate scope
 %(https://sofarocean.notion.site/Mooring-Design-and-Best-Practices-for-Smart-Mooring-6838d5d940114b968143d6196953e213#6e3c3fd8fb4641e784966e32dbe3ea24)
@@ -78,4 +81,4 @@ disp(['Min Scope: ' num2str(min_scope)]);
 % %plot schematic of mooring 
 % ax(2) = subplot(122); 
 
-fid = figure; 
+% fid = figure; 
