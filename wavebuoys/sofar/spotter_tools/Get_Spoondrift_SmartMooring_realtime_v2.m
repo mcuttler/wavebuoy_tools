@@ -13,7 +13,7 @@ import matlab.net.http.*
 header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
 r = RequestMessage('GET', header);
 %wave data
-tstart = datestr(datenum(now) - hours(12),30); 
+tstart = datestr(datenum(now) - hours(24),30); 
 tend = datestr(datenum(now)+ hours(2),30); 
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
@@ -285,6 +285,14 @@ if isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
 elseif ~isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
     Spotter.bott_temp = ones(size(Spotter.temp_time,1),1).*-9999; 
+end
+
+%check pressure
+if isempty(Spotter.pressure)&&isempty(Spotter.pressure_std)
+    Spotter.press_time = Spotter.time; 
+    Spotter.press_std_time = Spotter.time;
+    Spotter.pressure = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.pressure_std = ones(size(Spotter.time,1),1).*-9999; 
 end
 
         
