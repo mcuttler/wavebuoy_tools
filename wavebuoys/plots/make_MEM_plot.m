@@ -7,6 +7,11 @@
 %%
 
 function [] = make_MEM_plot(ndirec, freq, NE, hs, tp, dp, time, buoy_info)
+          %MC commented the below - this shouldn't be necessary as the
+          %input above 'freq' should already be 1 x n dimensional from the
+          %real-time scripts (see lines 91 in
+          %process_wavebuoys_realtime_website_Mandurah01 for example)
+%         freq=freq(1,:); % Matt adds 20240215 due to error in griddata line 19 below      
 
         ndirec2 = [ndirec 360];
         NE_plot = [NE NE(:,1)];
