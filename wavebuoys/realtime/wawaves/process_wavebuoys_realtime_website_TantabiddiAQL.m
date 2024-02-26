@@ -26,11 +26,11 @@ buoy_info.DeployLat = -21.895833;
 buoy_info.DeployLon = 113.932850; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.web_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-buoy_info.web_path = 'E:\wawaves';
 %data for search radius and alert
 buoy_info.time_cutoff = 6; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
@@ -130,7 +130,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 
             end
             realtime_archive_mat(buoy_info, SpotData);
-            realtime_archive_text(buoy_info, SpotData, limit); 
+            realtime_archive_text(buoy_info, SpotData, size(SpotData.time)); 
             realtime_backup_mat(buoy_info, SpotData);
             
             
