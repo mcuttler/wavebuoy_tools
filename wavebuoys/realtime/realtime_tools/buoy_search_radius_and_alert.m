@@ -69,6 +69,7 @@ if c-time_dev>in_cut/24 %if time difference greater than cutoff, development sit
     sendmail('michael.cuttler@uwa.edu.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
     sendmail('carlin.alerts@outlook.com.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
     sendmail('matt.hatcher@uwa.edu.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
+    sendmail('ronni.king@uwa.edu.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
 else
     warning.time = 0; 
 end
@@ -95,6 +96,7 @@ if dist_dev>dev_watch %if development site buoy offsite
     sendmail('carlin.alerts@outlook.com.au',mail_title, mail_message);
     sendmail('michael.cuttler@uwa.edu.au',mail_title, mail_message);
     sendmail('matt.hatcher@uwa.edu.au',mail_title, mail_message);
+    sendmail('ronni.king@uwa.edu.au',mail_title, mail_message);
 else
     warning.gps = 0; 
 end
