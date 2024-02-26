@@ -4,7 +4,7 @@
 
 %% read in bathy
 %read in bathymetry - Geoscience Australia 250m resolution (2023)
-bpath = 'X:\CUTTLER_wawaves\Data\Bathy\Australian Bathymetry and Topography 2023 250m';
+bpath = 'C:\Users\00084142\Data\Australian Bathymetry and Topography 2023 250m';
 bname = 'Australian_Bathymetry_and_Topography_2023_250m_MSL_cog.tif'; 
 bfile= fullfile(bpath,bname); 
 [bathy,binfo] = readgeoraster(bfile); 
@@ -21,18 +21,20 @@ clear ind_lat ind_lon
 
 %% optional: find closest point to deployment location 
 %proposed deployment coordinates in decimal degrees
-deploy_lat = -22.167030;
-deploy_lon = 114.335; 
+deploy_lat =-29.202967
+
+deploy_lon =114.822200
+
 
 %find closest bathy point
 ind_lat = find(abs(bathy_lat(:,1) - deploy_lat)==min(abs(bathy_lat(:,1) - deploy_lat))); 
 ind_lon = find(abs(bathy_lon(1,:) - deploy_lon)==min(abs(bathy_lon(1,:) - deploy_lon))); 
 
 %approximate depth - relative to MSL 
-deploy_depth = bathy(ind_lat, ind_lon)*-1 %GA has bathy as negative, so make it positive for calculations below
+deploy_depth = bathy(ind_lat, ind_lon)*-1;%GA has bathy as negative, so make it positive for calculations below
 
-%% set up info about the mooring 
-clc; 
+% set up info about the mooring 
+% clc; 
 %define the deployment depth if not read from a bathymetry file above. This
 %depth is relative to MSL. If you read your depth against a nautical chart
 %(e.g., Navionics) it is most likely relative to LAT (lowest astronomical
@@ -40,27 +42,28 @@ clc;
 %your depth) by half of your tidal range. So, for example, if you have a
 %proposed site that is 12m LAT and a tidal range of 3m, your depth MSL
 %would be 13.5m. 
-% deploy_depth = 11;
+% deploy_depth = 9;
 %length of line connecting surface float to surface temperature sensor
 B = 1; %in meters
 
 %length of smart mooring bottom section
-C = 15; %in meters
+C = 35; %in meters
 
 %length of riser connecting bottom temperature sensor to anchor
 D = 1; %in meters
 
 %tidal range
-tidal_range = 3; %in meters
+tidal_range = 1; %in meters
 
 %max swell height
-hs = 2; %in meters 
+hs = 4; %in meters 
 
 %calculate scope
 %(https://sofarocean.notion.site/Mooring-Design-and-Best-Practices-for-Smart-Mooring-6838d5d940114b968143d6196953e213#6e3c3fd8fb4641e784966e32dbe3ea24)
 min_scope = (B+C+D)/(deploy_depth + (0.5*tidal_range)+hs); 
 max_scope = (B+C+D)/(deploy_depth - (0.5*tidal_range)-hs); 
 
+disp(['Depth MSL: ' num2str(deploy_depth)]);
 disp(['Max Scope: ' num2str(max_scope)]); 
 disp(['Min Scope: ' num2str(min_scope)]); 
 
