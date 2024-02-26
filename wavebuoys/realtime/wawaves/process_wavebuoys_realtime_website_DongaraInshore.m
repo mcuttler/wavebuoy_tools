@@ -140,9 +140,11 @@ if strcmp(buoy_info.type,'sofar')==1
                     realtime_backup_mat(buoy_info, data);
                     
                     %output MEM and SST plots 
-                    if strcmp(buoy_info.DataType,'spectral')        
-                        [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-                        make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
+                    if strcmp(buoy_info.DataType,'spectral')                        
+                        [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
+                            SpotData.b2(end,:),SpotData.varianceDensity(end,:));
+                        make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
+                            SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)        
                     end
                     
                     %code to update the buoy info master file for website to read
@@ -161,10 +163,12 @@ if strcmp(buoy_info.type,'sofar')==1
             realtime_archive_text(buoy_info, SpotData, size(SpotData.time)); 
             realtime_backup_mat(buoy_info, SpotData);            
             
-            %output MEM and SST plots 
-            if strcmp(buoy_info.DataType,'spectral')        
-                [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-                make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
+            %output MEM and SST plots   
+            if strcmp(buoy_info.DataType,'spectral')  
+                [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
+                    SpotData.b2(end,:),SpotData.varianceDensity(end,:));
+                make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
+                    SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)        
             end
             
             %code to update the buoy info master file for website to read
