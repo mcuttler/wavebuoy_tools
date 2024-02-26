@@ -21,10 +21,9 @@ clear ind_lat ind_lon
 
 %% optional: find closest point to deployment location 
 %proposed deployment coordinates in decimal degrees
-deploy_lat =-29.202967
+deploy_lat = -29.181600; 
 
-deploy_lon =114.822200
-
+deploy_lon = 114.862467; 
 
 %find closest bathy point
 ind_lat = find(abs(bathy_lat(:,1) - deploy_lat)==min(abs(bathy_lat(:,1) - deploy_lat))); 
