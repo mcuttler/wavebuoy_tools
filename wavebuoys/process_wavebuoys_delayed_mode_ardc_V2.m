@@ -17,15 +17,15 @@ addpath(genpath(mpath))
 %% General attributes
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is with the Parser output csv's, or upper directory for Datawells
-buoy_info.datapath = 'F:\wawaves\SharkBay\delayedmode\20210310_to_20211223_dep01_SharkBay_SPOT0938'; 
+buoy_info.datapath = 'F:\wawaves\PerthCanyon\delayedmode\SPOT0093_PerthCanyon_20191015_to_20200903\Raw'; 
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; %datawell or sofar
-buoy_info.serial = 'SPOT-0938'; %datawell hull serial or SPOT ID 
+buoy_info.serial = 'SPOT-0093'; %datawell hull serial or SPOT ID 
 buoy_info.instrument = 'Sofar Spotter-V1'; %Datawell DWR Mk4; Sofar Spotter-V2 (or V1)
-buoy_info.mooring_type = 'smart mooring'; % e.g. smart mooring, single catenary, double catenary, other.
-buoy_info.site_name = 'SHARK-BAY'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
-buoy_info.DeployDepth = 20; 
+buoy_info.mooring_type = 'other'; % e.g. smart mooring, single catenary, double catenary, other.
+buoy_info.site_name = 'PERTH-CANYON'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
+buoy_info.DeployDepth = 300; 
 buoy_info.startdate = datenum(2018,01,01); % gets calculated and updated in processing
 buoy_info.enddate = datenum(2024,12,12);  % gets calculated and updated in processing
 buoy_info.timezone = 8; %signed integer for UTC offset 
@@ -36,7 +36,7 @@ buoy_info.MagDec = 0;
 buoy_info.watch_circle = 1; %radius of watch circle in meters get calculated and updated in processing; 
 
 %inputs for IMOS-ARDC filename structure
-buoy_info.archive_path = 'F:\wawaves\SharkBay\delayedmode\ProcessedData_DelayedMode\dep01';
+buoy_info.archive_path = 'F:\wawaves\PerthCanyon\delayedmode\ProcessedData_DelayedMode\dep01_processed_20240221';
 %additional attributes for IMOS netCDF
 % wording for project UWA: "UWA Nearshore wave buoy program (- IMOS NTP)"
 % VIC: "VIC-DEAKIN-UNI Nearshore wave buoy program (- IMOS NTP)"
@@ -287,7 +287,33 @@ if data.frequency(end)==-9999
 end
 
 
+% plot time vectors to make sure they are sequential
 
+figure()
+subplot(2,1,1)
+plot(data.time,'-o')
+title ('data time')
+subplot(2,1,2)
+plot(data.disp_time,'-o')
+title('disp time')
+
+%encountered one file where time took a step backward at end of file (Cape
+%Bridgewater dep05) need to remove in that case.
+
+%ind_end_time=10070;
+%ind_end_disp_time=45320000;
+
+%for i =27:30
+%    data.(fields{i}) =   data.(fields{i})(1:ind_end_time);
+%end 
+
+%for i =14:17
+%   data.(fields{i}) =   data.(fields{i})(1:ind_end_disp_time);
+%end
+
+%for i =19:25
+%   data.(fields{i}) =   data.(fields{i})(1:ind_end_time,:);
+%end 
 
 %% Graphical input on Lat and Lon data to find Start of Stop Time of Deployment Click on Start time and then Stop time
 %% Disable if confident in start and end time recorded metadata.
@@ -331,25 +357,13 @@ clf;
 
 %% Save mat file for internal Use
 
-% variable size limitation, break out x y z and disp time. If needed
+%save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_internal'),'data','bulkparams','buoy_info','check','fields','locations','mpath','spec');
 
-%disp_time=displacements.time;
-%disp_x=displacements.x;
-%disp_y=displacements.y;
-%disp_z=displacements.z;
+save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_internal'),'data','locations','buoy_info','check','-v7.3');
 
-
-%clearvars displacements
-
-%data=rmfield(data,'disp_time');
-%data=rmfield(data,'x');
-%data=rmfield(data,'y');
-%data=rmfield(data,'z');
-
-save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_internal'),'data','bulkparams','buoy_info','check','fields','locations','mpath','spec');
+save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_internal'),'-v7.3');
 
 %save(strcat(make_imos_ardc_filename_mat(buoy_info,'MAT'),'_disp_internal'),'disp_time','disp_x','disp_y','disp_z');
-
 
 % If re-processing from above mat file. start re running code from here.
 

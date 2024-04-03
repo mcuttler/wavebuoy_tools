@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'E:\wawaves\TorbayWest\delayedmode\ProcessedData_DelayedMode\dep06';
+filepath = 'F:\wawaves\CapeBridgewater\delayedmode\ProcessedData_DelayedMode\dep05';
 %IMOS file name
-filename = 'UWA_20230822_TORBAY-WEST_DM_WAVE-RAW-DISPLACEMENTS_20230902.nc';
+filename = 'VIC-DEAKIN-UNI_20230510_CAPE-BRIDGEWATER_DM_WAVE-RAW-DISPLACEMENTS_20230524.nc';
 
 ncfile = fullfile(filepath, filename); 
 
