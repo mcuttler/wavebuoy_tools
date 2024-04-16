@@ -22,6 +22,7 @@ function [out]=spectra_from_displacements(heave,north,east,nfft,nover,fs,merge,t
 %v1.1, JEH 2 Sept 2022 , modified to include peak period and direction
 %v2.0 MC 24 Apr 2023, modified to account for pressure + velocity (enu) or displacement(xyz) inputs 
 %v2.1 MC 5 April 2024, renamed and added to wave buoy tools 
+%v3 MC 16 April 2024, add functionality to do partitioning 
 
 %%
 
@@ -209,27 +210,24 @@ if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)
 
     indIG =freq>=info.fminIG & freq<info.fminSS; 
     indSS = freq>=info.fminSS & freq<info.fmaxSS; 
+    indSea = freq>=info.fmaxSS & freq<info.fmaxSea; 
     
     mdir1_SS= rad2deg(atan2(nansum(S(indSS).*b1(indSS)),nansum(S(indSS).*a1(indSS))));  
     mdir2_SS = rad2deg(atan2(nansum(S(indSS).*b2(indSS)),nansum(S(indSS).*a2(indSS)))/2);        
+
+    mdir1_Sea= rad2deg(atan2(nansum(S(indSea).*b1(indSea)),nansum(S(indSea).*a1(indSea))));  
+    mdir2_Sea = rad2deg(atan2(nansum(S(indSea).*b2(indSea)),nansum(S(indSea).*a2(indSea)))/2);        
     
     mdir1_IG= rad2deg(atan2(nansum(S(indIG).*b1(indIG)),nansum(S(indIG).*a1(indIG))));  
     mdir2_IG = rad2deg(atan2(nansum(S(indIG).*b2(indIG)),nansum(S(indIG).*a2(indIG)))/2);        
-    
-    %if there's a cutoff to further partition sea and swell then use it
-    if isfield(info,'fmaxSea')
-        indSea = freq>=info.fmaxSS & freq<info.fmaxSea; 
-        mdir1_Sea = rad2deg(atan2(nansum(S(indSea).*b1(indSea)),nansum(S(indSea).*a1(indSea))));  
-        mdir2_Sea = rad2deg(atan2(nansum(S(indSea).*b2(indSea)),nansum(S(indSea).*a2(indSea)))/2);     
-        mdir1_Sea = mod(270-mdir1_Sea,360); 
-        mdir2_Sea = mod(270-mdir2_Sea,360); 
-    end
     
     %rotate in WAVES FROM
     mdir1_tot = mod(270-mdir1_tot,360); 
     mdir2_tot = mod(270-mdir2_tot,360);
     mdir1_SS = mod(270-mdir1_SS,360); 
     mdir2_SS = mod(270-mdir2_SS,360); 
+    mdir1_Sea = mod(270-mdir1_Sea,360); 
+    mdir2_Sea = mod(270-mdir2_Sea,360); 
     mdir1_IG = mod(270-mdir1_IG,360); 
     mdir2_IG = mod(270-mdir2_IG,360);
 
@@ -238,12 +236,19 @@ if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)
     Tp=1./freq(ff);            
     Dp = rad2deg(atan2(b1(ff),a1(ff)));  
     Dp = mod(270 - Dp,360); 
-
-    spread=rad2deg(sqrt(2*(1-sqrt(trapz(freq,a1).^2+trapz(freq,b1).^2)))); 
+    spread_Dp = rad2deg(sqrt(2*(1-sqrt(a1(ff).^2+ b1(ff).^2)))); 
+    
+    
+    %spreading values
+    spread=rad2deg(sqrt(2*(1-sqrt(trapz(freq,a1).^2+trapz(freq,b1).^2)))); %mean, I think 
+   
+    spreadSS = rad2deg(sqrt(2*(1-sqrt(trapz(freq(indSS),a1(indSS)).^2+trapz(freq(indSS),b1(indSS)).^2)))); 
+    spreadSea = rad2deg(sqrt(2*(1-sqrt(trapz(freq(indSea),a1(indSea)).^2+trapz(freq(indSea),b1(indSea)).^2)))); 
+    spreadIG = rad2deg(sqrt(2*(1-sqrt(trapz(freq(indIG),a1(indIG)).^2+trapz(freq(indIG),b1(indIG)).^2)))); 
 
    %CALCUALTE WAVE PARAMETERS AND ORGANIZE OUTPUT
     if strcmp(type,'xyz') %xyz = displacements
-        %calcualte moments of spectrum
+        %calcualte moments of spectrum - total 
         n=0:3;
         for jj=1:4
             %calculate moments
@@ -253,6 +258,45 @@ if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)
             m(jj)=trapz(freq,freq.^n(jj).*S);
             if n(jj)==0
                 out.Hm0=4*sqrt(m(jj)); %sig wave height
+            end        
+        end
+
+        %calcualte moments of spectrum - swell         
+        n=0:3;
+        for jj=1:4
+            %calculate moments
+            %          /
+            %    Mi =  | f**i * E(f) df
+            %          /
+            mSS(jj)=trapz(freq(indSS),freq(indSS).^n(jj).*S(indSS));
+            if n(jj)==0
+                out.Hm0_SS=4*sqrt(mSS(jj)); %sig wave height
+            end        
+        end
+
+        %calcualte moments of spectrum - sea         
+        n=0:3;
+        for jj=1:4
+            %calculate moments
+            %          /
+            %    Mi =  | f**i * E(f) df
+            %          /
+            mSea(jj)=trapz(freq(indSea),freq(indSea).^n(jj).*S(indSea));
+            if n(jj)==0
+                out.Hm0_Sea=4*sqrt(mSea(jj)); %sig wave height
+            end        
+        end
+
+        %calcualte moments of spectrum - IG          
+        n=0:3;
+        for jj=1:4
+            %calculate moments
+            %          /
+            %    Mi =  | f**i * E(f) df
+            %          /
+            mIG(jj)=trapz(freq(indIG),freq(indIG).^n(jj).*S(indIG));
+            if n(jj)==0
+                out.Hm0_IG=4*sqrt(mIG(jj)); %sig wave height
             end        
         end
         
@@ -269,13 +313,25 @@ if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)
         out.mdir1_spec = mod(270-dir1,360);         
         out.mdir1_SS=mdir1_SS;
         out.mdir2_SS=mdir2_SS;
+        out.mdir1_Sea = mdir1_Sea; 
+        out.mdir2_Sea = mdir2_Sea; 
         out.mdir1_IG=mdir1_IG;
         out.mdir2_IG=mdir2_IG;
         out.Tp=Tp;
         out.Tm1=m(1)/m(2); %m0/m1
         out.Tm2=sqrt(m(1)/m(3)); %m0/m2
+        out.Tm1_IG=mIG(1)/mIG(2); %m0/m1
+        out.Tm2_IG=sqrt(mIG(1)/mIG(3)); %m0/m2
+        out.Tm1_SS=mSS(1)/mSS(2); %m0/m1
+        out.Tm2_SS=sqrt(mSS(1)/mSS(3)); %m0/m2
+        out.Tm1_Sea=mSea(1)/mSea(2); %m0/m1
+        out.Tm2_Sea=sqrt(mSea(1)/mSea(3)); %m0/m2
         out.Dp=Dp;
+        out.spread_Dp = spread_Dp; 
         out.spread=spread;
+        out.spreadSS = spreadSS;
+        out.spreadSea = spreadSea; 
+        out.spreadIG = spreadIG; 
         out.spread_spec=spread1;
         out.segments=windows;
         out.segments_used=windows-length(rw);
