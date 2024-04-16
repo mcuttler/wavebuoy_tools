@@ -142,8 +142,8 @@ if ~isempty(files)
         dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
         %files already have negative to indicate N-S, so should be ok to just
         %add 
-        dlat = dum.lat + ((dum.lat./10^5)/60); 
-        dlon = dum.lon + ((dum.lon./10^5)/60); 
+        dlat = dum.lat + ((dum.lat_min./10^5)/60); 
+        dlon = dum.lon + ((dum.lon_min./10^5)/60); 
         
         dumt = timetable(dlon, dlat,'RowTimes',dt,'VariableNames',{'longtiude','latitude'}); 
         
