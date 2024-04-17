@@ -14,25 +14,26 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1578'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-1608'; %spotter serial number, or just Datawell 
 buoy_info.name = 'Bundegi'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Bundegi';
-buoy_info.DeployDepth = 20; 
+buoy_info.DeployDepth = 20;
 buoy_info.DeployLat = -21.86674;
 buoy_info.DeployLon = 114.19172; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.web_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 %data for search radius and alert
-buoy_info.time_cutoff = 6; %hours
-buoy_info.search_rad = 190; %meters for watch circle radius 
+buoy_info.time_cutoff = 3; %hours
+buoy_info.search_rad = 200; %meters for watch circle radius 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
@@ -85,7 +86,10 @@ if strcmp(buoy_info.type,'sofar')==1
             %SpotData needs to be newer wave data, but the temperature time
             %also needs to end after the wave data for other codes to work
             %correctly (this is for Aqualink only !!)
-            if SpotData.time(1)>archive_data.time(end) && SpotData.temp_time(end)>SpotData.time(end) 
+            
+            %%uncomment below when running on Aqualink schedule
+%             if SpotData.time(1)>archive_data.time(end) && SpotData.temp_time(end)>SpotData.time(end) 
+            if SpotData.time(1)>archive_data.time(end)    
                 %check that it's new data
                 idx_w = find(SpotData.time>archive_data.time(end)); 
                 idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
@@ -105,8 +109,9 @@ if strcmp(buoy_info.type,'sofar')==1
 
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
+                realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
                 realtime_backup_mat(buoy_info, data);
-                realtime_archive_text(buoy_info, data, limit); 
+                
                 %output MEM and SST plots 
                 if strcmp(buoy_info.DataType,'spectral')        
                     [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
@@ -125,8 +130,9 @@ if strcmp(buoy_info.type,'sofar')==1
                 
             end
             realtime_archive_mat(buoy_info, SpotData);
+            realtime_archive_text(buoy_info, SpotData, size(SpotData.time)); 
             realtime_backup_mat(buoy_info, SpotData);
-            realtime_archive_text(buoy_info, SpotData, limit); 
+            
             
             %output MEM and SST plots 
             if strcmp(buoy_info.DataType,'spectral')        

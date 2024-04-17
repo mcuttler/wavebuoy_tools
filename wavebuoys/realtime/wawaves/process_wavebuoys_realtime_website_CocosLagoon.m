@@ -26,7 +26,8 @@ buoy_info.DeployLat = -12.14402;
 buoy_info.DeployLon = 96.86583; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.web_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
@@ -64,12 +65,12 @@ if strcmp(buoy_info.type,'sofar')==1
         
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
-        [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
+        [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info);                    
+            [archive_data] = load_archived_data(buoy_info);                    
             %add serial ID and name if not already there
             if ~isfield(archive_data,'serialID')
                 for i = 1:size(archive_data.time,1)
@@ -109,7 +110,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 %save data to different formats        
                 realtime_archive_mat(buoy_info, data);
                 realtime_backup_mat(buoy_info, data);
-                realtime_archive_text(buoy_info, data, limit); 
+                realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
                 %output MEM and SST plots 
                 if strcmp(buoy_info.DataType,'spectral')        
                     [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);

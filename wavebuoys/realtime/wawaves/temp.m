@@ -14,8 +14,8 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0171'; %spotter serial number, or just Datawell 
-buoy_info.name = 'TIDE_SouthAfricaDrifting04'; 
+buoy_info.serial = 'SPOT-0093'; %spotter serial number, or just Datawell 
+buoy_info.name = 'TIDE_SouthAfricaDrifting01'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V1'; %or DWR4 for Datawell, for example
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
@@ -26,10 +26,13 @@ buoy_info.DeployLat = 0;
 buoy_info.DeployLon = 0; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.web_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+buoy_info.time_cutoff = 3; %hours
+buoy_info.search_rad = 0; %meters for watch circle radius 
 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
@@ -39,20 +42,15 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
+    %check whether smart mooring or normal mooring
     if strcmp(buoy_info.version,'smart_mooring')
         limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
         [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
     else
-        if strcmp(buoy_info.DataType,'parameters')
-            limit = buoy_info.UpdateTime*2;            
-            [SpotData] = Get_Spoondrift_Data_realtime(buoy_info, limit);   
-            flag = 1; 
-        elseif strcmp(buoy_info.DataType,'spectral'); 
-            limit = buoy_info.UpdateTime; 
-            [SpotData] = Get_Spoondrift_Data_realtime_fullwaves(buoy_info, limit);     
-            flag = 1; 
-        end                    
-    end   
+        limit = buoy_info.UpdateTime*2; %not used in v2 code
+        [SpotData] = Get_Spoondrift_Data_realtime_v2(buoy_info, limit);         
+        flag = 1;                         
+    end     
     
       
     if flag == 1
@@ -62,12 +60,12 @@ if strcmp(buoy_info.type,'sofar')==1
         
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
-        [check] = check_archive_path(buoy_info.archive_path, buoy_info, SpotData);    
+        [check] = check_archive_path(buoy_info, SpotData);    
         
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info.archive_path, buoy_info);                  
+            [archive_data] = load_archived_data(buoy_info);                  
             idx_w = find(SpotData.time>archive_data.time(end));   
             if ~isempty(idx_w)
                 ff = fieldnames(SpotData); 
@@ -82,7 +80,7 @@ if strcmp(buoy_info.type,'sofar')==1
                     %save data to different formats        
                     realtime_archive_mat(buoy_info, data);
                     realtime_backup_mat(buoy_info, data);
-                    realtime_archive_text(buoy_info, data, limit); 
+                    realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
                     %output MEM and SST plots 
                     if strcmp(buoy_info.DataType,'spectral')        
                         [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);

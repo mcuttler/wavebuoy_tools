@@ -44,6 +44,7 @@ if tnow - SpotData.time(end) > in_cut/24 %if time difference greater than cutoff
     sendmail('michael.cuttler@uwa.edu.au', mail_title, mail_message) ;
     sendmail('carlin.alerts@outlook.com.au', mail_title, mail_message) ;
     sendmail('matt.hatcher@uwa.edu.au', mail_title, mail_message) ;
+    sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
 else
     warning.time = 0; 
 end
@@ -69,6 +70,7 @@ if dist_dev>dev_watch %if development site buoy offsite
     sendmail('carlin.alerts@outlook.com.au',mail_title, mail_message);
     sendmail('michael.cuttler@uwa.edu.au',mail_title, mail_message);
     sendmail('matt.hatcher@uwa.edu.au',mail_title, mail_message);
+    sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
 else
     warning.gps = 0; 
 end

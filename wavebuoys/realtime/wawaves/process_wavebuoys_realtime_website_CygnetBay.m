@@ -14,16 +14,16 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1542'; %spotter serial number, or just Datawell 
-buoy_info.name = 'MermaidReef'; 
+buoy_info.serial = 'SPOT-30959C'; %spotter serial number, or just Datawell 
+buoy_info.name = 'CygnetBay'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
-buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
+buoy_info.sofar_token = 'f6c01b0c9712e04c7f5f9bcdb5b694'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'MermaidReef';
-buoy_info.DeployDepth = 40;
-buoy_info.DeployLat = -17.093000;
-buoy_info.DeployLon = 119.589183; 
+buoy_info.DeployLoc = 'CygnetBay';
+buoy_info.DeployDepth = 19;
+buoy_info.DeployLat = -16.502567;
+buoy_info.DeployLon = 123.034383; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
@@ -32,8 +32,8 @@ buoy_info.website_filename = 'buoys.csv';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 %data for search radius and alert
-buoy_info.time_cutoff = 6; %hours
-buoy_info.search_rad = 250; %meters for watch circle radius 
+buoy_info.time_cutoff = 3; %hours
+buoy_info.search_rad = 150; %meters for watch circle radius 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 

@@ -22,16 +22,16 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Torbay';
 buoy_info.DeployDepth = 32; 
-buoy_info.DeployLat = -35.071057; 
-buoy_info.DeployLon = 117.775390; 
+buoy_info.DeployLat = -35.06892; 
+buoy_info.DeployLon = 117.77054; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.archive_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves';
 buoy_info.web_path = 'E:\wawaves';
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup';
 buoy_info.backup_path2 = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\realtime_archive_backup';
-buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+buoy_info.datawell_datapath = 'G:\waved'; %top level directory for Datawell CSVs
 
 %data for search radius and alert
 buoy_info.time_cutoff = 3; %hours
