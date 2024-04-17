@@ -1,4 +1,4 @@
-function [out]=spectra_from_displacements_JEH(heave,north,east,nfft,nover,fs,merge,type,info)
+function [out]=spectra_from_displacements(heave,north,east,nfft,nover,fs,merge,type,info)
 %
 %perform basic spectral processing of wave displacement data. Rather than
 %rely on the built in pwelch or similar function this takes a more basic
@@ -254,6 +254,7 @@ if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)
         out.Tp=Tp;
         out.Tm1=m(1)/m(2); %m0/m1
         out.Tm2=sqrt(m(1)/m(3)); %m0/m2
+        out.Dp = Dp; 
         out.spread_Dp = spread_Dp; 
         out.spread=spread;
         out.spread_spec=spread1;
