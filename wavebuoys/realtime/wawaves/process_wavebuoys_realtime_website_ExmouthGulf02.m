@@ -22,8 +22,8 @@ buoy_info.sofar_token = 'f6c01b0c9712e04c7f5f9bcdb5b694';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'ExmouthGulf02';
 buoy_info.DeployDepth = 25;
-buoy_info.DeployLat = -21.801800;
-buoy_info.DeployLon = 114.265350; 
+buoy_info.DeployLat = -21.7997302;
+buoy_info.DeployLon = 114.266074;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
@@ -244,21 +244,4 @@ end
 
 %%
 % quit
-
-
-
-
-
-
-
-
-
-        
-
-        
-        
-       
-
-
-
 

@@ -29,7 +29,7 @@ buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or 
 buoy_info.archive_path = 'G:\wawaves';
 buoy_info.web_path = 'E:\wawaves';
 buoy_info.website_filename = 'buoys.csv'; 
-buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup';
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup\batch_file_test';
 buoy_info.backup_path2 = '\\drive.irds.uwa.edu.au\SEE-PNP-001\HANSEN_Albany_WaveEnergy_Feasibility_ongoing\Data\WaveBuoys\realtime_archive_backup';
 buoy_info.datawell_datapath = 'G:\waved'; %top level directory for Datawell CSVs
 
