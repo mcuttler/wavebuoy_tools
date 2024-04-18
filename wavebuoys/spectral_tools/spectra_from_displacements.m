@@ -23,7 +23,7 @@ function [out]=spectra_from_displacements(heave,north,east,nfft,nover,fs,merge,t
 %v2.0 MC 24 Apr 2023, modified to account for pressure + velocity (enu) or displacement(xyz) inputs 
 %v2.1 MC 5 April 2024, renamed and added to wave buoy tools 
 %v3 MC 16 April 2024, add functionality to do partitioning 
-%v3.1 17 April 2024 JEH remove patritioning - to be done in second function using output
+%v3.1 17 April 2024 JEH remove patritioning - to be done in second function 'spectral_partioning' using output
 %structure from this function 
 
 %%
