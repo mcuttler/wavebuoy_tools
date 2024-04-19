@@ -61,12 +61,12 @@ cnt=1;
 rw=[];
 for jj=1:windows
     ff=find(isnan([hv_segs(:,jj) ; nt_segs(:,jj) ; et_segs(:,jj)])); %combine heave, east, north into one and just look for any nans
-    %look for unrealistic values- compare individual segment values but
-    %those from the overall record- 
-    if ~isempty(ff) | max(heights_seg{jj})>3*Hs0  | max(periods_seg{jj})> 4*T0 | max(periods_seg{jj})> 30 %******* cut off values for unrealitic values- from Table3 in Adi's JTEC paper, but cahnge to 4*T0 and add > 30s
-        if max(heights)>3*Hs0
+    %look for unrealistic values- compare individual segment values but those from the overall record- 
+     %******* cut off values for unrealitic values- from Table3 in Adi's JTEC paper, but cahnge to 4*T0 and add > 30s
+    if ~isempty(ff) | max(heights_seg{jj})>info.hs0_thresh*Hs0  | max(periods_seg{jj})> info.t0_thresh*T0 | max(periods_seg{jj})> 30
+        if max(heights)>info.hs0_thresh*Hs0
             jj;
-        elseif max(periods)> 4*T0
+        elseif max(periods)> info.t0_thresh*T0
             jj;
         end            
         rw(cnt)=jj;
@@ -75,8 +75,10 @@ for jj=1:windows
 end
 
 
-%IF MORE THAN 2/3 OF SEGMENTS DON'T HAVE BAD DATA CONTINUE
-if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)<0.1)
+%SET THRESHOLD TO CONTINUE BASED ON 'BAD_DATA_THRESH'
+%Set percentage of windows that are bad data and will cause processing to
+%stop 
+if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heave==0))/length(heave)<0.1)
     
     if ~isempty(rw)
         hv_segs(:,rw) = [];  

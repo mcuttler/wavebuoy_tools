@@ -53,8 +53,8 @@ mdir1_Sea = mod(270-mdir1_Sea,360);
 mdir2_Sea = mod(270-mdir2_Sea,360); 
 
 %method following rogers and wang eq 7 - modify to specific partition 
-a1_bar=trapz(out.f(indSea),(a1(indSea).*S(indSea)))./trapz(out.f(indSea),S(indSea));
-b1_bar=trapz(out.f(indSea),(b1(indSea).*S(indSea)))./trapz(out.f(indSea),S(indSea));
+a1_bar=trapz(out.f(indSea),(out.a1(indSea).*out.spec1D(indSea)))./trapz(out.f(indSea),out.spec1D(indSea));
+b1_bar=trapz(out.f(indSea),(out.b1(indSea).*out.spec1D(indSea)))./trapz(out.f(indSea),out.spec1D(indSea));
 spreadSea=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
 
 
@@ -96,8 +96,8 @@ mdir1_SS = mod(270-mdir1_SS,360);
 mdir2_SS = mod(270-mdir2_SS,360); 
 
 %method following rogers and wang eq 7 - modify to specific partition 
-a1_bar=trapz(out.f,(a1(indSS).*S(indSS)))./trapz(out.f(indSS),S(indSS));
-b1_bar=trapz(out.f,(b1(indSS).*S(indSS)))./trapz(out.f(indSS),S(indSS));
+a1_bar=trapz(out.f(indSS),(out.a1(indSS).*out.spec1D(indSS)))./trapz(out.f(indSS),out.spec1D(indSS));
+b1_bar=trapz(out.f(indSS),(out.b1(indSS).*out.spec1D(indSS)))./trapz(out.f(indSS),out.spec1D(indSS));
 spreadSS=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
 
 %calcualte moments of spectrum - swell         
@@ -140,8 +140,8 @@ if isfield(info,'fminIG')
     mdir2_IG = mod(270-mdir2_IG,360);
 
     %method following rogers and wang eq 7 - modify to specific partition 
-    a1_bar=trapz(out.f,(a1(indIG).*S(indIG)))./trapz(out.f(indIG),S(indIG));
-    b1_bar=trapz(out.f,(b1(indIG).*S(indIG)))./trapz(out.f(indIG),S(indIG));
+    a1_bar=trapz(out.f(indIG),(out.a1(indIG).*out.spec1D(indIG)))./trapz(out.f(indIG),out.spec1D(indIG));
+    b1_bar=trapz(out.f(indIG),(out.b1(indIG).*out.spec1D(indIG)))./trapz(out.f(indIG),out.spec1D(indIG));
     spreadIG=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
 
     %calcualte moments of spectrum - IG          
