@@ -222,8 +222,13 @@ if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)
     spread_Dp = rad2deg(sqrt(2*(1-sqrt(a1(ff).^2+ b1(ff).^2)))); 
      
     %spreading values
-    spread=rad2deg(sqrt(2*(1-sqrt(trapz(freq,a1).^2+trapz(freq,b1).^2)))); %mean, I think 
+    %spread=rad2deg(sqrt(2*(1-sqrt(trapz(freq,a1).^2+trapz(freq,b1).^2)))); %mean, I think 
    
+    %method following rogers and wang eq 7
+    a1_bar=trapz(freq,(a1.*S))./trapz(freq,S);
+    b1_bar=trapz(freq,(b1.*S))./trapz(freq,S);
+    spread=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
+
 
    %CALCUALTE WAVE PARAMETERS AND ORGANIZE OUTPUT
     if strcmp(type,'xyz') %xyz = displacements
