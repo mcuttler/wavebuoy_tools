@@ -30,6 +30,8 @@ function [out]=spectra_partitioning(out,info)
 %middle of bins. See code below to see usage of > vs >= and < vs <=
 %
 %v1.0 JEH April 2024
+%v1.1 MC April 2024 - modify spreading to match Rogers and Wang (equation
+%7) 
 
 
 
@@ -49,7 +51,12 @@ mdir2_Sea = rad2deg(atan2(nansum(out.spec1D(indSea).*out.b2(indSea)),nansum(out.
 %rotate in WAVES FROM
 mdir1_Sea = mod(270-mdir1_Sea,360); 
 mdir2_Sea = mod(270-mdir2_Sea,360); 
-spreadSea = rad2deg(sqrt(2*(1-sqrt(trapz(out.f(indSea),out.a1(indSea)).^2+trapz(out.f(indSea),out.b1(indSea)).^2)))); 
+
+%method following rogers and wang eq 7 - modify to specific partition 
+a1_bar=trapz(freq,(a1(indSea).*S(indSea)))./trapz(freq(indSea),S(indSea));
+b1_bar=trapz(freq,(b1(indSea).*S(indSea)))./trapz(freq(indSea),S(indSea));
+spreadSea=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
+
 
 %calcualte moments of spectrum - sea         
 n=0:3;
@@ -87,7 +94,11 @@ mdir2_SS = rad2deg(atan2(nansum(out.spec1D(indSS).*out.b2(indSS)),nansum(out.spe
 %rotate in WAVES FROM
 mdir1_SS = mod(270-mdir1_SS,360); 
 mdir2_SS = mod(270-mdir2_SS,360); 
-spreadSS = rad2deg(sqrt(2*(1-sqrt(trapz(out.f(indSS),out.a1(indSS)).^2+trapz(out.f(indSS),out.b1(indSS)).^2)))); 
+
+%method following rogers and wang eq 7 - modify to specific partition 
+a1_bar=trapz(freq,(a1(indSS).*S(indSS)))./trapz(freq(indSS),S(indSS));
+b1_bar=trapz(freq,(b1(indSS).*S(indSS)))./trapz(freq(indSS),S(indSS));
+spreadSS=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
 
 %calcualte moments of spectrum - swell         
 n=0:3;
@@ -127,8 +138,11 @@ if isfield(info,'fminIG')
     %rotate in WAVES FROM
     mdir1_IG = mod(270-mdir1_IG,360); 
     mdir2_IG = mod(270-mdir2_IG,360);
-    spreadIG = rad2deg(sqrt(2*(1-sqrt(trapz(out.f(indIG),out.a1(indIG)).^2+trapz(out.f(indIG),out.b1(indIG)).^2)))); 
 
+    %method following rogers and wang eq 7 - modify to specific partition 
+    a1_bar=trapz(freq,(a1(indIG).*S(indIG)))./trapz(freq(indIG),S(indIG));
+    b1_bar=trapz(freq,(b1(indIG).*S(indIG)))./trapz(freq(indIG),S(indIG));
+    spreadIG=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
 
     %calcualte moments of spectrum - IG          
     n=0:3;

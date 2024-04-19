@@ -25,6 +25,8 @@ function [out]=spectra_from_displacements(heave,north,east,nfft,nover,fs,merge,t
 %v3 MC 16 April 2024, add functionality to do partitioning 
 %v3.1 17 April 2024 JEH remove patritioning - to be done in second function 'spectral_partioning' using output
 %structure from this function 
+%v3.2 19 April 2024 JEH/MC - modify mean spreading calculation to match
+%Rogers and Wang 2007 
 
 %%
 
@@ -219,10 +221,7 @@ if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)
     Tp=1./freq(ff);            
     Dp = rad2deg(atan2(b1(ff),a1(ff)));  
     Dp = mod(270 - Dp,360); 
-    spread_Dp = rad2deg(sqrt(2*(1-sqrt(a1(ff).^2+ b1(ff).^2)))); 
-     
-    %spreading values
-    %spread=rad2deg(sqrt(2*(1-sqrt(trapz(freq,a1).^2+trapz(freq,b1).^2)))); %mean, I think 
+    spread_Dp = rad2deg(sqrt(2*(1-sqrt(a1(ff).^2+ b1(ff).^2))));      
    
     %method following rogers and wang eq 7
     a1_bar=trapz(freq,(a1.*S))./trapz(freq,S);
