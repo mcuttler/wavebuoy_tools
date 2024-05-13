@@ -34,6 +34,8 @@ buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Dat
 buoy_info.datawell_datapath = 'E:\waved'; %top  level directory for Datawell CSVs
 buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
+buoy_info.V_min=4; % minimum voltage before email alert is sent out
+buoy_info.Humid_max = 50; % Max Humidity before an email alert is sent out
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
