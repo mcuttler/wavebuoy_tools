@@ -1,39 +1,39 @@
 %%  Process wave buoys (real time) for display on wawaves.org
 
 %% set initial paths for wave buoy data to process and parser script
-clear; clc
-
-%location of wavebuoy_tools repo
-% buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
-% addpath(genpath(buoycodes))
-
-%buoy type and deployment info number and deployment info 
-%buoy type and deployment info number and deployment info 
-buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31395C'; %spotter serial number, or just Datawell 
-buoy_info.name = 'OceanBeach'; 
-buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
-buoy_info.processingSource = 'hdr'; %for new Spotters, this can be: embedded, HDR, or all
-buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
-buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'OceanBeach';
-buoy_info.DeployDepth = 38; 
-buoy_info.DeployLat = -35.0484167; 
-buoy_info.DeployLon = 117.3646833; 
-buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.web_path = 'E:\wawaves';
-buoy_info.archive_path = 'G:\wawaves'; 
-buoy_info.website_filename = 'buoys.csv'; 
-buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
-buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-buoy_info.time_cutoff = 3; %hours
-buoy_info.search_rad = 190; %meters for watch circle radius 
+% clear; clc
+% 
+% %location of wavebuoy_tools repo
+% % buoycodes = 'C:\Data\wavebuoy_tools\wavebuoys'; 
+% % addpath(genpath(buoycodes))
+% 
+% %buoy type and deployment info number and deployment info 
+% %buoy type and deployment info number and deployment info 
+% buoy_info.type = 'sofar'; 
+% buoy_info.serial = 'SPOT-31395C'; %spotter serial number, or just Datawell 
+% buoy_info.name = 'OceanBeach'; 
+% buoy_info.datawell_name = 'nan'; 
+% buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
+% buoy_info.processingSource = 'hdr'; %for new Spotters, this can be: embedded, HDR, or all
+% buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
+% buoy_info.utc_offset = 8; 
+% buoy_info.DeployLoc = 'OceanBeach';
+% buoy_info.DeployDepth = 38; 
+% buoy_info.DeployLat = -35.0484167; 
+% buoy_info.DeployLon = 117.3646833; 
+% buoy_info.UpdateTime =  1; %hours
+% buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+% buoy_info.web_path = 'E:\wawaves';
+% buoy_info.archive_path = 'G:\wawaves'; 
+% buoy_info.website_filename = 'buoys.csv'; 
+% buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
+% buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
+% buoy_info.time_cutoff = 3; %hours
+% buoy_info.search_rad = 190; %meters for watch circle radius 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 %% process realtime mode data
-function [log
+function [] = batch_realtime(buoy_info)
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
@@ -207,6 +207,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
 elseif strcmp(buoy_info.type,'triaxys')
     disp('No Triaxys code yet'); 
 end
+end
+
 
 %%
 % quit
