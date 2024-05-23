@@ -1,15 +1,29 @@
 %% run batch process
 
+%add wavebuoy_tools to path 
+addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
+
+%suppress warnings
+warning('off')
+
 %read in metadata for buoys to run
-dpath = 'C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\realtime'; 
+dpath = 'D:\wawaves_testing\local'; 
 dname = 'buoys_metadata.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
 %create log file for this run
-log_path = dpath; %modify this in future `
-log_name = ['buoys_log_file_' datestr(now,'yyyymmdd_HHMMSS') '.log']; 
-fid = fopen(fullfile(log_path,log_name),'a'); 
+log_path = 'D:\wawaves_testing\local\log_files'; %modify this in future
+
+if ~isfolder(fullfile(log_path, num2str(year(datetime("today"))), num2str(month(datetime("today")),'%02d'), num2str(day(datetime("today")),'%02d'))) 
+    mkdir(fullfile(log_path, num2str(year(datetime("today"))), num2str(month(datetime("today")),'%02d'), num2str(day(datetime("today")),'%02d')))
+    log_path = fullfile(log_path, num2str(year(datetime("today"))), num2str(month(datetime("today")),'%02d'), num2str(day(datetime("today")),'%02d')); 
+else
+    log_path = fullfile(log_path, num2str(year(datetime("today"))), num2str(month(datetime("today")),'%02d'), num2str(day(datetime("today")),'%02d')); 
+end
+
+log_name = ['log_file_' datestr(now,'yyyymmdd_HHMMSS') '.log']; 
+flog = fopen(fullfile(log_path,log_name),'a'); 
 
 % loop over buoys and execute 
 for jj = 1:size(buoy_metadata)
@@ -19,17 +33,20 @@ for jj = 1:size(buoy_metadata)
         if iscell(buoy_metadata.(buoy_info_fields{kk}))
             buoy_info.(buoy_info_fields{kk}) = buoy_metadata.(buoy_info_fields{kk}){jj};
         else
-            buoy_info.(buoy_info_fields{kk}) = buoy_metadata.(buoy_info_fields{kk}); 
+            buoy_info.(buoy_info_fields{kk}) = buoy_metadata.(buoy_info_fields{kk})(jj);  
         end
     end
     
     %run the realtime workflow 
+    disp(['running ' buoy_info.name]); %comment out when running for real 
     try
-        batch_realtime(buoy_info); 
-    catch
+        [log_message] = batch_realtime(buoy_info); 
+    catch   
+        disp([buoy_info.name ' could not be completed \n']); %comment out when running for real 
         %add message to log if a buoy fails 
-        fprintf(fid, [buoy_info.name ' could not be completed \n']); 
+        fprintf(flog, [buoy_info.name ': ' log_message ' \n']); 
     end
+    clear buoy_info 
 end
 
-fclose(fid);
+fclose(flog);

@@ -130,6 +130,8 @@ if strcmp(buoy_info.type,'sofar')==1
                     end
                 end                             
                 clear ff idx_w idx_t f idx_p idx_pstd  
+                
+                
                 if SpotData.time(1)>archive_data.time(end)
                     %perform some QA/QC --- QARTOD 19 and QARTOD 20        
                     [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                        
