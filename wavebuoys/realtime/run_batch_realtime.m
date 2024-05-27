@@ -38,12 +38,13 @@ for jj = 1:size(buoy_metadata)
     end
     
     %run the realtime workflow 
-    disp(['running ' buoy_info.name]); %comment out when running for real 
+%     disp(['running ' buoy_info.name]); %comment out when running for real 
     try
         [log_message] = batch_realtime(buoy_info); 
     catch   
-        disp([buoy_info.name ' could not be completed \n']); %comment out when running for real 
+%         disp([buoy_info.name ' could not be completed \n']); %comment out when running for real 
         %add message to log if a buoy fails 
+        log_message = 'code failed for reason unrelated to getting data'; 
         fprintf(flog, [buoy_info.name ': ' log_message ' \n']); 
     end
     clear buoy_info 
