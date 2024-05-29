@@ -1,10 +1,10 @@
 %% run batch process
 
 %add wavebuoy_tools to path 
-addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
+% addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
 
 %suppress warnings
-warning('off')
+% warning('off')
 
 %read in metadata for buoys to run
 dpath = 'D:\wawaves_testing\local'; 
