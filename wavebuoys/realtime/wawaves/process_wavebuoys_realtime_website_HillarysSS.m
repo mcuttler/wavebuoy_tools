@@ -14,29 +14,26 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31400C'; %spotter serial number, or just Datawell 
-buoy_info.name = 'KingGeorgeSound'; 
+buoy_info.serial = 'SPOT-31396C'; %spotter serial number, or just Datawell 
+buoy_info.name = 'HillarysSS'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
+buoy_info.processingSource = 'all'; %for new Spotters, this can be: embedded, HDR, or all
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'KingGeorgeSound';
-buoy_info.DeployDepth = 15; 
-buoy_info.DeployLat = -35.0797333; 
-buoy_info.DeployLon = 117.9779167; 
+buoy_info.DeployLoc = 'HillarysSS';
+buoy_info.DeployDepth = 29; 
+buoy_info.DeployLat = -31.84738; 
+buoy_info.DeployLon = 115.64640; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
 buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
-buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-%data for search radius and alert
+buoy_info.datawell_datapath = 'E:\waved'; %top  level directory for Datawell CSVs
 buoy_info.time_cutoff = 3; %hours
-buoy_info.search_rad = 190; %meters for watch circle radius
-buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
-buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
-
+buoy_info.search_rad = 190; %meters for watch circle radius 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
@@ -63,7 +60,6 @@ if strcmp(buoy_info.type,'sofar')==1
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
-        [warning2] = spotter_buoy_volt_humid_alert(buoy_info);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
@@ -114,11 +110,15 @@ if strcmp(buoy_info.type,'sofar')==1
                     realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
                     %output MEM and SST plots --- only most recent time
                     %point 
-                    if strcmp(buoy_info.DataType,'spectral')                        
-                        [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
-                            SpotData.b2(end,:),SpotData.varianceDensity(end,:));
-                        make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
-                            SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)        
+                    if strcmp(buoy_info.DataType,'spectral')
+                        try
+                            [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
+                                SpotData.b2(end,:),SpotData.varianceDensity(end,:));
+                            make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
+                                SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info) 
+                        catch
+                            disp('failed to make MEM - probably no HDR data');                             
+                        end
                     end
                     
                     %code to update the buoy info master file for website to read
@@ -136,11 +136,15 @@ if strcmp(buoy_info.type,'sofar')==1
             realtime_archive_text(buoy_info, SpotData, size(SpotData.time,1)); 
             
             %output MEM and SST plots 
-            if strcmp(buoy_info.DataType,'spectral')        
-                [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
-                    SpotData.b2(end,:),SpotData.varianceDensity(end,:));
-                make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
-                    SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)      
+            if strcmp(buoy_info.DataType,'spectral')   
+                try
+                    [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
+                        SpotData.b2(end,:),SpotData.varianceDensity(end,:));
+                    make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
+                        SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)      
+                catch
+                    disp('faild to make MEM'); 
+                end
             end
             
             %code to update the buoy info master file for website to read
@@ -219,8 +223,6 @@ end
 
 %%
 % quit
-
-
 
 
 

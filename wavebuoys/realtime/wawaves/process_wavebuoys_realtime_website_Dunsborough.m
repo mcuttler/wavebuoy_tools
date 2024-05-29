@@ -5,6 +5,11 @@
 %AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
 %UWA token: e0eb70b6d9e0b5e00450929139ea34
 
+%Shore Coastal Token: dc6f3f68c52e2fa8127488f9ad947d
+
+% Note 'Dunsborough', 'Abbey' and 'Busselton jetty' run by shore coastal.
+% Asked to put on our site 2024/05/01
+
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
 
@@ -14,29 +19,28 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31400C'; %spotter serial number, or just Datawell 
-buoy_info.name = 'KingGeorgeSound'; 
+buoy_info.serial = 'SPOT-30192R'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Dunsborough'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
-buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
+buoy_info.processingSource = 'all'; %for new Spotters, this can be: embedded, HDR, or all
+buoy_info.sofar_token = 'dc6f3f68c52e2fa8127488f9ad947d'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'KingGeorgeSound';
-buoy_info.DeployDepth = 15; 
-buoy_info.DeployLat = -35.0797333; 
-buoy_info.DeployLon = 117.9779167; 
+buoy_info.DeployLoc = 'Dunsborough';
+buoy_info.DeployDepth = 12; 
+%note depth estimate taken from nautical chart for Busselton Jetty, Abbey and
+%Dunsborough
+buoy_info.DeployLat = -33.59128;
+buoy_info.DeployLon = 115.11575;
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
 buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
-%data for search radius and alert
 buoy_info.time_cutoff = 3; %hours
-buoy_info.search_rad = 190; %meters for watch circle radius
-buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
-buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
-
+buoy_info.search_rad = 190; %meters for watch circle radius 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
@@ -63,7 +67,6 @@ if strcmp(buoy_info.type,'sofar')==1
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
-        [warning2] = spotter_buoy_volt_humid_alert(buoy_info);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
@@ -219,8 +222,6 @@ end
 
 %%
 % quit
-
-
 
 
 

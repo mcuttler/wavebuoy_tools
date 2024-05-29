@@ -14,11 +14,11 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31131C'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-30819C'; %spotter serial number, or just Datawell 
 buoy_info.name = 'JurienBayInshore'; 
-buoy_info.datawell_name = 'nan'; 
+buoy_info.datawell_name = 'nan';
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
-buoy_info.sofar_token = 'f6c01b0c9712e04c7f5f9bcdb5b694'; 
+buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'JurienBayInshore';
 buoy_info.DeployDepth = 25;
@@ -34,6 +34,9 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 %data for search radius and alert
 buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 100; %meters for watch circle radius 
+buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
+buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
+
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
@@ -60,6 +63,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning2] = spotter_buoy_volt_humid_alert(buoy_info);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         

@@ -27,13 +27,15 @@ buoy_info.DeployLat = -35.06819;
 buoy_info.DeployLon = 117.76826; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.web_path = 'E:\wawaves\batch_file_test';
-buoy_info.archive_path = 'G:\wawaves\batch_file_test'; 
+buoy_info.web_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
-buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup\batch_file_test'; 
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top  level directory for Datawell CSVs
 buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
+buoy_info.V_min=4; % minimum voltage before email alert is sent out
+buoy_info.Humid_max = 50; % Max Humidity before an email alert is sent out
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
@@ -60,6 +62,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning2] = spotter_buoy_volt_humid_alert(buoy_info);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         if all(check)~=0        
