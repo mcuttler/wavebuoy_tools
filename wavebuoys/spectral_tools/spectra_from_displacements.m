@@ -23,8 +23,10 @@ function [out]=spectra_from_displacements(heave,north,east,nfft,nover,fs,merge,t
 %v2.0 MC 24 Apr 2023, modified to account for pressure + velocity (enu) or displacement(xyz) inputs 
 %v2.1 MC 5 April 2024, renamed and added to wave buoy tools 
 %v3 MC 16 April 2024, add functionality to do partitioning 
-%v3.1 17 April 2024 JEH remove patritioning - to be done in second function using output
+%v3.1 17 April 2024 JEH remove patritioning - to be done in second function 'spectral_partioning' using output
 %structure from this function 
+%v3.2 19 April 2024 JEH/MC - modify mean spreading calculation to match
+%Rogers and Wang 2007 
 
 %%
 
@@ -59,12 +61,12 @@ cnt=1;
 rw=[];
 for jj=1:windows
     ff=find(isnan([hv_segs(:,jj) ; nt_segs(:,jj) ; et_segs(:,jj)])); %combine heave, east, north into one and just look for any nans
-    %look for unrealistic values- compare individual segment values but
-    %those from the overall record- 
-    if ~isempty(ff) | max(heights_seg{jj})>3*Hs0  | max(periods_seg{jj})> 4*T0 | max(periods_seg{jj})> 30 %******* cut off values for unrealitic values- from Table3 in Adi's JTEC paper, but cahnge to 4*T0 and add > 30s
-        if max(heights)>3*Hs0
+    %look for unrealistic values- compare individual segment values but those from the overall record- 
+     %******* cut off values for unrealitic values- from Table3 in Adi's JTEC paper, but cahnge to 4*T0 and add > 30s
+    if ~isempty(ff) | max(heights_seg{jj})>info.hs0_thresh*Hs0  | max(periods_seg{jj})> info.t0_thresh*T0 | max(periods_seg{jj})> 30
+        if max(heights)>info.hs0_thresh*Hs0
             jj;
-        elseif max(periods)> 4*T0
+        elseif max(periods)> info.t0_thresh*T0
             jj;
         end            
         rw(cnt)=jj;
@@ -73,8 +75,10 @@ for jj=1:windows
 end
 
 
-%IF MORE THAN 2/3 OF SEGMENTS DON'T HAVE BAD DATA CONTINUE
-if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)<0.1)
+%SET THRESHOLD TO CONTINUE BASED ON 'BAD_DATA_THRESH'
+%Set percentage of windows that are bad data and will cause processing to
+%stop 
+if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heave==0))/length(heave)<0.1)
     
     if ~isempty(rw)
         hv_segs(:,rw) = [];  
@@ -219,11 +223,13 @@ if isempty(rw) | (length(rw)<windows*0.33 & length(find(heave==0))/length(heave)
     Tp=1./freq(ff);            
     Dp = rad2deg(atan2(b1(ff),a1(ff)));  
     Dp = mod(270 - Dp,360); 
-    spread_Dp = rad2deg(sqrt(2*(1-sqrt(a1(ff).^2+ b1(ff).^2)))); 
-     
-    %spreading values
-    spread=rad2deg(sqrt(2*(1-sqrt(trapz(freq,a1).^2+trapz(freq,b1).^2)))); %mean, I think 
+    spread_Dp = rad2deg(sqrt(2*(1-sqrt(a1(ff).^2+ b1(ff).^2))));      
    
+    %method following rogers and wang eq 7
+    a1_bar=trapz(freq,(a1.*S))./trapz(freq,S);
+    b1_bar=trapz(freq,(b1.*S))./trapz(freq,S);
+    spread=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
+
 
    %CALCUALTE WAVE PARAMETERS AND ORGANIZE OUTPUT
     if strcmp(type,'xyz') %xyz = displacements

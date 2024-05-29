@@ -28,7 +28,7 @@ if ~isempty(files)
         dum = dum(:,1:5); 
         dum.Properties.VariableNames = {'millis','GPSEpoch','x','y','z'};  
         
-        dt = datetime(dum.GPSEpoch,'convertfrom','posixtime') + seconds(dum.millis./1000);     
+        dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
         dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,'RowTimes',dt,'VariableNames',{'x','y','z'});  
         if i == 1
             displacements = dumt; 

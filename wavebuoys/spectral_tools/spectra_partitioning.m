@@ -1,15 +1,16 @@
 function [out]=spectra_partitioning(out,info)
 %
 %Take output structure from spectra_from_displacements function and
-%calcualte partitioned Sea and Swell and IG as option bulk parameters
+%calcualte partitioned Sea and Swell and IG bulk parameters
 %requires info structure as input as 
 %  info.fminIG = 1/300; 
 %  info.fminSS = 1/25; Swell min
 %  info.fmaxSS = 1/8; %Sea/swell cuoff
 %  info.fmaxSea = 1/2;     
 % if no calcualtion of IG is desired do not include info.fminIG as a field
-% in the input structure you can also omit fminSS (swell min) and fmaxSea
-% (sea max out.fuency) as options
+% in the input structure. You can also omit fminSS (swell min) and fmaxSea
+% (sea max frequency). If only info.fmaxSS is provided the code will use a
+% single cutoff to define sea/swell
 %
 %the out structure provided as an input must include:
 %out.S  the 1D spectrum
@@ -23,10 +24,14 @@ function [out]=spectra_partitioning(out,info)
 %variables.
 %
 %****NOTE: attention should be paid to alignment between the input
-%out.fuency vector and cut off out.fuencies (e.g. between sea and swell
+%out.frequency vector and cut off frequencies (e.g. between sea and swell
 %bands) in some cases it may be best to interpolate the spectrum to higher
-%resolution out.fuenies to ensure the cut off out.fuencies do not fall in the
+%resolution frequency bins to ensure the cut off frequencies do not fall in the
 %middle of bins. See code below to see usage of > vs >= and < vs <=
+%
+%v1.0 JEH April 2024
+%v1.1 MC April 2024 - modify spreading to match Rogers and Wang (equation
+%7) 
 
 
 
@@ -46,7 +51,12 @@ mdir2_Sea = rad2deg(atan2(nansum(out.spec1D(indSea).*out.b2(indSea)),nansum(out.
 %rotate in WAVES FROM
 mdir1_Sea = mod(270-mdir1_Sea,360); 
 mdir2_Sea = mod(270-mdir2_Sea,360); 
-spreadSea = rad2deg(sqrt(2*(1-sqrt(trapz(out.f(indSea),out.a1(indSea)).^2+trapz(out.f(indSea),out.b1(indSea)).^2)))); 
+
+%method following rogers and wang eq 7 - modify to specific partition 
+a1_bar=trapz(out.f(indSea),(out.a1(indSea).*out.spec1D(indSea)))./trapz(out.f(indSea),out.spec1D(indSea));
+b1_bar=trapz(out.f(indSea),(out.b1(indSea).*out.spec1D(indSea)))./trapz(out.f(indSea),out.spec1D(indSea));
+spreadSea=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
+
 
 %calcualte moments of spectrum - sea         
 n=0:3;
@@ -84,7 +94,11 @@ mdir2_SS = rad2deg(atan2(nansum(out.spec1D(indSS).*out.b2(indSS)),nansum(out.spe
 %rotate in WAVES FROM
 mdir1_SS = mod(270-mdir1_SS,360); 
 mdir2_SS = mod(270-mdir2_SS,360); 
-spreadSS = rad2deg(sqrt(2*(1-sqrt(trapz(out.f(indSS),out.a1(indSS)).^2+trapz(out.f(indSS),out.b1(indSS)).^2)))); 
+
+%method following rogers and wang eq 7 - modify to specific partition 
+a1_bar=trapz(out.f(indSS),(out.a1(indSS).*out.spec1D(indSS)))./trapz(out.f(indSS),out.spec1D(indSS));
+b1_bar=trapz(out.f(indSS),(out.b1(indSS).*out.spec1D(indSS)))./trapz(out.f(indSS),out.spec1D(indSS));
+spreadSS=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
 
 %calcualte moments of spectrum - swell         
 n=0:3;
@@ -124,8 +138,11 @@ if isfield(info,'fminIG')
     %rotate in WAVES FROM
     mdir1_IG = mod(270-mdir1_IG,360); 
     mdir2_IG = mod(270-mdir2_IG,360);
-    spreadIG = rad2deg(sqrt(2*(1-sqrt(trapz(out.f(indIG),out.a1(indIG)).^2+trapz(out.f(indIG),out.b1(indIG)).^2)))); 
 
+    %method following rogers and wang eq 7 - modify to specific partition 
+    a1_bar=trapz(out.f(indIG),(out.a1(indIG).*out.spec1D(indIG)))./trapz(out.f(indIG),out.spec1D(indIG));
+    b1_bar=trapz(out.f(indIG),(out.b1(indIG).*out.spec1D(indIG)))./trapz(out.f(indIG),out.spec1D(indIG));
+    spreadIG=(180/pi)*(2*(1-(a1_bar^2+b1_bar^2)^0.5))^0.5;
 
     %calcualte moments of spectrum - IG          
     n=0:3;

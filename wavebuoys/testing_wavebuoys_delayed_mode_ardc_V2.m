@@ -11,13 +11,13 @@
 %% set initial paths for Spotter data to process and parser script
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
 
 %% General attributes
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is with the Parser output csv's, or upper directory for Datawells
-buoy_info.datapath = 'J:\CUTTLER_wawaves\Data\wawaves\YanchepLagoon\delayedmode\20231129_to_20240124_dep01_YanchepLagoon_SPOT30815C'; 
+buoy_info.datapath = 'F:\WannerooDEP01\YanchepLagoon\delayedmode\20231129_to_20240124_dep01_YanchepLagoon_SPOT30815C'; 
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; %datawell or sofar
@@ -26,8 +26,8 @@ buoy_info.instrument = 'Sofar Spotter-V3'; %Datawell DWR Mk4; Sofar Spotter-V2 (
 buoy_info.mooring_type = 'single catenary'; % e.g. smart mooring, single catenary, double catenary, other.
 buoy_info.site_name = 'YANCHEP-LAGOON'; %needs to be capital; if multiple part name, separate with dash (i.e. GOODRICH-BANK)
 buoy_info.DeployDepth = 10; 
-buoy_info.startdate = datenum(2023,11,25); % gets calculated and updated in processing
-buoy_info.enddate = datenum(2024,1,24);  % gets calculated and updated in processing
+buoy_info.startdate = datenum(2023,11,25); % placeholder now, gets calculated and updated in processing
+buoy_info.enddate = datenum(2025,1,24);  % placeholder now, gets calculated and updated in processing
 buoy_info.timezone = 8; %signed integer for UTC offset 
 % use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % (MH 20221209 no mag dec for spotters because their direction is relative
@@ -36,7 +36,7 @@ buoy_info.MagDec = 0;
 buoy_info.watch_circle = 1; %radius of watch circle in meters get calculated and updated in processing; 
 
 %inputs for IMOS-ARDC filename structure
-buoy_info.archive_path = 'F:\wawaves\SharkBay\delayedmode\ProcessedData_DelayedMode\dep01';
+buoy_info.archive_path = 'F:\WannerooDEP01\YanchepLagoon\delayedmode\ProcessedData_DelayedMode\dep01';
 %additional attributes for IMOS netCDF
 % wording for project UWA: "UWA Nearshore wave buoy program (- IMOS NTP)"
 % VIC: "VIC-DEAKIN-UNI Nearshore wave buoy program (- IMOS NTP)"
@@ -69,7 +69,8 @@ if strcmp(buoy_info.type,'sofar')==1
     %     [bulkparams, locations, spec, displacements, sst] = read_parser_results_V2(buoy_info.datapath);
     % elseif strcmp(buoy_info.instrument, 'Sofar Spotter-V1')
     %     [bulkparams, locations, spec, displacements] = read_parser_results_V2(buoy_info.datapath);
-    % end    
+    % end  
+   
  [displacements, surface_temp, baro, gps, smart_mooring] = process_sofar_SD_card(buoy_info.datapath); 
 
  %calculate bulkparameters from displacements 
