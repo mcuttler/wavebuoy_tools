@@ -180,6 +180,17 @@ if isfield(resp.Body.Data.data,'frequencyData')
         Spotter.directionalSpread(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).directionalSpread';
         Spotter.direction(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).direction';
     end
+else
+    Spotter.spec_time = Spotter.time;
+    Spotter.a1 = ones(size(Spotter.time,1),79).*-9999; 
+    Spotter.a2 = ones(size(Spotter.time,1),79).*-9999; 
+    Spotter.b1 = ones(size(Spotter.time,1),79).*-9999; 
+    Spotter.b2 = ones(size(Spotter.time,1),79).*-9999; 
+    Spotter.varianceDensity = ones(size(Spotter.time,1),79).*-9999; 
+    Spotter.frequency = ones(size(Spotter.time,1),79).*-9999; 
+    Spotter.df = ones(size(Spotter.time,1),79).*-9999; 
+    Spotter.directionalSpread = ones(size(Spotter.time,1),79).*-9999; 
+    Spotter.direction = ones(size(Spotter.time,1),79).*-9999; 
 end
 
 %% PARTITIONED WAVE DATA 
@@ -218,14 +229,23 @@ if isfield(resp.Body.Data.data,'partitionData')
         Spotter.dmspr_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).meanDirectionalSpread;
         Spotter.dmspr_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).meanDirectionalSpread;
     end
+else
+    Spotter.part_time = Spotter.time; 
+    Spotter.startFreq_swell = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.endFreq_swell = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.startFreq_sea = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.endFreq_sea = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.hsig_swell = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.hsig_sea = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.tm_swell = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.tm_sea = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.dm_swell = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.dm_sea = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.dmspr_swell = ones(size(Spotter.time,1)).*-9999; 
+    Spotter.dmspr_sea = ones(size(Spotter.time,1)).*-9999; 
 end
 
-
-%% TEMPERATURE
-%check for temperature data
-%assume surface and bottom sensor   
-%check for temperature data
-%assume surface and bottom sensor   
+%% SMART MOORING vs SPOTTER TEMPERAUTRE AND PRESSURE
 Spotter.temp_time = []; 
 Spotter.surf_temp = []; 
 Spotter.bott_temp = []; 
@@ -234,7 +254,43 @@ Spotter.pressure_std = [];
 Spotter.press_time = []; 
 Spotter.press_std_time=[]; 
 
-if ~isempty(resp_sensor.Body.Data.data)    
+%Spotter
+if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfaceTemp)
+    %isolate HDR and embedded 
+    indHDR = []; 
+    indEmbedded = []; 
+    for j = 1:size(resp.Body.Data.data.surfaceTemp)
+        if strcmp(resp.Body.Data.data.surfaceTemp(j).processing_source,'hdr')
+            indHDR = [indHDR; j]; 
+        elseif strcmp(resp.Body.Data.data.surfaceTemp(j).processing_source,'embedded')
+            indEmbedded = [indEmbedded;j]; 
+        end
+    end    
+    
+    %use HDR if available 
+    if ~isempty(indHDR)
+        indTemp = indHDR; 
+    else
+        indTemp = indEmbedded; 
+    end
+    
+    for j = 1:size(indTemp,1)
+            Spotter.surf_temp(j,1) = resp.Body.Data.data.surfaceTemp(indTemp(j)).degrees;
+            Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(indTemp(j)).timestamp,'yyyy-mm-ddTHH:MM:SS');
+    end
+    
+    %check for bottom temperature data
+    if isfield(resp.Body.Data.data,'bottomTemp')
+        for j = 1:size(indTemp)
+            Spotter.bott_temp(j,1) = resp.Body.Data.data.bottomTemp(indTemp(j)).degrees;
+        end
+    else
+        for j = 1:size(indTemp)
+            Spotter.bott_temp(j,1)= -9999; 
+        end
+    end
+ %smart mooring
+elseif ~isempty(resp_sensor.Body.Data.data)    
     for j = 1:size(resp_sensor.Body.Data.data,1)
         if strcmp(resp_sensor.Body.Data.data(j).unit_type,'temperature')
             if resp_sensor.Body.Data.data(j).sensorPosition==1
@@ -268,9 +324,9 @@ if ~isempty(resp_sensor.Body.Data.data)
             end
         end
     end
-%if no sensor data, act like normal wave buoy
+    %if no sensor data, act like normal wave buoy
 else
-    Spotter.temp_time = Spotter.time; 
+    Spotter.temp_time = Spotter.time;
     Spotter.press_time = Spotter.time;
     Spotter.press_std_time = Spotter.time;
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
@@ -278,6 +334,7 @@ else
     Spotter.pressure = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure_std =ones(size(Spotter.time,1),1).*-9999; 
 end        
+%% Check and fill variables when empty
 
 %check temperature 
 if isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
@@ -296,7 +353,6 @@ if isempty(Spotter.pressure)&&isempty(Spotter.pressure_std)
     Spotter.pressure_std = ones(size(Spotter.time,1),1).*-9999; 
 end
 
-        
 
 
 %% check that mooring data has correc time stamps to continue
