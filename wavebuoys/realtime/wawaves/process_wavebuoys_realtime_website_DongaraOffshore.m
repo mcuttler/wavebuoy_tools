@@ -43,16 +43,9 @@ buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
 
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
-    %check whether smart mooring or normal mooring
-    if contains(buoy_info.version,'smart_mooring')
-        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime_v2(buoy_info,limit);
-        flag = 1; %ignore flag in Smart mooring code 
-    else
-        limit = buoy_info.UpdateTime*2; %not used in v2 code
-        [SpotData] = Get_Spoondrift_Data_realtime_v2(buoy_info, limit);         
-        flag = 1;                  
-    end  
+    limit = buoy_info.UpdateTime*2; %not used in v2 code    
+    [SpotData] = get_sofar_realtime(buoy_info, limit); 
+    flag = 1;  
     
     if flag == 1
         for i = 1:size(SpotData.time,1)

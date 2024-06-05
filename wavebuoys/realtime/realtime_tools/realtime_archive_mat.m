@@ -1,4 +1,4 @@
-%% archive buoy data to text file
+%% archive buoy data to mat file
 
 function [] = realtime_archive_mat(buoy_info, buoy_data); 
 
