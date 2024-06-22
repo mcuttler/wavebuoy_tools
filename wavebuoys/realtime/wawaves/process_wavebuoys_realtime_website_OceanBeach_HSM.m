@@ -4,6 +4,7 @@
 
 %AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
 %UWA token: e0eb70b6d9e0b5e00450929139ea34
+%IMOS Coast facility token: 3492dc5f66a8fadca20aeb9c91ab00
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -14,19 +15,19 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1578'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Bundegi'; 
+buoy_info.serial = 'SPOT-31708C'; %spotter serial number, or just Datawell 
+buoy_info.name = 'OceanBeach_HSM'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'smart_mooring'; %or DWR4 for Datawell, for example
-buoy_info.processingSource = 'embedded'; %for new Spotters, this can be: embedded, HDR, or all
-buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51'; 
+buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
+buoy_info.processingSource = 'all'; %for new Spotters, this can be: embedded, HDR, or all
+buoy_info.sofar_token = '3492dc5f66a8fadca20aeb9c91ab00'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'Bundegi';
-buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -21.86495; 
-buoy_info.DeployLon = 114.18925; 
+buoy_info.DeployLoc = 'OceanBeach_HSM';
+buoy_info.DeployDepth = 42; 
+buoy_info.DeployLat = -35.04933; 
+buoy_info.DeployLon = 117.36614; 
 buoy_info.UpdateTime =  1; %hours
-buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
+buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
 buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
