@@ -150,35 +150,48 @@ end
 
 %% SPECTRAL WAVE DATA
 if isfield(resp.Body.Data.data,'frequencyData')
-    %isolate HDR and embedded 
-    indHDR = []; 
-    indEmbedded = []; 
-    for j = 1:size(resp.Body.Data.data.frequencyData)
-        if strcmp(resp.Body.Data.data.frequencyData(j).processing_source,'hdr')
-            indHDR = [indHDR; j]; 
-        elseif strcmp(resp.Body.Data.data.frequencyData(j).processing_source,'embedded')
-            indEmbedded = [indEmbedded;j]; 
+    if ~isempty(resp.Body.Data.data.frequencyData)
+        %isolate HDR and embedded 
+        indHDR = []; 
+        indEmbedded = []; 
+        for j = 1:size(resp.Body.Data.data.frequencyData)
+            if strcmp(resp.Body.Data.data.frequencyData(j).processing_source,'hdr')
+                indHDR = [indHDR; j]; 
+            elseif strcmp(resp.Body.Data.data.frequencyData(j).processing_source,'embedded')
+                indEmbedded = [indEmbedded;j]; 
+            end
         end
-    end    
-    
-    %use HDR if available 
-    if ~isempty(indHDR)
-        indSpec = indHDR; 
+        
+        %use HDR if available
+        if ~isempty(indHDR)
+            indSpec = indHDR; 
+        else
+            indSpec = indEmbedded;
+        end
+        
+        for j = 1:size(indSpec,1)
+            Spotter.spec_time(j,1) = datenum(resp.Body.Data.data.frequencyData(indSpec(j)).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
+            Spotter.a1(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).a1';
+            Spotter.a2(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).a2';
+            Spotter.b1(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).b1';
+            Spotter.b2(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).b2';
+            Spotter.varianceDensity(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).varianceDensity';
+            Spotter.frequency(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).frequency';
+            Spotter.df(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).df';
+            Spotter.directionalSpread(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).directionalSpread';
+            Spotter.direction(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).direction';
+        end
     else
-        indSpec = indEmbedded; 
-    end
-    
-    for j = 1:size(indSpec,1)
-        Spotter.spec_time(j,1) = datenum(resp.Body.Data.data.frequencyData(indSpec(j)).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
-        Spotter.a1(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).a1';
-        Spotter.a2(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).a2';
-        Spotter.b1(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).b1';
-        Spotter.b2(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).b2';
-        Spotter.varianceDensity(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).varianceDensity';
-        Spotter.frequency(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).frequency';
-        Spotter.df(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).df';
-        Spotter.directionalSpread(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).directionalSpread';
-        Spotter.direction(j,:) = resp.Body.Data.data.frequencyData(indSpec(j)).direction';
+        Spotter.spec_time = Spotter.time;
+        Spotter.a1 = ones(size(Spotter.time,1),79).*-9999; 
+        Spotter.a2 = ones(size(Spotter.time,1),79).*-9999; 
+        Spotter.b1 = ones(size(Spotter.time,1),79).*-9999; 
+        Spotter.b2 = ones(size(Spotter.time,1),79).*-9999; 
+        Spotter.varianceDensity = ones(size(Spotter.time,1),79).*-9999; 
+        Spotter.frequency = ones(size(Spotter.time,1),79).*-9999; 
+        Spotter.df = ones(size(Spotter.time,1),79).*-9999; 
+        Spotter.directionalSpread = ones(size(Spotter.time,1),79).*-9999; 
+        Spotter.direction = ones(size(Spotter.time,1),79).*-9999; 
     end
 else
     Spotter.spec_time = Spotter.time;
@@ -192,45 +205,61 @@ else
     Spotter.directionalSpread = ones(size(Spotter.time,1),79).*-9999; 
     Spotter.direction = ones(size(Spotter.time,1),79).*-9999; 
 end
-
+    
 %% PARTITIONED WAVE DATA 
 
 if isfield(resp.Body.Data.data,'partitionData')
-    %isolate HDR and embedded 
-    indHDR = []; 
-    indEmbedded = []; 
-    for j = 1:size(resp.Body.Data.data.partitionData)
-        if strcmp(resp.Body.Data.data.partitionData(j).processing_source,'hdr')
-            indHDR = [indHDR; j]; 
-        elseif strcmp(resp.Body.Data.data.partitionData(j).processing_source,'embedded')
-            indEmbedded = [indEmbedded;j]; 
+    if ~isempty(resp.Body.Data.data.partitionData)
+        %isolate HDR and embedded 
+        indHDR = []; 
+        indEmbedded = []; 
+        for j = 1:size(resp.Body.Data.data.partitionData)
+            if strcmp(resp.Body.Data.data.partitionData(j).processing_source,'hdr')
+                indHDR = [indHDR; j]; 
+            elseif strcmp(resp.Body.Data.data.partitionData(j).processing_source,'embedded')
+                indEmbedded = [indEmbedded;j]; 
+            end
         end
-    end    
-    
-    %use HDR if available 
-    if ~isempty(indHDR)
-        indPart = indHDR; 
+        
+        %use HDR if available
+        if ~isempty(indHDR)
+            indPart = indHDR; 
+        else
+            indPart = indEmbedded;
+        end
+        
+        for j = 1:size(indPart,1)
+            Spotter.part_time(j,1) = datenum(resp.Body.Data.data.partitionData(indPart(j)).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
+            Spotter.startFreq_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).startFrequency; 
+            Spotter.endFreq_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).endFrequency;
+            Spotter.startFreq_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).startFrequency;
+            Spotter.endFreq_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).endFrequency;
+            Spotter.hsig_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).significantWaveHeight;
+            Spotter.hsig_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).significantWaveHeight;
+            Spotter.tm_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).meanPeriod;
+            Spotter.tm_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).meanPeriod;
+            Spotter.dm_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).meanDirection;
+            Spotter.dm_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).meanDirection;
+            Spotter.dmspr_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).meanDirectionalSpread;
+            Spotter.dmspr_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).meanDirectionalSpread;
+        end
     else
-        indPart = indEmbedded; 
-    end
-    
-    for j = 1:size(indPart,1)
-        Spotter.part_time(j,1) = datenum(resp.Body.Data.data.partitionData(indPart(j)).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
-        Spotter.startFreq_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).startFrequency; 
-        Spotter.endFreq_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).endFrequency;
-        Spotter.startFreq_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).startFrequency;
-        Spotter.endFreq_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).endFrequency;
-        Spotter.hsig_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).significantWaveHeight;
-        Spotter.hsig_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).significantWaveHeight;
-        Spotter.tm_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).meanPeriod;
-        Spotter.tm_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).meanPeriod;
-        Spotter.dm_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).meanDirection;
-        Spotter.dm_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).meanDirection;
-        Spotter.dmspr_swell(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(1).meanDirectionalSpread;
-        Spotter.dmspr_sea(j,1) = resp.Body.Data.data.partitionData(indPart(j)).partitions(2).meanDirectionalSpread;
+        Spotter.part_time = Spotter.time;
+        Spotter.startFreq_swell = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.endFreq_swell = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.startFreq_sea = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.endFreq_sea = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.hsig_swell = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.hsig_sea = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.tm_swell = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.tm_sea = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.dm_swell = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.dm_sea = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.dmspr_swell = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.dmspr_sea = ones(size(Spotter.time,1)).*-9999; 
     end
 else
-    Spotter.part_time = Spotter.time; 
+    Spotter.part_time = Spotter.time;
     Spotter.startFreq_swell = ones(size(Spotter.time,1)).*-9999; 
     Spotter.endFreq_swell = ones(size(Spotter.time,1)).*-9999; 
     Spotter.startFreq_sea = ones(size(Spotter.time,1)).*-9999; 
@@ -244,7 +273,7 @@ else
     Spotter.dmspr_swell = ones(size(Spotter.time,1)).*-9999; 
     Spotter.dmspr_sea = ones(size(Spotter.time,1)).*-9999; 
 end
-
+    
 %% SMART MOORING vs SPOTTER TEMPERAUTRE AND PRESSURE
 Spotter.temp_time = []; 
 Spotter.surf_temp = []; 
