@@ -46,7 +46,7 @@ if isfield(resp.Body.Data.data,'waves')
 end
 
 %check for temperature data
-if isfield(resp.Body.Data.data,'surfaceTemp')
+if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfaceTemp)
     for j = 1:size(resp.Body.Data.data.surfaceTemp)
         Spotter.surf_temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
         Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
@@ -60,20 +60,26 @@ if isfield(resp.Body.Data.data,'surfaceTemp')
         for j = 1:size(resp.Body.Data.data.surfaceTemp)
             Spotter.bott_temp(j,1)= -9999; 
         end
-    end               
+    end
+else
+    Spotter.temp_time = Spotter.time; 
+    Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
 end
 
-
-%
-
 %check for wind data 
-if isfield(resp.Body.Data.data,'wind')
+if isfield(resp.Body.Data.data,'wind')&~isempty(resp.Body.Data.data.wind)
     for j = 1:size(resp.Body.Data.data.wind)
-        Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;
-        Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;
         Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
+        Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(j).speed;
+        Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(j).direction;        
         Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(j).seasurfaceId;
     end
+else
+    Spotter.wind_time = Spotter.time;
+    Spotter.wind_speed = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.wind_dir = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.wind_seasurfaceId = ones(size(Spotter.time,1),1).*-9999; 
 end
 
 %check that wind and waves have same time, duplicate temp for the hour so

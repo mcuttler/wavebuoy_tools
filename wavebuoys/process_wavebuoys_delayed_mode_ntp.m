@@ -9,11 +9,11 @@ clear; clc
 
 %location of wavebuoy_tools repo
 
-homepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Matlab Codes\Github Repository\wavebuoy_tools\wavebuoys'; 
+homepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(homepath))
 
 %general path to data files - either location where raw dump of memory cardfrom Spotter is, or upper directory for Datawells
-datapath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\Data\SPOT1109_CapeBridgewaterDC_20210624_to_20211203'; 
+datapath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\Data\20220718_to_20220731_dep03_Dampier_SPOT1266'; 
 
 
 %path of Sofar parser script
@@ -24,19 +24,19 @@ parser = 'parser_v1.11.2.py';
 %% 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.name = 'SPOT-1109'; %spotter serial number, or just Datawell 
+buoy_info.name = 'SPOT-1266'; %spotter serial number, or just Datawell 
 buoy_info.version = 'Spotter-V2'; %or DWR4 for Datawell, for example
 buoy_info.site_code = 'CAPEBW01';
 buoy_info.DeployLoc = 'CapeBridgewater01';%this is IMOS site_name and station_id
 buoy_info.DeployDepth = 69; 
 buoy_info.DeployLat = nan; 
 buoy_info.DeployLon = nan; 
-buoy_info.tstart = datenum(2021,06,24,07,59,15); 
-buoy_info.tend = datenum(2021,12,03,02,28,44); 
+buoy_info.tstart = datenum(2020,07,17,07,59,15); 
+buoy_info.tend = datenum(2022,10,01,02,28,44); 
 buoy_info.DeployID = 'CAPEBW0103'; %deployment number at this site
 buoy_info.timezone = 10; %signed integer for UTC offset 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
-buoy_info.MagDec = 10.20; 
+buoy_info.MagDec = 0; 
 
 
 %inputs for IMOS filename structure

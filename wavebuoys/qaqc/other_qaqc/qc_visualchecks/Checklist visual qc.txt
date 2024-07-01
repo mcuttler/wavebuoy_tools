@@ -1,0 +1,4 @@
+- Run 'check_IMOSnc_ARDC_file_BP', 'check_IMOSnc_ARDC_file_DISP', 'check_IMOSnc_ARDC_file_SPEC' and inspect plots
+- Check that global attributes is correct for type of file:
+   - VIC vs UWS vs IMOS NTP
+- Check file name is correct

@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\LOWE_IMOS_WaveBuoys\Data\SofarSpotter\ProcessedData_DelayedMode\nc\CapeBridgewater01';
+filepath = 'C:\Users\00104893\Downloads';
 %IMOS file name
-filename = 'IMOS_NTP-WAVE_TW_20210624T075916Z_CAPEBW01_WAVERIDER_FV01_timeseries_END-20211203T022843Z.nc';
+filename = 'UWA_20231101_OCEAN-BEACH_RT_WAVE-PARAMETERS_monthly.nc';
 
 ncfile = fullfile(filepath, filename); 
 

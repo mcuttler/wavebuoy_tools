@@ -43,7 +43,7 @@ if isfield(resp.Body.Data.data,'waves')
 end
 
 %check for temperature data
-if isfield(resp.Body.Data.data,'surfaceTemp')
+if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfaceTemp)
     for j = 1:size(resp.Body.Data.data.surfaceTemp)
         Spotter.surf_temp(j,1) = resp.Body.Data.data.surfaceTemp(j).degrees;
         Spotter.temp_time(j,1) = datenum(resp.Body.Data.data.surfaceTemp(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
@@ -57,9 +57,12 @@ if isfield(resp.Body.Data.data,'surfaceTemp')
         for j = 1:size(resp.Body.Data.data.surfaceTemp)
             Spotter.bott_temp(j,1)= -9999; 
         end
-    end               
+    end
+else
+    Spotter.temp_time = Spotter.time; 
+    Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
+    Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
 end
-%
 
 %check for wind data 
 if isfield(resp.Body.Data.data,'wind')
@@ -83,16 +86,16 @@ end
 %Spectral variables
 if isfield(resp.Body.Data.data,'frequencyData')
     for j = 1:size(resp.Body.Data.data.frequencyData)
-        Spotter.spec_time = datenum(resp.Body.Data.data.frequencyData(j).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
-        Spotter.a1 = resp.Body.Data.data.frequencyData.a1';
-        Spotter.a2 = resp.Body.Data.data.frequencyData.a2';
-        Spotter.b1 = resp.Body.Data.data.frequencyData.b1';
-        Spotter.b2 = resp.Body.Data.data.frequencyData.b2';
-        Spotter.varianceDensity = resp.Body.Data.data.frequencyData.varianceDensity';
-        Spotter.frequency = resp.Body.Data.data.frequencyData.frequency';
-        Spotter.df = resp.Body.Data.data.frequencyData.df';
-        Spotter.directionalSpread = resp.Body.Data.data.frequencyData.directionalSpread';
-        Spotter.direction = resp.Body.Data.data.frequencyData.direction';
+        Spotter.spec_time(j,1) = datenum(resp.Body.Data.data.frequencyData(j).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
+        Spotter.a1(j,:) = resp.Body.Data.data.frequencyData(j).a1';
+        Spotter.a2(j,:) = resp.Body.Data.data.frequencyData(j).a2';
+        Spotter.b1(j,:) = resp.Body.Data.data.frequencyData(j).b1';
+        Spotter.b2(j,:) = resp.Body.Data.data.frequencyData(j).b2';
+        Spotter.varianceDensity(j,:) = resp.Body.Data.data.frequencyData(j).varianceDensity';
+        Spotter.frequency(j,:) = resp.Body.Data.data.frequencyData(j).frequency';
+        Spotter.df(j,:) = resp.Body.Data.data.frequencyData(j).df';
+        Spotter.directionalSpread(j,:) = resp.Body.Data.data.frequencyData(j).directionalSpread';
+        Spotter.direction(j,:) = resp.Body.Data.data.frequencyData(j).direction';
     end
 end
 
