@@ -4,7 +4,7 @@
 % addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
 
 %suppress warnings
-% warning('off')
+warning('off')
 
 %read in metadata for buoys to run
 dpath = 'D:\wawaves_testing\local'; 

@@ -10,16 +10,9 @@ if strcmp(buoy_info.type,'sofar')==1
     
     %get buoy data
     try
-        %check whether smart mooring or normal mooring
-        if strcmp(buoy_info.version,'smart_mooring')
-            limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-            [SpotData, ~] = Get_Spoondrift_SmartMooring_realtime_v2(buoy_info,limit);
-            flag = 1; 
-        else
-            limit = buoy_info.UpdateTime*2; %not used in v2 code
-            [SpotData] = Get_Spoondrift_Data_realtime_v2(buoy_info, limit);         
-            flag = 1;                         
-        end       
+        limit = buoy_info.UpdateTime*2; %not used in v2 code
+        [SpotData] = get_sofar_realtime(buoy_info, limit);         
+        flag = 1;                                
     catch
         log_message = 'code failed on getting Spotter data'; 
     end
