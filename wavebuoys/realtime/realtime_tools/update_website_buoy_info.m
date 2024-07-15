@@ -13,7 +13,7 @@ function [] = update_website_buoy_info(buoy_info, data)
 
 %read in existing data - read everything as strings
 fid = fopen([buoy_info.web_path '\' buoy_info.website_filename],'r'); 
-fmt = '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s'; 
+fmt = '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s'; 
 in_data = textscan(fid, fmt, 'Delimiter',','); 
 fclose(fid); 
 
@@ -102,6 +102,7 @@ for i = 1:size(web_data,2)
 end
 
 fid = fopen([buoy_info.web_path '\' buoy_info.website_filename ],'w'); 
+
 
 for i = 1:size(web_data,1)
     if i == 1

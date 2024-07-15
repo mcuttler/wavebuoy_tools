@@ -126,7 +126,7 @@ if strcmp(buoy_info.type,'sofar')==1
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
                     end
                 end
-                clear ff idx_w idx_t f idx_p idx_pstd
+                clear ff idx_w idx_t f idx_p idx_pstd idx_part idx_s
                 %check that it's new data
                 if SpotData.time(1)>archive_data.time(end)
                     %perform some QA/QC --- QARTOD 19 and QARTOD 20        

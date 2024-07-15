@@ -35,7 +35,7 @@ buoy_info.datawell_datapath = 'E:\waved'; %top  level directory for Datawell CSV
 buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 200; %meters for watch circle radius 
 buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
-buoy_info.Humid_max = 70; % Max Humidity before an email alert is sent out
+buoy_info.Humid_max = 85; % Max Humidity before an email alert is sent out
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 

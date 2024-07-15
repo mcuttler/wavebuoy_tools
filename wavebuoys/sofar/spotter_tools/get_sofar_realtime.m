@@ -245,33 +245,33 @@ if isfield(resp.Body.Data.data,'partitionData')
         end
     else
         Spotter.part_time = Spotter.time;
-        Spotter.startFreq_swell = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.endFreq_swell = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.startFreq_sea = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.endFreq_sea = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.hsig_swell = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.hsig_sea = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.tm_swell = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.tm_sea = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.dm_swell = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.dm_sea = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.dmspr_swell = ones(size(Spotter.time,1)).*-9999; 
-        Spotter.dmspr_sea = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.startFreq_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.endFreq_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.startFreq_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.endFreq_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.hsig_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.hsig_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.tm_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.tm_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.dm_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.dm_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.dmspr_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.dmspr_sea = ones(size(Spotter.time,1),1).*-9999; 
     end
 else
-    Spotter.part_time = Spotter.time;
-    Spotter.startFreq_swell = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.endFreq_swell = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.startFreq_sea = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.endFreq_sea = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.hsig_swell = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.hsig_sea = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.tm_swell = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.tm_sea = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.dm_swell = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.dm_sea = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.dmspr_swell = ones(size(Spotter.time,1)).*-9999; 
-    Spotter.dmspr_sea = ones(size(Spotter.time,1)).*-9999; 
+        Spotter.part_time = Spotter.time;
+        Spotter.startFreq_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.endFreq_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.startFreq_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.endFreq_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.hsig_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.hsig_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.tm_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.tm_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.dm_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.dm_sea = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.dmspr_swell = ones(size(Spotter.time,1),1).*-9999; 
+        Spotter.dmspr_sea = ones(size(Spotter.time,1),1).*-9999; 
 end
     
 %% SMART MOORING vs SPOTTER TEMPERAUTRE AND PRESSURE
