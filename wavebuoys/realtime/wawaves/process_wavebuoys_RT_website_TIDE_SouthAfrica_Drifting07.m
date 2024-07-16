@@ -38,20 +38,16 @@ buoy_info.search_rad = 0; %meters for watch circle radius
 % buoy_info.MagDec = 1.98; 
 
 %% process realtime mode data
+%% process realtime mode data
 
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
-    if contains(buoy_info.version,'smart_mooring')
-        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime_v2(buoy_info,limit);
-        flag = 1; %ignore flag in Smart mooring code 
-    else
-        limit = buoy_info.UpdateTime*2; %not used in v2 code
-        [SpotData] = Get_Spoondrift_Data_realtime_v2(buoy_info, limit);         
-        flag = 1;                  
-    end  
+    limit = buoy_info.UpdateTime*2; %not used in v2 code    
+    [SpotData] = get_sofar_realtime(buoy_info, limit); 
+    flag = 1;                         
     
+      
     if flag == 1
         for i = 1:size(SpotData.time,1)
             SpotData.name{i,1} = buoy_info.name; 
@@ -60,11 +56,11 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info, SpotData);    
-        %[warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+%         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+%         [warning2] = spotter_buoy_volt_humid_alert(buoy_info);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
-        
-        if all(check)~=0        
+        if all(check)~=0                        
            [archive_data] = load_archived_data(buoy_info);                  
             %add serial ID and name if not already there
             if ~isfield(archive_data,'serialID')
@@ -103,7 +99,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 idx_s = []; 
             end
             
-            %add spectral data if it exists in archive
+            %add partition data if it exists in archive
             if isfield(SpotData,'part_time') & isfield(archive_data,'part_time')
                 idx_part = find(SpotData.part_time>archive_data.part_time(end));
             elseif isfield(SpotData,'part_time') & ~isfield(archive_data,'part_time')
@@ -128,54 +124,60 @@ if strcmp(buoy_info.type,'sofar')==1
                     else
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
                     end
-                end                             
-                clear ff idx_w idx_t f idx_p idx_pstd  
+                end
+                clear ff idx_w idx_t f idx_p idx_pstd
+                %check that it's new data
                 if SpotData.time(1)>archive_data.time(end)
                     %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-                    [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                        
-                    
+                    [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                               
+
                     %save data to different formats        
                     realtime_archive_mat(buoy_info, data);
-                    realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
                     realtime_backup_mat(buoy_info, data);
-                    
-                    %output MEM and SST plots 
-                    if strcmp(buoy_info.DataType,'spectral')                        
-                        [NS, NE, ndirec] = lygre_krogstad(data.a1(end,:),data.a2(end,:),data.b1(end,:),...
-                            data.b2(end,:),data.varianceDensity(end,:));
-                        make_MEM_plot(ndirec, data.frequency(end,:), NE, data.hsig(end,1),...
-                            data.tp(end,1), data.dp(end,1), data.time(end,1), buoy_info)        
+                    realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
+                    %output MEM and SST plots --- only most recent time
+                    %point 
+                    if strcmp(buoy_info.DataType,'spectral')
+                        try
+                            [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
+                                SpotData.b2(end,:),SpotData.varianceDensity(end,:));
+                            make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
+                                SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info) 
+                        catch
+                            disp('failed to make MEM - probably no HDR data');                             
+                        end
                     end
                     
                     %code to update the buoy info master file for website to read
                     update_website_buoy_info(buoy_info, data); 
                 end
-                clear idx_t idx_w
-            end   
+            end
         else
-            SpotData.qf_waves = ones(size(SpotData.time,1),1).*1;
+            SpotData.qf_waves = ones(size(SpotData.time,1),1).*4;
             if isfield(SpotData,'temp_time')
                 SpotData.qf_sst = ones(size(SpotData.temp_time,1),1).*4; 
-                SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4; 
-                
+                SpotData.qf_bott_temp = ones(size(SpotData.temp_time,1),1).*4;                 
             end
             realtime_archive_mat(buoy_info, SpotData);
-            realtime_archive_text(buoy_info, SpotData, size(SpotData.time)); 
             realtime_backup_mat(buoy_info, SpotData);
-            
+            realtime_archive_text(buoy_info, SpotData, size(SpotData.time,1)); 
             
             %output MEM and SST plots 
-            if strcmp(buoy_info.DataType,'spectral')                        
-                [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
-                    SpotData.b2(end,:),SpotData.varianceDensity(end,:));
-                make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
-                    SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)        
+            if strcmp(buoy_info.DataType,'spectral')   
+                try
+                    [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
+                        SpotData.b2(end,:),SpotData.varianceDensity(end,:));
+                    make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
+                        SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)      
+                catch
+                    disp('faild to make MEM'); 
+                end
             end
             
             %code to update the buoy info master file for website to read
             update_website_buoy_info(buoy_info, SpotData); 
         end        
-    end       
+    end        
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
@@ -248,7 +250,6 @@ end
 
 %%
 % quit
-
 
 
 
