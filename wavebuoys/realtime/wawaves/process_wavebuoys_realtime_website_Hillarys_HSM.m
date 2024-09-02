@@ -14,17 +14,17 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31397C'; %spotter serial number, or just Datawell 
-buoy_info.name = 'QuinnsDogBeach'; 
+buoy_info.serial = 'SPOT-31707C'; %spotter serial number, or just Datawell 
+buoy_info.name = 'Hillarys_HSM'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
 buoy_info.processingSource = 'all'; %for new Spotters, this can be: embedded, HDR, or all
-buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
+buoy_info.sofar_token = '3492dc5f66a8fadca20aeb9c91ab00'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'QuinnsDogBeach';
-buoy_info.DeployDepth = 10; 
-buoy_info.DeployLat = -31.65989; 
-buoy_info.DeployLon = 115.66463; 
+buoy_info.DeployLoc = 'Hillarys_HSM';
+buoy_info.DeployDepth = 29; 
+buoy_info.DeployLat = -31.84738; 
+buoy_info.DeployLon = 115.64640; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
@@ -180,7 +180,7 @@ if strcmp(buoy_info.type,'sofar')==1
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  %Datawell DWR4 
 elseif strcmp(buoy_info.type,'datawell')==1
-    data.time = datenum(now); 
+    data.time = now; 
     data.tnow = datevec(data.time); 
     
     data.file20 = [buoy_info.datawell_datapath '\' buoy_info.datawell_name '\' num2str(data.tnow(1)) '\' num2str(data.tnow(2),'%02d') '\' buoy_info.datawell_name '{0xF20}' num2str(data.tnow(1)) '-' num2str(data.tnow(2),'%02d') '.csv'];
@@ -249,9 +249,6 @@ end
 
 %%
 % quit
-
-
-
 
 
 

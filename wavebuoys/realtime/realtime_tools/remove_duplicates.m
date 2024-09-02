@@ -148,36 +148,36 @@ if isfield(data,'press_std_time')
     end
 end
 
-%spectral data
-%add spec time for Datawell 
-if isfield(data,'ndirec')
-  t_spec = unique(data.time); 
-    for i = 1:length(t_spec)        
-        idx = find(data.time==t_spec(i));     
-        for j = 1:length(fields)
-            if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')
-                if length(idx)>1
-                    t1 = data.(fields{j})(idx(1));
-                    t2 = data.(fields{j})(idx(2));                 
-                    if isnan(t1)&isnan(t2)
-                        dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
-                    elseif isnan(t1)&~isnan(t2)
-                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
-                    elseif ~isnan(t1)&isnan(t2)
-                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
-                    else
-                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
-                    end
-                else
-                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
-                end  
-            elseif strcmp(fields{j},'frequency')||strcmp(fields{j},'ndirec')
-                dataout.(fields{j}) = data.(fields{j}); 
-            end
-        end
-        clear idx t1 t2
-    end
-end
+% %spectral data
+% %add spec time for Datawell 
+% if isfield(data,'ndirec')
+%   t_spec = unique(data.time); 
+%     for i = 1:length(t_spec)        
+%         idx = find(data.time==t_spec(i));     
+%         for j = 1:length(fields)
+%             if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')
+%                 if length(idx)>1
+%                     t1 = data.(fields{j})(idx(1));
+%                     t2 = data.(fields{j})(idx(2));                 
+%                     if isnan(t1)&isnan(t2)
+%                         dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
+%                     elseif isnan(t1)&~isnan(t2)
+%                         dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
+%                     elseif ~isnan(t1)&isnan(t2)
+%                         dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
+%                     else
+%                         dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
+%                     end
+%                 else
+%                     dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+%                 end  
+%             elseif strcmp(fields{j},'frequency')||strcmp(fields{j},'ndirec')
+%                 dataout.(fields{j}) = data.(fields{j}); 
+%             end
+%         end
+%         clear idx t1 t2
+%     end
+% end
 
 %spectral data - Spotter
 if isfield(data,'spec_time')
@@ -188,19 +188,29 @@ if isfield(data,'spec_time')
         for j = 1:length(fields)
             if strcmp(fields{j},'a1')|strcmp(fields{j},'a2')|strcmp(fields{j},'b1')|strcmp(fields{j},'b2')|strcmp(fields{j},'varianceDensity')|strcmp(fields{j},'frequency')|strcmp(fields{j},'df')|strcmp(fields{j},'directionalSpread')|strcmp(fields{j},'direction')|strcmp(fields{j},'ndirec')
                 if length(idx)>1
-                    t1 = data.(fields{j})(idx(1));
-                    t2 = data.(fields{j})(idx(2));                 
-                    if isnan(t1)&isnan(t2)
-                        dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
-                    elseif isnan(t1)&~isnan(t2)
-                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
-                    elseif ~isnan(t1)&isnan(t2)
-                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
+                    %add catch for datawell frequency and ndirc
+                    if size(data.(fields{j}),1)==1
+                        dataout.(fields{j}) = data.(fields{j});
                     else
-                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
+                        t1 = data.(fields{j})(idx(1));
+                        t2 = data.(fields{j})(idx(2));                 
+                        if isnan(t1)&isnan(t2)
+                            dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
+                        elseif isnan(t1)&~isnan(t2)
+                            dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
+                        elseif ~isnan(t1)&isnan(t2)
+                            dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
+                        else
+                            dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
+                        end
                     end
                 else
-                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+                    %add catch for datawell frequency and ndirc
+                    if size(data.(fields{j}),1)==1
+                        dataout.(fields{j}) = data.(fields{j});
+                    else
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+                    end
                 end                            
             end
         end

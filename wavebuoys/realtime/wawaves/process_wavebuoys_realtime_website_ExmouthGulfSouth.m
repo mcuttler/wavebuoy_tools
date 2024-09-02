@@ -14,7 +14,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31132C'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-31131C'; %spotter serial number, or just Datawell 
 buoy_info.name = 'ExmouthGulfSouth'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
@@ -22,8 +22,8 @@ buoy_info.sofar_token = 'f6c01b0c9712e04c7f5f9bcdb5b694';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'ExmouthGulfSouth';
 buoy_info.DeployDepth = 10;
-buoy_info.DeployLat = -22.16820;
-buoy_info.DeployLon = 114.33798; 
+buoy_info.DeployLat = -22.16818;
+buoy_info.DeployLon = 114.33817; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
