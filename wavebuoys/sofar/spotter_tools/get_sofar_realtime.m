@@ -53,9 +53,15 @@ if isfield(resp.Body.Data.data,'waves')
         Spotter.dp(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).peakDirection;
         Spotter.dpspr(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).peakDirectionalSpread;
         Spotter.dm(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).meanDirection;
-        Spotter.dmspr(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).meanDirectionalSpread;       
-        Spotter.lat(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).latitude;
-        Spotter.lon(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).longitude;
+        Spotter.dmspr(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).meanDirectionalSpread;    
+        %catch null lat/lon associated with spikes
+        if isempty(resp.Body.Data.data.waves(indEmbedded(j)).latitude) | isempty( resp.Body.Data.data.waves(indEmbedded(j)).longitude)
+            Spotter.lat(j,1) = -999.9999; 
+            Spotter.lon(j,1) = -999.9999; 
+        else
+            Spotter.lat(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).latitude;
+            Spotter.lon(j,1) = resp.Body.Data.data.waves(indEmbedded(j)).longitude;
+        end
     end
 end
 
