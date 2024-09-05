@@ -44,9 +44,17 @@ buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
-    limit = buoy_info.UpdateTime*2; %not used in v2 code    
-    [SpotData] = get_sofar_realtime(buoy_info, limit); 
-    flag = 1;                         
+    limit = buoy_info.UpdateTime*2; %not used in v2 code   
+    %time range set to minus 12 hours - if it doesn't work then trigger
+    %alert
+    try
+        [SpotData] = get_sofar_realtime(buoy_info, limit);
+        flag = 1;  
+    catch
+        [warning] = spotter_get_data_fail_warning(buoy_info);
+        flag = 0; 
+    end
+                           
     
       
     if flag == 1
