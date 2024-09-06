@@ -2,10 +2,6 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
-
-%Shore Coastal Token: dc6f3f68c52e2fa8127488f9ad947d
 
 % Note 'Dunsborough', 'Abbey' and 'Busselton jetty' run by shore coastal.
 % Asked to put on our site 2024/05/01

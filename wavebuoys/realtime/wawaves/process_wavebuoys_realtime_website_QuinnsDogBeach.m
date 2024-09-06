@@ -2,8 +2,6 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
