@@ -2,8 +2,7 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
+
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -14,7 +13,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31140C'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-30958C'; %spotter serial number, or just Datawell 
 buoy_info.name = 'DongaraInshore'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
@@ -22,8 +21,8 @@ buoy_info.sofar_token = 'f6c01b0c9712e04c7f5f9bcdb5b694';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'DongaraInshore';
 buoy_info.DeployDepth = 22;
-buoy_info.DeployLat = -29.181783;
-buoy_info.DeployLon = 114.862617; 
+buoy_info.DeployLat = -29.18133;
+buoy_info.DeployLon = 114.86240; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
@@ -34,6 +33,8 @@ buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 %data for search radius and alert
 buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 100; %meters for watch circle radius 
+buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
+buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
@@ -41,17 +42,9 @@ buoy_info.search_rad = 100; %meters for watch circle radius
 
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
-    %check whether smart mooring or normal mooring
-    if contains(buoy_info.version,'smart_mooring')
-        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime_v2(buoy_info,limit);
-        flag = 1; %ignore flag in Smart mooring code 
-    else
-        limit = buoy_info.UpdateTime*2; %not used in v2 code
-        [SpotData] = Get_Spoondrift_Data_realtime_v2(buoy_info, limit);         
-        flag = 1;                  
-    end  
-    
+    limit = buoy_info.UpdateTime*2; %not used in v2 code    
+    [SpotData] = get_sofar_realtime(buoy_info, limit); 
+    flag = 1;  
     if flag == 1
         for i = 1:size(SpotData.time,1)
             SpotData.name{i,1} = buoy_info.name; 
@@ -61,6 +54,7 @@ if strcmp(buoy_info.type,'sofar')==1
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning2] = spotter_buoy_volt_humid_alert(buoy_info);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         

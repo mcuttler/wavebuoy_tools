@@ -27,6 +27,8 @@ function [out]=spectra_from_displacements(heave,north,east,nfft,nover,fs,merge,t
 %structure from this function 
 %v3.2 19 April 2024 JEH/MC - modify mean spreading calculation to match
 %Rogers and Wang 2007 
+%v3.3 30 May, 2024 JEH, added calculation of Check factor, which is, per
+%frequency bin, the ratio of the vertical to horizontal displacements.
 
 %%
 
@@ -202,6 +204,12 @@ if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heav
     a2 = (UU - VV) ./ (UU + VV);
     b2 = (2 .* coUV) ./ ( UU + VV );    
 
+    %calculate check factor- ratio of horizontal to vertical displacements in each frequency bin,
+    %for linear waves in deep water should be 1. NOTE: often seen written
+    %in the inverse with vertical in numerator, but this has the
+    %disadvantage of blowing up for frequencies with near 0 energy
+    Check=(UU+VV)./S;
+
     %primary directional spectrum --- direction at each frequency  
     dir1 = rad2deg ( atan2(b1,a1) );          
     spread1 = ( sqrt( 2 .* ( 1-sqrt(a1.^2 + b1.^2) ) ) );
@@ -264,8 +272,10 @@ if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heav
         out.spread_Dp = spread_Dp; 
         out.spread=spread;
         out.spread_spec=spread1;
+        out.Check=Check;
         out.segments=windows;
         out.segments_used=windows-length(rw);
+        
 
     elseif strcmp(type,'enu') %enu = velocity
         %apply depth correction
@@ -303,6 +313,7 @@ if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heav
         out.Dp=Dp;       
         out.spread=spread;
         out.spread_spec=spread1;
+        out.Check=Check;
         out.segments=windows;
         out.segments_used=windows-length(rw);
 

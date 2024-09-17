@@ -2,8 +2,6 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -15,7 +13,7 @@ clear; clc
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
 buoy_info.serial = 'SPOT-30320R'; %spotter serial number, or just Datawell 
-buoy_info.name = 'Hillarys'; 
+buoy_info.name = 'Dunsborough'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring_combined'; %V1, V2, smart_mooring, Datawell, Triaxys
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 

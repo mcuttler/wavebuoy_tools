@@ -2,8 +2,7 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
+
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -14,7 +13,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-30962C'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-31134C'; %spotter serial number, or just Datawell 
 buoy_info.name = 'CableBeach'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %V1, V2, smart_mooring, Datawell, Triaxys
@@ -22,8 +21,8 @@ buoy_info.sofar_token = 'f6c01b0c9712e04c7f5f9bcdb5b694';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'CableBeach';
 buoy_info.DeployDepth = 19;
-buoy_info.DeployLat = -17.900517;
-buoy_info.DeployLon = 122.133367; 
+buoy_info.DeployLat = -17.90729;
+buoy_info.DeployLon = 122.13387; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
@@ -33,24 +32,20 @@ buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Dat
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 %data for search radius and alert
 buoy_info.time_cutoff = 3; %hours
-buoy_info.search_rad = 150; %meters for watch circle radius 
+buoy_info.search_rad = 200; %meters for watch circle radius 
+buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
+buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
+
 
 %% process realtime mode data
 
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
-    %check whether smart mooring or normal mooring
-    if contains(buoy_info.version,'smart_mooring')
-        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime_v2(buoy_info,limit);
-        flag = 1; %ignore flag in Smart mooring code 
-    else
-        limit = buoy_info.UpdateTime*2; %not used in v2 code
-        [SpotData] = Get_Spoondrift_Data_realtime_v2(buoy_info, limit);         
-        flag = 1;                  
-    end  
+    limit = buoy_info.UpdateTime*2; %not used in v2 code    
+    [SpotData] = get_sofar_realtime(buoy_info, limit); 
+    flag = 1;  
     
     if flag == 1
         for i = 1:size(SpotData.time,1)
@@ -60,7 +55,8 @@ if strcmp(buoy_info.type,'sofar')==1
         %load in any existing data for this site and combine with new
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info, SpotData);    
-        %[warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+        [warning2] = spotter_buoy_volt_humid_alert(buoy_info);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
         
@@ -140,9 +136,11 @@ if strcmp(buoy_info.type,'sofar')==1
                     realtime_backup_mat(buoy_info, data);
                     
                     %output MEM and SST plots 
-                    if strcmp(buoy_info.DataType,'spectral')        
-                        [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-                        make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
+                    if strcmp(buoy_info.DataType,'spectral')                        
+                        [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
+                            SpotData.b2(end,:),SpotData.varianceDensity(end,:));
+                        make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
+                            SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)        
                     end
                     
                     %code to update the buoy info master file for website to read
@@ -159,13 +157,14 @@ if strcmp(buoy_info.type,'sofar')==1
             end
             realtime_archive_mat(buoy_info, SpotData);
             realtime_archive_text(buoy_info, SpotData, size(SpotData.time)); 
-            realtime_backup_mat(buoy_info, SpotData);
+            realtime_backup_mat(buoy_info, SpotData);            
             
-            
-            %output MEM and SST plots 
-            if strcmp(buoy_info.DataType,'spectral')        
-                [NS, NE, ndirec] = lygre_krogstad(SpotData.a1,SpotData.a2,SpotData.b1,SpotData.b2,SpotData.varianceDensity);
-                make_MEM_plot(ndirec, SpotData.frequency, NE, SpotData.hsig, SpotData.tp, SpotData.dp, SpotData.time, buoy_info)        
+            %output MEM and SST plots   
+            if strcmp(buoy_info.DataType,'spectral')  
+                [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
+                    SpotData.b2(end,:),SpotData.varianceDensity(end,:));
+                make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
+                    SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)        
             end
             
             %code to update the buoy info master file for website to read

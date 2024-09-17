@@ -2,8 +2,9 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
+
+% Note 'Dunsborough', 'Abbey' and 'Busselton jetty' run by shore coastal.
+% Asked to put on our site 2024/05/01
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -14,24 +15,26 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-0561'; %spotter serial number, or just Datawell 
-buoy_info.name = 'TorbayWest'; 
+buoy_info.serial = 'SPOT-30809C'; %spotter serial number, or just Datawell 
+buoy_info.name = 'BusseltonJetty02'; 
 buoy_info.datawell_name = 'nan'; 
-buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
-buoy_info.processingSource = 'embedded'; %for new Spotters, this can be: embedded, HDR, or all
-buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34'; 
+buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
+buoy_info.processingSource = 'all'; %for new Spotters, this can be: embedded, HDR, or all
+buoy_info.sofar_token = 'dc6f3f68c52e2fa8127488f9ad947d'; 
 buoy_info.utc_offset = 8; 
-buoy_info.DeployLoc = 'TorbayWest';
-buoy_info.DeployDepth = 32; 
-buoy_info.DeployLat = -35.06819; 
-buoy_info.DeployLon = 117.76826; 
+buoy_info.DeployLoc = 'BusseltonJetty02';
+buoy_info.DeployDepth = 7; 
+%note depth estimate taken from nautical chart for Busselton Jetty, Abbey and
+%Dunsborough
+buoy_info.DeployLat = -33.62794;
+buoy_info.DeployLon = 115.33786;
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
-buoy_info.web_path = 'E:\wawaves\batch_file_test';
-buoy_info.archive_path = 'G:\wawaves\batch_file_test'; 
+buoy_info.web_path = 'E:\wawaves';
+buoy_info.archive_path = 'G:\wawaves'; 
 buoy_info.website_filename = 'buoys.csv'; 
-buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup\batch_file_test'; 
-buoy_info.datawell_datapath = 'E:\waved'; %top  level directory for Datawell CSVs
+buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
+buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
@@ -42,14 +45,10 @@ buoy_info.search_rad = 190; %meters for watch circle radius
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
-    if strcmp(buoy_info.version,'smart_mooring')
-        limit = buoy_info.UpdateTime*2; %note, for AQL they only transmit 2 points even though it's 2 hour update time
-        [SpotData, flag] = Get_Spoondrift_SmartMooring_realtime(buoy_info, limit); 
-    else
-        limit = buoy_info.UpdateTime*2; %not used in v2 code
-        [SpotData] = Get_Spoondrift_Data_realtime_v2(buoy_info, limit);         
-        flag = 1;                         
-    end       
+    limit = buoy_info.UpdateTime*2; %not used in v2 code    
+    [SpotData] = get_sofar_realtime(buoy_info, limit); 
+    flag = 1;                         
+    
       
     if flag == 1
         for i = 1:size(SpotData.time,1)
@@ -60,12 +59,39 @@ if strcmp(buoy_info.type,'sofar')==1
         %measurements, then QAQC
         [check] = check_archive_path(buoy_info, SpotData);    
         [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData);
+%         [warning2] = spotter_buoy_volt_humid_alert(buoy_info);
         %check>0 means that directory already exists (and monthly file should
         %exist); otherwise, this is the first data for this location 
-        if all(check)~=0        
-            [archive_data] = load_archived_data(buoy_info);                  
-            idx_w = find(SpotData.time>archive_data.time(end));   
-            idx_t = find(SpotData.temp_time>archive_data.temp_time(end));    
+        if all(check)~=0                        
+           [archive_data] = load_archived_data(buoy_info);                  
+            %add serial ID and name if not already there
+            if ~isfield(archive_data,'serialID')
+                for i = 1:size(archive_data.time,1)
+                    archive_data.serialID{i,1} = buoy_info.serial;
+                end
+            end
+            if ~isfield(archive_data,'name')
+                for i = 1:size(archive_data.time,1)
+                    archive_data.name{i,1} = buoy_info.name;
+                end
+            end   
+            
+            %check that it's new data
+            idx_w = find(SpotData.time>archive_data.time(end)); 
+            idx_t = find(SpotData.temp_time>archive_data.temp_time(end)); 
+            
+            %add pressure data
+            if isfield(SpotData,'press_time') & isfield(archive_data,'press_time')
+                idx_p = find(SpotData.press_time>archive_data.press_time(end)); 
+                idx_pstd = find(SpotData.press_std_time>archive_data.press_std_time(end));       
+            elseif isfield(SpotData,'press_time') & ~isfield(archive_data,'press_time')
+                idx_p = [1:length(SpotData.press_time)]'; 
+                idx_pstd = [1:length(SpotData.press_std_time)]';
+            else
+                idx_p = [];
+                idx_pstd = [];
+            end
+            
             %add spectral data if it exists in archive
             if isfield(SpotData,'spec_time') & isfield(archive_data,'spec_time')
                 idx_s = find(SpotData.spec_time>archive_data.spec_time(end));
@@ -75,7 +101,7 @@ if strcmp(buoy_info.type,'sofar')==1
                 idx_s = []; 
             end
             
-            %add spectral data if it exists in archive
+            %add partition data if it exists in archive
             if isfield(SpotData,'part_time') & isfield(archive_data,'part_time')
                 idx_part = find(SpotData.part_time>archive_data.part_time(end));
             elseif isfield(SpotData,'part_time') & ~isfield(archive_data,'part_time')
@@ -84,26 +110,29 @@ if strcmp(buoy_info.type,'sofar')==1
                 idx_part = [];
             end
             
-            
-            
             if ~isempty(idx_w)&~isempty(idx_t)
                 ff = fieldnames(SpotData); 
-                for f = 1:length(ff)                
+                for f = 1:length(ff)
                     if strcmp(ff{f},'temp_time')|strcmp(ff{f},'surf_temp')|strcmp(ff{f},'bott_temp')
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_t,:); 
+                    elseif strcmp(ff{f},'press_time')|strcmp(ff{f},'pressure')
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_p,:); 
+                    elseif strcmp(ff{f},'press_std_time')|strcmp(ff{f},'pressure_std')
+                        SpotData.(ff{f}) = SpotData.(ff{f})(idx_pstd,:); 
                     elseif (contains(ff{f},'swell')|contains(ff{f},'sea')|strcmp(ff{f},'part_time'))&~strcmp(ff{f},'wind_seasurfaceId')
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_part,:); 
                     elseif strcmp(ff{f},'spec_time')|size(SpotData.(ff{f}),2)>1
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_s,:); 
                     else
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
-                    end                
+                    end
                 end
+                clear ff idx_w idx_t f idx_p idx_pstd
                 %check that it's new data
                 if SpotData.time(1)>archive_data.time(end)
                     %perform some QA/QC --- QARTOD 19 and QARTOD 20        
-                    [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                        
-                
+                    [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                               
+
                     %save data to different formats        
                     realtime_archive_mat(buoy_info, data);
                     realtime_backup_mat(buoy_info, data);
@@ -223,7 +252,6 @@ end
 
 %%
 % quit
-
 
 
 
