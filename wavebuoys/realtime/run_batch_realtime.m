@@ -1,7 +1,7 @@
 %% run batch process
-
+tic
 %add wavebuoy_tools to path 
-% addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
+addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
 
 %suppress warnings
 warning('off')
@@ -51,4 +51,7 @@ for jj = 1:size(buoy_metadata)
     clear buoy_info 
 end
 
+log_message = ['Elapsed run time is: ' num2str(toc) ' seconds']; 
+fprintf(flog, [log_message ' \n']); 
 fclose(flog);
+
