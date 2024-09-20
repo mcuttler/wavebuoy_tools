@@ -152,7 +152,7 @@ if strcmp(buoy_info.type,'sofar')==1
                     try
                         update_website_buoy_info(buoy_info, data); 
                     catch
-                        log_message = 'code failed on updating buosy.csv'; 
+                        log_message = 'code failed on updating buoys.csv'; 
                     end                    
                 end
             end
