@@ -22,20 +22,26 @@ function [displacements, displacements_hdr, surface_temp, baro, gps, smart_moori
 disp('concatenating displacements'); 
 files = dir([sofarpath '\*_FLT.csv']); 
 if ~isempty(files)
+    displacements=[];
     for i = 1:size(files)
-        dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');     
-        %should only have 5 variables
-        dum = dum(:,1:5); 
-        dum.Properties.VariableNames = {'millis','GPSEpoch','x','y','z'};  
-        
-        dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
-        dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,'RowTimes',dt,'VariableNames',{'x','y','z'});  
-        if i == 1
-            displacements = dumt; 
-        else
+       
+
+        %skip first 0000 files as usually contain no data, also make sure
+        %file is at least 200 bytes
+        if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
+
+            dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');     
+            %should only have 5 variables
+            dum = dum(:,1:5); 
+            dum.Properties.VariableNames = {'millis','GPSEpoch','x','y','z'};  
+            
+            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
+            dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,'RowTimes',dt,'VariableNames',{'x','y','z'});  
+
             displacements = [displacements; dumt]; 
+
+            clear dum dt dumt; 
         end
-        clear dum dt dumt; 
         
     end
 
@@ -52,22 +58,28 @@ end
 disp('concatenating surface temperature'); 
 files = dir([sofarpath '\*_SST.csv']); 
 if ~isempty(files)
+    
+    surface_temp=[];
+
     for i = 1:size(files)
-        dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
+
         
-        %should only have 2 variables
-        dum = dum(:,1:2); 
-        dum.Properties.VariableNames = {'GPSEpoch','temperature'}; 
-        
-        dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
-        dumt = timetable(dum.temperature,'RowTimes',dt,'VariableNames',{'temperature'}); 
-        
-        if i == 1
-            surface_temp = dumt; 
-        else
-            surface_temp = [surface_temp; dumt]; 
+        %skip first 0000 files as usually contain no data
+        if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
+    
+            dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
+            
+            %should only have 2 variables
+            dum = dum(:,1:2); 
+            dum.Properties.VariableNames = {'GPSEpoch','temperature'}; 
+            
+            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
+            dumt = timetable(dum.temperature,'RowTimes',dt,'VariableNames',{'temperature'}); 
+    
+             surface_temp = [surface_temp; dumt]; 
+    
+            clear dum dt dumt; 
         end
-        clear dum dt dumt;         
     end
         %mask out NaT
     mask = ~isnat(surface_temp.Time); 
@@ -78,23 +90,27 @@ end
 %% baro
 disp('concatenating barometric pressure'); 
 files = dir([sofarpath '\*_BARO.csv']); 
-if ~isempty(files)
+if ~isempty(files) 
+    
+    baro=[];
+
     for i = 1:size(files)
-        dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
-        
-        %should only have 2 variables
-        dum = dum(:,1:2); 
-        dum.Properties.VariableNames = {'GPSEpoch','baro_pressure'}; 
-        
-        dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
-        dumt = timetable(dum.baro_pressure,'RowTimes',dt,'VariableNames',{'baro_pressure'}); 
-        
-        if i == 1
-            baro = dumt; 
-        else
+       
+        %skip first 0000 files as usually contain no data
+        if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
+            dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
+            
+            %should only have 2 variables
+            dum = dum(:,1:2); 
+            dum.Properties.VariableNames = {'GPSEpoch','baro_pressure'}; 
+            
+            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
+            dumt = timetable(dum.baro_pressure,'RowTimes',dt,'VariableNames',{'baro_pressure'}); 
+            
             baro = [baro; dumt]; 
+            
+            clear dum dt dumt; 
         end
-        clear dum dt dumt; 
     end
     %mask out NaT
     mask = ~isnat(baro.Time); 
@@ -132,27 +148,30 @@ end
 disp('concatenating gps positions'); 
 files = dir([sofarpath '\*_LOC.csv']); 
 if ~isempty(files)
-    for i = 1:size(files)
-        dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
-        
-        %should only have 5 variables
-        dum = dum(:,1:5); 
-        dum.Properties.VariableNames = {'GPSEpoch','lat','lat_min','lon','lon_min'}; 
-        
-        dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
-        %files already have negative to indicate N-S, so should be ok to just
-        %add 
-        dlat = dum.lat + ((dum.lat_min./10^5)/60); 
-        dlon = dum.lon + ((dum.lon_min./10^5)/60); 
-        
-        dumt = timetable(dlon, dlat,'RowTimes',dt,'VariableNames',{'longtiude','latitude'}); 
-        
-        if i == 1
-            gps = dumt; 
-        else
+     gps=[];
+     for i = 1:size(files)
+       
+        %skip first 0000 files as usually contain no data
+        if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
+    
+            dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
+            
+            %should only have 5 variables
+            dum = dum(:,1:5); 
+            dum.Properties.VariableNames = {'GPSEpoch','lat','lat_min','lon','lon_min'}; 
+            
+            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
+            %files already have negative to indicate N-S, so should be ok to just
+            %add 
+            dlat = dum.lat + ((dum.lat_min./10^5)/60); 
+            dlon = dum.lon + ((dum.lon_min./10^5)/60); 
+            
+            dumt = timetable(dlon, dlat,'RowTimes',dt,'VariableNames',{'longtiude','latitude'}); 
+            
             gps = [gps; dumt]; 
+        
+            clear dum dt dumt; 
         end
-        clear dum dt dumt; 
     end
             %mask out NaT
     mask = ~isnat(gps.Time); 
@@ -166,21 +185,25 @@ disp('concatenating hdr files');
 files = dir([sofarpath '\*_HDR.csv']); 
 
 if ~isempty(files)
+    displacements_hdr=[];
     for i = 1:size(files)
-        dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
         
-        %should only have 5 variables
-        dum = dum(:,1:5); 
-        dum.Properties.VariableNames = {'GPSEpoch','x','y','z','n'}; 
-        
-        dt = datetime(dum.GPSEpoch,'convertfrom','posixtime');     
-        dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,dum.n./1000, 'RowTimes',dt,'VariableNames',{'x','y','z','n'});  
-        if i == 1
-            displacements_hdr = dumt; 
-        else
+
+        %skip first 0000 files as usually contain no data
+        if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
+    
+            dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
+            
+            %should only have 5 variables
+            dum = dum(:,1:5); 
+            dum.Properties.VariableNames = {'GPSEpoch','x','y','z','n'}; 
+            
+            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime');     
+            dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,dum.n./1000, 'RowTimes',dt,'VariableNames',{'x','y','z','n'});  
             displacements_hdr = [displacements_hdr; dumt]; 
+    
+            clear dum dt dumt; 
         end
-        clear dum dt dumt; 
         
     end
 
