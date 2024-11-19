@@ -35,6 +35,8 @@ buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 150; %meters for watch circle radius 
 buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
 buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
+buoy_info.ftp_details = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\bom_ftp_upload.csv';
+
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 

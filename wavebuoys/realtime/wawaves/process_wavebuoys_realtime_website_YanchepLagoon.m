@@ -12,7 +12,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31569C'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-31825C'; %spotter serial number, or just Datawell 
 buoy_info.name = 'YanchepLagoon'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
@@ -32,6 +32,8 @@ buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Dat
 buoy_info.datawell_datapath = 'E:\waved'; %top level directory for Datawell CSVs
 buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 190; %meters for watch circle radius 
+buoy_info.ftp_details = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\bom_ftp_upload.csv';
+
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 

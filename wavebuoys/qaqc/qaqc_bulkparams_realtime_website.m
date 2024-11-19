@@ -17,7 +17,18 @@ if strcmp(buoy_info.type,'sofar')
     fields_archive = fieldnames(archive_data); 
     fields_int = intersect(fields, fields_archive);
     for j = 1:size(fields_int,1)
+        %try to catch difference sized columns and pad with nans (usually
+        %for spectral data)
+        old = size(archive_data.(fields_int{j,:}),2); 
+        new = size(new_data.(fields_int{j,:}),2); 
+        if old < new 
+            archive_data.(fields_int{j,:})(:,old+1:new)=nan; 
+        elseif old > new
+            new_data.(fields_int{j,:})(:,new+1:old)=nan;
+        end
+
         bulkparams.(fields_int{j}) = [archive_data.(fields_int{j,:}); new_data.(fields_int{j,:})]; 
+        
     end
     %now include any missing fields from archive data
     for j = 1:size(fields_archive)

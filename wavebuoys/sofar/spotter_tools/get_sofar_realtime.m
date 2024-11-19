@@ -283,6 +283,7 @@ end
     
 %% SMART MOORING vs SPOTTER TEMPERAUTRE AND PRESSURE
 Spotter.temp_time = []; 
+Spotter.bott_temp_time = [];
 Spotter.surf_temp = []; 
 Spotter.bott_temp = []; 
 Spotter.pressure =[]; 
@@ -334,10 +335,12 @@ elseif ~isempty(resp_sensor.Body.Data.data)
                 Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
             elseif resp_sensor.Body.Data.data(j).sensorPosition==2
                 Spotter.bott_temp = [Spotter.bott_temp; resp_sensor.Body.Data.data(j).value]; 
+                Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
             else
                 Spotter.surf_temp = [Spotter.surf_temp; NaN];
                 Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
                 Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
+                Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
             end
         elseif strcmp(resp_sensor.Body.Data.data(j).unit_type,'pressure')
             %check whether mean or std
@@ -360,7 +363,24 @@ elseif ~isempty(resp_sensor.Body.Data.data)
             end
         end
     end
-    %if no sensor data, act like normal wave buoy
+    %add check for surface and bottom temperature data
+    if size(Spotter.surf_temp,1)~= size(Spotter.bott_temp,1)
+        if size(Spotter.surf_temp,1)>size(Spotter.bott_temp,1)
+            bdum = ones(size(Spotter.surf_temp,1),1)*nan; 
+            [~,I,~] = intersect(Spotter.temp_time, Spotter.bott_temp_time);             
+            bdum(I) = Spotter.bott_temp; 
+            Spotter.bott_temp = bdum; 
+            clear bdum I
+        elseif size(Spotter.surf_temp,1)<size(Spotter.bott_temp,1)
+            bdum = ones(size(Spotter.bott_temp,1),1); 
+            [~,I,~] = intersect(Spotter.bott_temp_time, Spotter.temp_time); 
+            bdum(I) = Spotter.surf_temp; 
+            Spotter.surf_temp = bdum; 
+            clear bdum I
+        end
+       
+    end                    
+%if no sensor data, act like normal wave buoy
 else
     Spotter.temp_time = Spotter.time;
     Spotter.press_time = Spotter.time;
@@ -369,7 +389,12 @@ else
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure_std =ones(size(Spotter.time,1),1).*-9999; 
-end        
+end   
+
+%remove bott temp time if exists
+if isfield(Spotter,'bott_temp_time')
+    Spotter = rmfield(Spotter,'bott_temp_time'); 
+end
 %% Check and fill variables when empty
 
 %check temperature 
@@ -399,6 +424,7 @@ else
     flag = 0;
 end
 % flag = 1; 
+
 
 end
 
