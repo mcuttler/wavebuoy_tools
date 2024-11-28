@@ -220,9 +220,14 @@ else
     smart_mooring_bm_agg = nan; 
 end
 
-%% smart mooring - legacy - TO DO 
+%% smart mooring - legacy 
 
 %SMD files 
+disp('concatenating smart mooring data'); 
+files = dir([sofarpath '\*_SMD.csv']); 
+
+if ~isempty(files)
+    smart_mooring = []; 
 
 %% GPS
 disp('concatenating gps positions'); 
