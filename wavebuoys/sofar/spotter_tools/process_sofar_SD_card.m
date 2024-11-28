@@ -227,7 +227,65 @@ disp('concatenating smart mooring data');
 files = dir([sofarpath '\*_SMD.csv']); 
 
 if ~isempty(files)
-    smart_mooring = []; 
+    for i = 1:size(files)    
+        dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');
+        if ~isempty(dum)
+            %only keep rows with 'data'
+            mask = (strcmp(dum.Var3,'DATA') & dum.Var1>0); 
+            dum = dum(mask,:);             
+            varnames = {'time','node','logtype','instrument','time_on'}; 
+            if ~isempty(dum)
+                %check instrument type
+                if contains(dum.Var4(1),'SOFT')
+                    varnames = [varnames,'temp_degC']; 
+                    %amount to divide temperature by
+                    divT = 100; 
+                    dum = dum(:,1:length(varnames));
+                    dum.Properties.VariableNames = varnames;     
+                    dum.temp_degC = dum.temp_degC./divT; 
+                elseif contains(dum.Var3(1),'RBR')
+                    if strcmp(dum.Var4(1),'RBRT')
+                        varnames = [varnames,'temp_degC']; 
+                        divT = 100; 
+                        dum = dum(:,1:length(varnames));
+                        dum.Properties.VariableNames = varnames;     
+                        dum.temp_degC = dum.temp_degC./divT; 
+                    elseif strcmp(dum.Var4(1),'RBRD')
+                        varnames = [varnames,'pressure_dbar']; 
+                        dum = dum(:,1:length(varnames));
+                        dum.Properties.VariableNames = varnames;   
+                    elseif strcmp(dum.Var4(1),'RBRDT')
+                        varnames = [varnames,'temp_degC','pressure_dbar']; 
+                        divT = 100; 
+                        dum = dum(:,1:length(varnames));
+                        dum.Properties.VariableNames = varnames;     
+                        dum.temp_degC = dum.temp_degC./divT; 
+                    end
+                elseif contains(dum.Var4(1),'aanderaa')
+                    varnames = [varnames, 'abs_speed_cm-s','direction_deg','north_cm-s','east_cm-s','heading_deg',...
+                        'tilt_x_deg','tilt_y_deg','single_ping_std','signal_strength_dB','ping_count','abs_tilt_deg',...
+                        'max_tilt','std_tilt','temp_degC']; 
+                    dum = dum(:,1:length(varnames));
+                    dum.Properties.VariableNames = varnames;   
+                end                                   
+                
+                dt = datetime(dum.time,'convertfrom','posixtime'); 
+                dumt = table2timetable(dum,'RowTimes',dt); 
+                if i == 1
+                    smart_mooring = dumt; 
+                else
+                    try
+                        smart_mooring = [smart_mooring; dumt]; 
+                    catch
+                        smart_mooring = dumt; 
+                    end                
+                end            
+            end      
+        end
+    end
+else
+    smart_mooring = nan; 
+end
 
 %% GPS
 disp('concatenating gps positions'); 
