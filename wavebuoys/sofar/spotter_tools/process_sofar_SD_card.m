@@ -17,7 +17,7 @@
 % [out]s = process_sofar_SD_card(sofarpath, utcoffset); 
 
 %%
-function [displacements, displacements_hdr, surface_temp, baro, gps, smart_mooring_bm, smart_mooring_bm_agg] = process_sofar_SD_card(sofarpath)
+function [displacements, displacements_hdr, surface_temp, baro, gps, smart_mooring, smart_mooring_bm, smart_mooring_bm_agg] = process_sofar_SD_card(sofarpath)
 
 %% displacements
 disp('concatenating displacements'); 
@@ -236,51 +236,55 @@ if ~isempty(files)
             varnames = {'time','node','logtype','instrument','time_on'}; 
             if ~isempty(dum)
                 %check instrument type
-                if contains(dum.Var4(1),'SOFT')
-                    varnames = [varnames,'temp_degC']; 
-                    %amount to divide temperature by
-                    divT = 100; 
-                    dum = dum(:,1:length(varnames));
-                    dum.Properties.VariableNames = varnames;     
-                    dum.temp_degC = dum.temp_degC./divT; 
-                elseif contains(dum.Var3(1),'RBR')
-                    if strcmp(dum.Var4(1),'RBRT')
+                try
+                    if contains(dum.Var4(1),'SOFT')
                         varnames = [varnames,'temp_degC']; 
+                        %amount to divide temperature by
                         divT = 100; 
                         dum = dum(:,1:length(varnames));
                         dum.Properties.VariableNames = varnames;     
                         dum.temp_degC = dum.temp_degC./divT; 
-                    elseif strcmp(dum.Var4(1),'RBRD')
-                        varnames = [varnames,'pressure_dbar']; 
+                    elseif contains(dum.Var4(1),'RBR')
+                        if strcmp(dum.Var4(1),'RBRT')
+                            varnames = [varnames,'temp_degC']; 
+                            divT = 100; 
+                            dum = dum(:,1:length(varnames));
+                            dum.Properties.VariableNames = varnames;     
+                            dum.temp_degC = dum.temp_degC./divT; 
+                        elseif strcmp(dum.Var4(1),'RBRD')
+                            varnames = [varnames,'pressure_dbar']; 
+                            dum = dum(:,1:length(varnames));
+                            dum.Properties.VariableNames = varnames;   
+                        elseif strcmp(dum.Var4(1),'RBRDT')
+                            varnames = [varnames,'temp_degC','pressure_dbar']; 
+                            divT = 100; 
+                            dum = dum(:,1:length(varnames));
+                            dum.Properties.VariableNames = varnames;     
+                            dum.temp_degC = dum.temp_degC./divT; 
+                        end
+                    elseif contains(dum.Var4(1),'aanderaa')
+                        varnames = [varnames, 'abs_speed_cm-s','direction_deg','north_cm-s','east_cm-s','heading_deg',...
+                            'tilt_x_deg','tilt_y_deg','single_ping_std','signal_strength_dB','ping_count','abs_tilt_deg',...
+                            'max_tilt','std_tilt','temp_degC']; 
                         dum = dum(:,1:length(varnames));
                         dum.Properties.VariableNames = varnames;   
-                    elseif strcmp(dum.Var4(1),'RBRDT')
-                        varnames = [varnames,'temp_degC','pressure_dbar']; 
-                        divT = 100; 
-                        dum = dum(:,1:length(varnames));
-                        dum.Properties.VariableNames = varnames;     
-                        dum.temp_degC = dum.temp_degC./divT; 
-                    end
-                elseif contains(dum.Var4(1),'aanderaa')
-                    varnames = [varnames, 'abs_speed_cm-s','direction_deg','north_cm-s','east_cm-s','heading_deg',...
-                        'tilt_x_deg','tilt_y_deg','single_ping_std','signal_strength_dB','ping_count','abs_tilt_deg',...
-                        'max_tilt','std_tilt','temp_degC']; 
-                    dum = dum(:,1:length(varnames));
-                    dum.Properties.VariableNames = varnames;   
-                end                                   
-                
-                dt = datetime(dum.time,'convertfrom','posixtime'); 
-                dumt = table2timetable(dum,'RowTimes',dt); 
-                if i == 1
-                    smart_mooring = dumt; 
-                else
-                    try
-                        smart_mooring = [smart_mooring; dumt]; 
-                    catch
+                    end                                                   
+                    
+                    dt = datetime(dum.time,'convertfrom','posixtime'); 
+                    dumt = table2timetable(dum,'RowTimes',dt); 
+                    if i == 1
                         smart_mooring = dumt; 
-                    end                
-                end            
-            end      
+                    else
+                        try
+                            smart_mooring = [smart_mooring; dumt]; 
+                        catch
+                            smart_mooring = dumt; 
+                        end                
+                    end     
+                catch
+                    disp(['could not determine instrument type']); 
+                end      
+            end
         end
     end
 else
