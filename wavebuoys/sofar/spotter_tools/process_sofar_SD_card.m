@@ -285,6 +285,8 @@ if ~isempty(files)
                     disp(['could not determine instrument type']); 
                 end      
             end
+        else
+            smart_mooring=nan;
         end
     end
 else
@@ -313,16 +315,21 @@ if ~isempty(files)
             dlat = dum.lat + ((dum.lat_min./10^5)/60); 
             dlon = dum.lon + ((dum.lon_min./10^5)/60); 
             
-            dumt = timetable(dlon, dlat,'RowTimes',dt,'VariableNames',{'longtiude','latitude'}); 
+            dumt = timetable(dlon, dlat,'RowTimes',dt,'VariableNames',{'longitude','latitude'}); 
             
             gps = [gps; dumt]; 
         
             clear dum dt dumt; 
         end
-    end
-            %mask out NaT
+     end
+     %mask out NaT
     mask = ~isnat(gps.Time); 
-    gps = gps(mask,:); 
+    gps = gps(mask,:);     
+    
+    % %get rid of obviously bad GPS points
+    ind = (gps.latitude>90|gps.latitude<-90) | (gps.longitude>180 | gps.longitude<-180);
+    gps = gps(~ind,:); 
+
 else
     gps = nan; 
 end
