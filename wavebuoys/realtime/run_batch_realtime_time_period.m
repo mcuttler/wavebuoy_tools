@@ -18,7 +18,7 @@ tend_master = datenum(2025,1,1,0,0,0);
 tloop = tstart_master:1:tend_master;
 
 % loop over buoys and execute 
-for jj = 1:size(buoy_metadata)
+for jj = 16:size(buoy_metadata)
     %build buoy info from metadata
     buoy_info_fields = buoy_metadata.Properties.VariableNames; 
     for kk = 1:length(buoy_info_fields)
@@ -33,27 +33,36 @@ for jj = 1:size(buoy_metadata)
     disp(['running ' buoy_info.name]); %comment out when running for real 
 
     %loop over every date 
+    data = []; 
     for kk = 1:length(tloop)-1
-        [SpotData] = get_sofar_realtime_time_period(buoy_info,tloop(kk), tloop(kk+1));
-        for i = 1:size(SpotData.time,1)
-            SpotData.name{i,1} = buoy_info.name; 
-        end
-
-        if kk ==1
-            data = SpotData; 
-        else
-            fields = fieldnames(SpotData); 
-            for mm = 1:length(fields)
-                data.(fields{mm}) = [data.(fields{mm}); SpotData.(fields{mm})]; 
+        try
+            [SpotData] = get_sofar_realtime_time_period(buoy_info,tloop(kk), tloop(kk+1));
+            for i = 1:size(SpotData.time,1)
+                SpotData.name{i,1} = buoy_info.name; 
             end
-        end            
+            
+            if kk ==1
+                data = SpotData; 
+            else
+                if isstruct(data)
+                    fields = fieldnames(SpotData); 
+                    for mm = 1:length(fields)
+                        data.(fields{mm}) = [data.(fields{mm}); SpotData.(fields{mm})]; 
+                    end
+                else
+                    data = SpotData; 
+                end
+            end            
+        catch
+            disp(['no data for: ' datestr(tloop(kk))]); 
+        end
     end    
     
     [data] = qaqc_bulkparams_realtime_website(buoy_info, data, SpotData);   
     realtime_archive_mat(buoy_info, data);
     realtime_backup_mat(buoy_info, data);            
 
-    clear buoy_info 
+    clear buoy_info SpotData data; 
 end
 
 
