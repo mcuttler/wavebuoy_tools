@@ -5,15 +5,20 @@
 %for current or preceding month 
 
 function [data] = load_archived_data(buoy_info)
-data  = []; 
-dyr = dir([buoy_info.archive_path '\' buoy_info.name '\mat_archive\']); 
-%only use latest
-dyr = dyr(end); 
-%now get all files in each year                
-dmths = dir([buoy_info.archive_path '\' buoy_info.name '\mat_archive\' dyr.name]); 
-%only keep latest
-dmths = dmths(end); 
-monthly_file = fullfile(dmths.folder, dmths.name); 
+% data  = []; 
+% dyr = dir([buoy_info.archive_path '\' buoy_info.name '\mat_archive\']); 
+% %only use latest
+% dyr = dyr(end); 
+% %now get all files in each year                
+% dmths = dir([buoy_info.archive_path '\' buoy_info.name '\mat_archive\' dyr.name]); 
+% %only keep latest
+% dmths = dmths(end); 
+% monthly_file = fullfile(dmths.folder, dmths.name); 
+
+%potential new option if buoys break at new month/year 
+dfiles = dir(fullfile(buoy_info.archive_path, buoy_info.name,'mat_archive','**\*.mat')); 
+monthly_file = fullfile(dfiles(end).folder, dfiles(end).name); 
+
 if exist(monthly_file)
     try                
         dum = load(monthly_file);
@@ -29,7 +34,7 @@ if exist(monthly_file)
 end
 
 
-%%        
+%% OLD  
 % dv = datevec(SpotData.time); 
 % ddv = unique(dv(:,1:2),'rows'); 
 % %if one month 
