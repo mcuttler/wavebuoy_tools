@@ -13,8 +13,8 @@ import matlab.net.http.*
 header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
 r = RequestMessage('GET', header);
 %wave data
-% tstart = datestr(datenum(now) - hours(12),30); 
-% tend = datestr(datenum(now)+ hours(2),30); 
+tstart = datestr(tstart,30); 
+tend = datestr(tend,30); 
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
 
