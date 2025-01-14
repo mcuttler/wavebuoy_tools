@@ -1,7 +1,7 @@
 %%  Process wave buoys (real time) for display on wawaves.org
 
 
-function [log_message] = batch_realtime_service_time_period(buoy_info)
+function [log_message] = batch_realtime_time_period(buoy_info)
 
 %initiate empty log message
 log_message = []; 
