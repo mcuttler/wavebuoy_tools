@@ -25,13 +25,13 @@ uri_waves=URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.s
 
 resp = send(r,uri_waves);
 status = resp.StatusCode;
-disp([status]); 
+% disp([status]); 
 
 
 uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]); 
 resp_sensor = send(r,uri_sensor);
 status = resp_sensor.StatusCode;
-disp([status]); 
+% disp([status]); 
 
 
 
