@@ -33,6 +33,11 @@ resp_sensor = send(r,uri_sensor);
 status = resp_sensor.StatusCode;
 disp([status]); 
 
+uri_latest = URI(['https://api.sofarocean.com/api/latest-data?spotterId=' buoy_info.serial]);
+resp_latest = send(r,uri_latest);
+status = resp_latest.StatusCode;
+disp([status]); 
+
 
 
 %%   WAVE PARAMETERS AND WIND
@@ -413,6 +418,14 @@ if isempty(Spotter.pressure)&&isempty(Spotter.pressure_std)
     Spotter.pressure = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure_std = ones(size(Spotter.time,1),1).*-9999; 
 end
+
+%% add in humidity and voltage 
+
+Spotter.systime = datenum(resp_latest.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
+Spotter.batteryVoltage = resp_latest.Body.Data.data.batteryVoltage;
+Spotter.batteryPower =  resp_latest.Body.Data.data.batteryPower;
+Spotter.solarVoltage =  resp_latest.Body.Data.data.solarVoltage;
+Spotter.humidity =  resp_latest.Body.Data.data.humidity;
 
 
 

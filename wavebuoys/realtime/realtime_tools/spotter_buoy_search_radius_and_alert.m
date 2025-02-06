@@ -40,11 +40,18 @@ if tnow - SpotData.time(end) > in_cut/24 %if time difference greater than cutoff
     mail_title = [buoy_info.name ' buoy data >' num2str(in_cut) ' hrs old'];
     mail_message = [buoy_info.name ' buoy data last reported ' num2str(dt) '  hrs ago']; 
     
-    sendmail('jeff.hansen@uwa.edu.au',mail_title,mail_message) ;
-    sendmail('michael.cuttler@uwa.edu.au', mail_title, mail_message) ;
-    sendmail('carlin.alerts@outlook.com.au', mail_title, mail_message) ;
-    sendmail('matt.hatcher@uwa.edu.au', mail_title, mail_message) ;
-    sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
+    if isfield(buoy_info,'alert_emails')
+        alert_emails = strsplit(buoy_info.alert_emails,';'); 
+        for aa = 1:length(alert_emails)
+            sendmail(strrep(alert_emails{aa},' ',''), mail_title, mail_message); 
+        end
+    else        
+        sendmail('jeff.hansen@uwa.edu.au',mail_title,mail_message) ;
+        sendmail('michael.cuttler@uwa.edu.au', mail_title, mail_message) ;
+        sendmail('carlin.alerts@outlook.com.au', mail_title, mail_message) ;
+        sendmail('matt.hatcher@uwa.edu.au', mail_title, mail_message) ;
+        sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
+    end
 else
     warning.time = 0; 
 end
