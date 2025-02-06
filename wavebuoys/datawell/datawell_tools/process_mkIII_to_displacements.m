@@ -14,7 +14,7 @@
 %contain several days...
 
 %% pull in Hs values and time stamp (time stamp corresponds to start of sample interval)
-dum = dir('X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\Buoy_displacement_processing\Tantabiddi_buoy_data\Tantabiddi_19_20\processed_SDT'); 
+dum = dir('P:\HANSEN_UWA-UNSW_Linkage\Data\Waves_WaterLevels\DOT_waves\Jurien\Raw_OnBoard\JUR-23-24\processed_SDT'); 
 dum = dum(3:end); 
 sdt = struct('time',[],'hs',[]); 
 for i = 1:size(dum); 
@@ -32,11 +32,11 @@ sdt.hs = sdt.hs(I);
 
 %% process displacements 
 %Get list of files in directory
-addpath('C:\Data\wavebuoy_tools\wavebuoys\datawell\datawell_tools'); 
-dum = dir('X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\Buoy_displacement_processing\Tantabiddi_buoy_data\Tantabiddi_19_20\processed_RDT'); 
+addpath('D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys\datawell\datawell_tools'); 
+dum = dir('P:\HANSEN_UWA-UNSW_Linkage\Data\Waves_WaterLevels\DOT_waves\Jurien\Raw_OnBoard\JUR-23-24\processed_RDT'); 
 dum = dum(3:end); 
 % determine date of each file and number of days covered
-yrs = [2019; 2020]; 
+yrs = [2023; 2024]; 
 cnt = 1; 
 displacements = struct('time',[],'heave',[], 'north',[],'west',[],'checksum',[]); 
 for i = 1:size(dum,1); 
