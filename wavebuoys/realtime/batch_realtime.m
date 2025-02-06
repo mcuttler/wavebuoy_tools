@@ -14,7 +14,9 @@ if strcmp(buoy_info.type,'sofar')==1
         [SpotData] = get_sofar_realtime(buoy_info, limit);         
         flag = 1;                                
     catch
-        [warning] = spotter_get_data_fail_warning(buoy_info);
+        if buoy_info.send_alert_emails==1
+            [warning] = spotter_get_data_fail_warning(buoy_info);
+        end
         flag = 0; 
         log_message = [log_message,' (1) code failed on getting Spotter data - no new data or wrong API token'];
     end                            
