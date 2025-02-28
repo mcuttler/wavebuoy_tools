@@ -8,7 +8,7 @@ warning('off')
 
 %read in metadata for buoys to run
 dpath = 'X:\CUTTLER_wawaves\Data\website\auswaves'; 
-dname = 'buoys_metadata_test.csv'; 
+dname = 'buoys_metadata.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
