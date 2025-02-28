@@ -94,6 +94,15 @@ if strcmp(buoy_info.type,'sofar')==1
                 else
                     idx_part = [];
                 end
+
+                %add system data (voltage, humidity)
+                if isfield(SpotData,'systime') & isfield(archive_data,'systime')
+                    idx_sys = find(SpotData.systime>archive_data.systime(end)); 
+                elseif isfield(SpotData,'systime') & ~isfield(archive_data,'systime')
+                    idx_sys = [1:length(SpotData.systime)]';
+                else
+                    idx_sys = []; 
+                end
             catch
                 log_message = [log_message, ' (4) code failed on indexing SpotData for new data']; 
             end
@@ -112,11 +121,13 @@ if strcmp(buoy_info.type,'sofar')==1
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_part,:); 
                         elseif strcmp(ff{f},'spec_time')|size(SpotData.(ff{f}),2)>1
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_s,:); 
+                        elseif strcmp(ff{f},'systime') | contains(ff{f},'batt') | contains(ff{f},'solar') | contains(ff{f},'humid')
+                            SpotData.(ff{f}) = SpotData.(ff{f})(idx_sys,:); 
                         else
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
                         end
                     end
-                    clear ff idx_w idx_t f idx_p idx_pstd
+                    clear ff idx_w idx_t f idx_p idx_pstd idx_sys
                 catch
                     log_message = [log_message, ' (5) code failed on cleaning up SpotData for new data']; 
                 end                
@@ -129,7 +140,13 @@ if strcmp(buoy_info.type,'sofar')==1
                     catch
                         log_message = [log_message, ' (6) code failed on running QAQC']; 
                     end
-                
+                    
+                    % %calculate trends in humidity and battery voltage for
+                    % %fouling alerts
+                    % try
+                    %     data.sent_fouling_alert = spotter_buoy_volt_humid_alert(buoy_info, data); 
+
+                    
                     %save data to different formats 
                     try
                         realtime_archive_mat(buoy_info, data);
@@ -139,6 +156,7 @@ if strcmp(buoy_info.type,'sofar')==1
                         log_message = [log_message, ' (7) code failed on archiving or writing text file'];
                     end
                     
+
                     
                     %output MEM and SST plots --- only most recent time point                     
                     if strcmp(buoy_info.DataType,'spectral')                        
@@ -174,6 +192,8 @@ if strcmp(buoy_info.type,'sofar')==1
             catch
                 log_message = [log_message, ' (7) code failed on archiving or writing text file'];
             end
+
+            % run quick check on humidity and solar for fouling alerts 
                         
             %output MEM and SST plots 
             if strcmp(buoy_info.DataType,'spectral')        
