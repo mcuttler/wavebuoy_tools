@@ -2,8 +2,7 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
+
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -14,7 +13,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31573C'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-31395C'; %spotter serial number, or just Datawell 
 buoy_info.name = 'OceanBeach'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V3'; %or DWR4 for Datawell, for example
@@ -23,8 +22,8 @@ buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'OceanBeach';
 buoy_info.DeployDepth = 42; 
-buoy_info.DeployLat = -35.04882; 
-buoy_info.DeployLon = 117.36450; 
+buoy_info.DeployLat = -35.04899; 
+buoy_info.DeployLon = 117.36380; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';

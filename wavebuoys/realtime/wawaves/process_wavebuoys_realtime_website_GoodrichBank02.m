@@ -2,8 +2,6 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -44,9 +42,17 @@ buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
 %Sofar Spotter (v1 and v2) 
 if strcmp(buoy_info.type,'sofar')==1            
     %check whether smart mooring or normal mooring
-    limit = buoy_info.UpdateTime*2; %not used in v2 code    
-    [SpotData] = get_sofar_realtime(buoy_info, limit); 
-    flag = 1;                         
+    limit = buoy_info.UpdateTime*2; %not used in v2 code   
+    %time range set to minus 12 hours - if it doesn't work then trigger
+    %alert
+    try
+        [SpotData] = get_sofar_realtime(buoy_info, limit);
+        flag = 1;  
+    catch
+        [warning] = spotter_get_data_fail_warning(buoy_info);
+        flag = 0; 
+    end
+                           
     
       
     if flag == 1
@@ -126,7 +132,7 @@ if strcmp(buoy_info.type,'sofar')==1
                         SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
                     end
                 end
-                clear ff idx_w idx_t f idx_p idx_pstd
+                clear ff idx_w idx_t f idx_p idx_pstd idx_part idx_s
                 %check that it's new data
                 if SpotData.time(1)>archive_data.time(end)
                     %perform some QA/QC --- QARTOD 19 and QARTOD 20        

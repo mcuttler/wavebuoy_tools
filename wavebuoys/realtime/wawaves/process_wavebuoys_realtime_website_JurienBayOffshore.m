@@ -2,8 +2,7 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
+
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -36,6 +35,8 @@ buoy_info.time_cutoff = 3; %hours
 buoy_info.search_rad = 150; %meters for watch circle radius 
 buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
 buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
+buoy_info.ftp_details = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\bom_ftp_upload.csv';
+
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
@@ -126,6 +127,8 @@ if strcmp(buoy_info.type,'sofar')==1
                     end
                 end                             
                 clear ff idx_w idx_t f idx_p idx_pstd  
+                
+                
                 if SpotData.time(1)>archive_data.time(end)
                     %perform some QA/QC --- QARTOD 19 and QARTOD 20        
                     [data] = qaqc_bulkparams_realtime_website(buoy_info, archive_data, SpotData);                                        

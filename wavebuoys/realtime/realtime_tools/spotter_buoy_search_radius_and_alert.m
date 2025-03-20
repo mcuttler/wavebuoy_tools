@@ -5,21 +5,27 @@ function [warning] = spotter_buoy_search_radius_and_alert(buoy_info, SpotData)
 %buoy time warning 
 in_cut=buoy_info.time_cutoff; %hours
 
-dev_loc = [buoy_info.DeployLat, buoy_info.DeployLon]; %lat lon location of development site buou
-[xdev_dep,ydev_dep]=gda94ll2utm(dev_loc(1),dev_loc(2));
 dev_watch=buoy_info.search_rad; %warning distance for offshore buoy, in m
-%watch radius for 30 m depth is 178 m per http://cdip.ucsd.edu/documents/index/gauge_docs/buoy_watch_circle.pdf
+
+%lat lon location of development site buou
+dev_loc = [buoy_info.DeployLat, buoy_info.DeployLon]; 
 
 %most recent latitude and longitude
 lat_dev=SpotData.lat(end); 
 long_dev=SpotData.lon(end);
 
-%convert to UTM
-[xdev,ydev,zn]=gda94ll2utm(lat_dev,long_dev);
-
+%convert to UTM - old 
+% [xdev_dep,ydev_dep]=gda94ll2utm(dev_loc(1),dev_loc(2));
+% [xdev,ydev,zn]=gda94ll2utm(lat_dev,long_dev);
 %calculate distance from deployment location
-dist_dev=sqrt((xdev-xdev_dep)^2+(ydev-ydev_dep)^2);
+% dist_dev=sqrt((xdev-xdev_dep)^2+(ydev-ydev_dep)^2);
+
+%new way using mapping toolbox
+wgs84 = wgs84Ellipsoid("m");
+dist_dev = distance(dev_loc(1), dev_loc(2), lat_dev, long_dev,wgs84); 
+
 tnow = datenum(now) - (8/24);  %current time in UTC
+
 if tnow - SpotData.time(end) > in_cut/24 %if time difference greater than cutoff, development site
     %set up email details
     warning.time = 1; 
@@ -40,11 +46,18 @@ if tnow - SpotData.time(end) > in_cut/24 %if time difference greater than cutoff
     mail_title = [buoy_info.name ' buoy data >' num2str(in_cut) ' hrs old'];
     mail_message = [buoy_info.name ' buoy data last reported ' num2str(dt) '  hrs ago']; 
     
-    sendmail('jeff.hansen@uwa.edu.au',mail_title,mail_message) ;
-    sendmail('michael.cuttler@uwa.edu.au', mail_title, mail_message) ;
-    sendmail('carlin.alerts@outlook.com.au', mail_title, mail_message) ;
-    sendmail('matt.hatcher@uwa.edu.au', mail_title, mail_message) ;
-    sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
+    if isfield(buoy_info,'alert_emails')
+        alert_emails = strsplit(buoy_info.alert_emails,';'); 
+        for aa = 1:length(alert_emails)
+            sendmail(strrep(alert_emails{aa},' ',''), mail_title, mail_message); 
+        end
+    else        
+        sendmail('jeff.hansen@uwa.edu.au',mail_title,mail_message) ;
+        sendmail('michael.cuttler@uwa.edu.au', mail_title, mail_message) ;
+        sendmail('carlin.alerts@outlook.com.au', mail_title, mail_message) ;
+        sendmail('matt.hatcher@uwa.edu.au', mail_title, mail_message) ;
+        sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
+    end
 else
     warning.time = 0; 
 end

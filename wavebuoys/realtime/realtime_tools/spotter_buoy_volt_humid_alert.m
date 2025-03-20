@@ -1,32 +1,19 @@
 %% check buoy location and time since last data, send alert email if outside limits
 
-function [warning] = spotter_buoy_volt_humid_alert(buoy_info)
+function [warning] = spotter_buoy_volt_humid_alert(buoy_info, data); 
 
-% threshholds for a warning being sent:
-V_min = buoy_info.V_min;
-Humid_max = buoy_info.Humid_max; 
 
-% Retreive buoy latest data point 
-% Accesses Spoondrift API to get most recent data from specified Spotter
-% SpotterID is string of Spotter name - i.e. 'SPOT-0093'
-% AQL token: a1b3c0dbaa16bb21d5f0befcbcca51
+% threshholds for a warning being sent - hard code, but could be added to
+% buoys_metadata.csv 
+V_min = 3.8; %Spotter battery is 3.7 V
+Humid_max = 80; 
 
-import matlab.net.*
-import matlab.net.http.*
-header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
-r = RequestMessage('GET', header);
+%calculate trend in Voltage and humidity over last week
+system_data = array2timetable([data.humidity, data.batteryVoltage],'RowTimes',datetime(data.systime,'convertfrom','datenum'),'VariableNames',{'humidity','voltage'}); 
+tr = timerange(system_data.Time(end)-days(7), system_data.Time(end)); 
+system_data = system_data(tr,:); 
 
-%get data
-uri = URI(['https://api.sofarocean.com/api/latest-data?spotterId=' buoy_info.serial]);
-
-resp = send(r,uri);
-status = resp.StatusCode;
-
-disp('Get Volt and Humid from API status - ')
-disp(status);
-
-V=resp.Body.Data.data.batteryVoltage(end);
-Humid = resp.Body.Data.data.humidity(end);
+dV = fitlm(system_data.Time
 
 if V < V_min % If voltage below voltage min warning   
     %set up email details

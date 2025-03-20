@@ -1,0 +1,2 @@
+﻿name,serial,type,datawell_name,version,processingSource,sofar_token,utc_offset,DeployLoc,DeployDepth,DeployLat,DeployLon,UpdateTime,DataType,web_path,archive_path,website_filename,backup_path,datawell_datapath,time_cutoff,search_rad
+OceanBeach,SPOT-31395C,sofar,nan,V3,hdr,e0eb70b6d9e0b5e00450929139ea34,8,OceanBeach,38,-35.0484167,117.3646833,1,spectral,E:\wawaves,G:\wawaves,buoys.csv,\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup,E:\waved,3,190

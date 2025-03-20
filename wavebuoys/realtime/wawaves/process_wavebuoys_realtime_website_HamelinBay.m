@@ -2,8 +2,7 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
+
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -15,7 +14,7 @@ clear; clc
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
 buoy_info.serial = 'SPOT-1800'; %spotter serial number, or just Datawell 
-buoy_info.name = 'UWA_Drifting11'; 
+buoy_info.name = 'HamelinBayDrift'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V2'; %or DWR4 for Datawell, for example
 % original HamelinBay Token 'f8f4c8b08d51c3440bfd7042bf40d1'

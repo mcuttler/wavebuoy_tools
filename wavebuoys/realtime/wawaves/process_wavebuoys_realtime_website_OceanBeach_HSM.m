@@ -2,9 +2,6 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
-%IMOS Coast facility token: 3492dc5f66a8fadca20aeb9c91ab00
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -24,8 +21,8 @@ buoy_info.sofar_token = '3492dc5f66a8fadca20aeb9c91ab00';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'OceanBeach_HSM';
 buoy_info.DeployDepth = 42; 
-buoy_info.DeployLat = -35.04933; 
-buoy_info.DeployLon = 117.36614; 
+buoy_info.DeployLat = -35.04965; 
+buoy_info.DeployLon = 117.36497; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'spectral'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';

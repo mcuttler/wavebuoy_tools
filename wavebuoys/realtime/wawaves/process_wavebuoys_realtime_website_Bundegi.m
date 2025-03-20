@@ -2,8 +2,7 @@
 
 %MC to update prior to merging into master branch
 
-%AQL public token: a1b3c0dbaa16bb21d5f0befcbcca51
-%UWA token: e0eb70b6d9e0b5e00450929139ea34
+
 
 %% set initial paths for wave buoy data to process and parser script
 clear; clc
@@ -14,7 +13,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-1578'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-1608'; %spotter serial number, or just Datawell 
 buoy_info.name = 'Bundegi'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'smart_mooring'; %or DWR4 for Datawell, for example
@@ -23,8 +22,8 @@ buoy_info.sofar_token = 'a1b3c0dbaa16bb21d5f0befcbcca51';
 buoy_info.utc_offset = 8; 
 buoy_info.DeployLoc = 'Bundegi';
 buoy_info.DeployDepth = 20; 
-buoy_info.DeployLat = -21.86495; 
-buoy_info.DeployLon = 114.18925; 
+buoy_info.DeployLat = -21.86383; 
+buoy_info.DeployLon = 114.19043; 
 buoy_info.UpdateTime =  1; %hours
 buoy_info.DataType = 'parameters'; %can be parameters if only bulk parameters, or spectral for including spectral coefficients
 buoy_info.web_path = 'E:\wawaves';
@@ -33,9 +32,9 @@ buoy_info.website_filename = 'buoys.csv';
 buoy_info.backup_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\realtime_archive_backup'; 
 buoy_info.datawell_datapath = 'E:\waved'; %top  level directory for Datawell CSVs
 buoy_info.time_cutoff = 3; %hours
-buoy_info.search_rad = 200; %meters for watch circle radius 
+buoy_info.search_rad = 300; %meters for watch circle radius 
 buoy_info.V_min=3.8; % minimum voltage before email alert is sent out
-buoy_info.Humid_max = 65; % Max Humidity before an email alert is sent out
+buoy_info.Humid_max = 85; % Max Humidity before an email alert is sent out
 %use this website to calculate magnetic declination: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml#declination
 % buoy_info.MagDec = 1.98; 
 
