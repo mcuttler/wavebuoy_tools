@@ -7,13 +7,13 @@ tic
 warning('off')
 
 %read in metadata for buoys to run
-dpath = 'X:\CUTTLER_wawaves\Data\website\auswaves'; 
-dname = 'buoys_metadata.csv'; 
+dpath = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\auswaves'; 
+dname = 'buoys_metadata_test.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
 %create log file for this run
-log_path = 'X:\CUTTLER_wawaves\Data\website\auswaves\log_files_test'; %modify this in future
+log_path = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\auswaves\log_files_test'; %modify this in future
 
 if ~isfolder(fullfile(log_path, num2str(year(datetime("today"))), num2str(month(datetime("today")),'%02d'), num2str(day(datetime("today")),'%02d'))) 
     mkdir(fullfile(log_path, num2str(year(datetime("today"))), num2str(month(datetime("today")),'%02d'), num2str(day(datetime("today")),'%02d')))

@@ -22,7 +22,7 @@ long_dev=SpotData.lon(end);
 
 %new way using mapping toolbox
 wgs84 = wgs84Ellipsoid("m");
-dist_dev = distance(dev_loc(1), dev_loc(2), lat_dev(1), long_dev(2),wgs84); 
+dist_dev = distance(dev_loc(1), dev_loc(2), lat_dev, long_dev,wgs84); 
 
 tnow = datenum(now) - (8/24);  %current time in UTC
 

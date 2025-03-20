@@ -421,12 +421,35 @@ end
 
 %% add in humidity and voltage 
 
-Spotter.systime = datenum(resp_latest.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
-Spotter.batteryVoltage = resp_latest.Body.Data.data.batteryVoltage;
-Spotter.batteryPower =  resp_latest.Body.Data.data.batteryPower;
-Spotter.solarVoltage =  resp_latest.Body.Data.data.solarVoltage;
-Spotter.humidity =  resp_latest.Body.Data.data.humidity;
+if ~isempty(resp_latest.Body.Data.data.waves)
+    Spotter.systime = datenum(resp_latest.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
+else
+    Spotter.systime = Spotter.time(end)
+end
 
+if ~isempty(resp_latest.Body.Data.data.batteryVoltage)
+    Spotter.batteryVoltage = resp_latest.Body.Data.data.batteryVoltage;
+else
+    Spotter.batteryVoltage=nan; 
+end
+
+if ~isempty(resp_latest.Body.Data.data.batteryPower)
+    Spotter.batteryPower =  resp_latest.Body.Data.data.batteryPower;
+else
+    Spotter.batteryPower = nan;
+end
+
+if ~isempty(resp_latest.Body.Data.data.solarVoltage)
+    Spotter.solarVoltage =  resp_latest.Body.Data.data.solarVoltage;
+else
+    Spotter.solarVoltage = nan;
+end
+ 
+if ~isempty(resp_latest.Body.Data.data.humidity)
+    Spotter.humidity =  resp_latest.Body.Data.data.humidity;
+else
+    Spotter.humidity = nan; 
+end
 
 
 %% check that mooring data has correc time stamps to continue
