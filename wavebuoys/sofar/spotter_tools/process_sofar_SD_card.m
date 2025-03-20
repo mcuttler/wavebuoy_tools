@@ -24,7 +24,7 @@ disp('concatenating displacements');
 files = dir([sofarpath '\*_FLT.csv']); 
 if ~isempty(files)
     displacements=[];
-    for i = 1:size(files)
+    for i = 1:size(files,1)
        
 
         %skip first 0000 files as usually contain no data, also make sure
@@ -62,7 +62,7 @@ if ~isempty(files)
     
     surface_temp=[];
 
-    for i = 1:size(files)
+    for i = 1:size(files,1)
 
         
         %skip first 0000 files as usually contain no data
