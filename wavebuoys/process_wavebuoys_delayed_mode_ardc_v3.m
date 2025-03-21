@@ -138,7 +138,7 @@ for b = 1:size(buoy_metadata,1)
         info.t0_thresh = 5; 
         
         %%  calculate integrated wave paremeters loop over and calculate parameters 
-        for i = 1:50%length(dt)-1
+        for i = 1:length(dt)-1
             disp(['processing time block ' num2str(i) ' out of ' num2str(length(dt)-1)]); 
             tr = timerange(dt(i), dt(i+1));  
             
