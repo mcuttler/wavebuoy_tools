@@ -10,20 +10,18 @@ addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools'));
 warning('off')
 
 %read in metadata for buoys to run
-dpath = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\vicwaves'; 
-dname = 'vicwaves_buoy_log_metadata.csv'; 
+dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
+dname = 'wawaves_buoy_log_metadata.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
 %get data by site
 sites = unique(buoy_metadata_master.name); 
 
-for dd = 1:size(sites,1)
-    if ~contains(sites{dd},'Apollo')
-        
+for dd = 1:size(sites,1)            
         buoy_metadata = buoy_metadata_master(strcmp(buoy_metadata_master.name,sites{dd}),:); 
         
-        yrs = 2019:2024; 
+        yrs = 2019:2025; 
         for yy = 1:length(yrs)
             if ~isfolder(fullfile(buoy_metadata.archive_path{1}, sites{dd},'mat_archive', num2str(yrs(yy))))
                 mkdir(fullfile(buoy_metadata.archive_path{1}, sites{dd},'mat_archive', num2str(yrs(yy)))); 
@@ -91,8 +89,8 @@ for dd = 1:size(sites,1)
         realtime_archive_text(buoy_info, data, size(data.time,1)); 
         
         clear data buoy_metadata  
-    end
 end
+
 
 toc
         
