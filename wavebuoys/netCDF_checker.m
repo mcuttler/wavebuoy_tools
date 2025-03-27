@@ -11,9 +11,9 @@
 %% read nc files 
 
 dpath = 'X:\CUTTLER_wawaves\Data\wawaves\OceanBeach\delayedmode\ProcessedData_DelayedMode'; 
-nc_int =  'UWA_20240701_OCEAN-BEACH_DM_WAVE-PARAMETERS_20240702.nc'; 
-nc_spec = 'UWA_20240701_OCEAN-BEACH_DM_WAVE-SPECTRA_20240702.nc'; 
-nc_disp = 'UWA_20240701_OCEAN-BEACH_DM_WAVE-RAW-DISPLACEMENTS_20240702.nc'; 
+nc_int =  'UWA_20240701_OCEAN-BEACH_DM_WAVE-PARAMETERS_20240703.nc'; 
+nc_spec = 'UWA_20240701_OCEAN-BEACH_DM_WAVE-RAW-DISPLACEMENTS_20240703.nc'; 
+nc_disp = 'UWA_20240701_OCEAN-BEACH_DM_WAVE-SPECTRA_20240703.nc'; 
 
 
 info = ncinfo(fullfile(dpath,nc_int)); 
@@ -34,22 +34,17 @@ end
 
 %% make bulk params figures
 
-fid = figure; 
-ax(1) = subplot(421);
-plot(bulkparams.TIME, bulkaprams.WSSH); 
-hold on
-plot(bulkparams.TIME(bulkparams.WAVE_quality_control>1), bulkparams.WSSH(bulkparams.WAVE_quality_control>1),'ro'); 
+vars = {'WSSH','WPFM','WPPE','SSWMD','WPDI','WMDS','WPDS'}; 
+labels = {'Hs','Tm','Tp','Dm','Dp','DmSpr','DpSpr'}; 
 
-ax(2) = subplot(422);
-plot(bulkparams.TIME, bulkaprams.WSSH); 
-hold on
-plot(bulkparams.TIME(bulkparams.WAVE_quality_control>1), bulkparams.WSSH(bulkparams.WAVE_quality_control>1),'ro'); 
+for i = 1:size(vars,2)
+    ax(i) = subplot(size(vars,2),1,i)
+    plot(bulkparams.TIME, bulkparams.(vars{i})); 
+    hold on; grid on; 
+    plot(bulkparams.TIME(bulkparams.WAVE_quality_control>1), bulkparams.(vars{i})(bulkparams.WAVE_quality_control>1),'ro')
+    ylabel(labels{i}); 
 
-ax(3) = subplot(423);
-plot(bulkparams.TIME, bulkaprams.WSSH); 
-hold on
-plot(bulkparams.TIME(bulkparams.WAVE_quality_control>1), bulkparams.WSSH(bulkparams.WAVE_quality_control>1),'ro'); 
-
+end
 
 
 
