@@ -89,6 +89,7 @@ if isfield(data,'temp_time')
         clear idx t1 t2
     end
 end
+
 %pressure data
 if isfield(data,'press_time')
     p_temp = unique(data.press_time); 
@@ -117,6 +118,7 @@ if isfield(data,'press_time')
         clear idx t1 t2
     end
 end
+
 %pressure std data
 if isfield(data,'press_std_time')
     p_temp = unique(data.press_std_time); 
