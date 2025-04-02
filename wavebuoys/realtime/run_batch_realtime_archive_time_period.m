@@ -11,7 +11,7 @@ warning('off')
 
 %read in metadata for buoys to run
 dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wawaves_buoy_log_metadata_v2.csv'; 
+dname = 'wawaves_buoy_log_metadata.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
