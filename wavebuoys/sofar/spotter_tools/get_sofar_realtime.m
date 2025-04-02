@@ -42,14 +42,22 @@ disp([status]);
 
 %%   WAVE PARAMETERS AND WIND
 if isfield(resp.Body.Data.data,'waves')
-    %use embedded data instead of HDR for parameters    
+    %isolate HDR and embedded 
     indEmbedded =[]; 
+    indHDR = []; 
     for j = 1:size(resp.Body.Data.data.waves)
         if strcmp(resp.Body.Data.data.waves(j).processing_source,'embedded')
             indEmbedded = [indEmbedded; j]; 
+        elseif strcmp(resp.Body.Data.data.waves(j).processing_source,'hdr')
+            indHDR = [indHDR; j]; 
         end
+    end            
+    
+    %use HDR if available
+    if ~isempty(indHDR)
+        indEmbedded = indHDR; 
     end    
-        
+
     for j = 1:size(indEmbedded,1)
         Spotter.serialID{j,1} = buoy_info.serial; 
         Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(indEmbedded(j)).timestamp,'yyyy-mm-ddTHH:MM:SS');
