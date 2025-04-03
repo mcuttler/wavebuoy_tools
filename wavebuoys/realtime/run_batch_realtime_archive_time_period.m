@@ -11,7 +11,7 @@ warning('off')
 
 %read in metadata for buoys to run
 dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wawaves_buoy_log_metadata.csv'; 
+dname = 'wawaves_buoy_log_metadata2.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -93,7 +93,14 @@ for dd = 1:size(sites,1)
              disp(['qaqc data']);         
              [data] = qaqc_bulkparams_realtime_website(buoy_info, data, SpotData);   
              
-             disp(['archiving mat files']); 
+             disp(['archiving mat files']);      
+             if ~isfield(data,'systime')
+                 data.systime = data.time; 
+                 data.batteryVoltage = ones(size(data.hsig,1)).*nan; 
+                 data.batteryPower = ones(size(data.hsig,1)).*nan; 
+                 data.humidity = ones(size(data.hsig,1)).*nan; 
+                 data.solarVoltage = ones(size(data.hsig,1)).*nan; 
+             end
              realtime_archive_mat(buoy_info, data);          
              
              disp(['archiving text files']); 
