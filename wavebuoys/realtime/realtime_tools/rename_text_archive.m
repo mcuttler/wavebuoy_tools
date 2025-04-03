@@ -1,6 +1,6 @@
 %% change filename
 
-files = dir('E:\auswaves\wawaves\ExmouthGulfNorth\text_archive\**\*.csv'); 
+files = dir('E:\scratch\CUTTLER_wawaves\Data\auswaves_realtime_backup\wawaves\ExmouthGulfNorth\text_archive\**\*.csv'); 
 
 site = 'ExmouthGulf02';
 sitenew = 'ExmouthGulfNorth'; 
