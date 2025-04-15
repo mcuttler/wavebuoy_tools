@@ -14,11 +14,11 @@
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'D:\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\wawaves'; 
+dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\TorbayWest_deploy20240614_retrieve20241205_SPOT31558C'; 
 dname = 'wa_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
@@ -414,6 +414,15 @@ for b = 1:size(buoy_metadata,1)
     end
 
 
+
+%%%% Calculate actual watch circle from Metadata
+buoy_info.watch_circle_calc = sqrt( buoy_info.mainline_length^2 - buoy_info.DeployDepth^2) + buoy_info.catenary_length;
+
+%%%%% rename so NETCDF attributes correctly written for watch circle 
+buoy_info.watch_circle_max = buoy_info.watch_circle;
+buoy_info.watch_circle=buoy_info.watch_circle_calc;
+buoy_info=rmfield(buoy_info,'watch_circle_calc');
+
 %% Save mat file for internal Use
 buoy_info.startdate = data.time(1); buoy_info.enddate = data.time(end); 
 
@@ -426,9 +435,9 @@ save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp
 %% Organise for netCDF following IMOS-ARDC conventions      
 
 %Clip data to start/stop time of interest 
-ind_wave = find(data.time>=buoy_info.startdate&data.time<=buoy_info.enddate); 
+ind_wave = find(data.time>=datenum(buoy_info.startdate)&data.time<=datenum(buoy_info.enddate)); 
 ind_tempcurr = find(data.temp_time>=buoy_info.startdate&data.temp_time<=buoy_info.enddate); 
-ind_disp = find(data.disp_time(:,1)>=buoy_info.startdate&data.disp_time(:,1)<=buoy_info.enddate); 
+ind_disp = find(data.disp_time(:,1)>=datenum(buoy_info.startdate)&data.disp_time(:,1)<=datenum(buoy_info.enddate)); 
 
 fields = fieldnames(data); 
 for i = 1:length(fields); 

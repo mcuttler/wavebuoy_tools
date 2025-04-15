@@ -3,8 +3,8 @@ buoy_info.serial = 'SPOT-0172';
 buoy_info.sofar_token = 'e0eb70b6d9e0b5e00450929139ea34';
 
 %build time vector
-t1 = datenum(2020,01,20); 
-tend = datenum(2020,06,01); 
+t1 = datenum(2024,11,26); 
+tend = datenum(202,01,05); 
 dt = t1:7:tend; 
 
  

@@ -24,7 +24,7 @@ disp('concatenating displacements');
 files = dir([sofarpath '\*_FLT.csv']); 
 if ~isempty(files)
     displacements=[];
-    for i = 1:size(files,1)
+    for i = 9:size(files,1)
        
 
         %skip first 0000 files as usually contain no data, also make sure
@@ -72,13 +72,17 @@ if ~isempty(files)
             
             %should only have 2 variables
             dum = dum(:,1:2); 
-            dum.Properties.VariableNames = {'GPSEpoch','temperature'}; 
+            % check that time stamp is numeric and eliminate if not
+            if isnumeric(table2array(dum(:,1)))
+                dum.Properties.VariableNames = {'GPSEpoch','temperature'}; 
+                dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
+                dumt = timetable(dum.temperature,'RowTimes',dt,'VariableNames',{'temperature'}); 
+                
+
+                surface_temp = [surface_temp; dumt]; 
+            else 
             
-            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
-            dumt = timetable(dum.temperature,'RowTimes',dt,'VariableNames',{'temperature'}); 
-    
-             surface_temp = [surface_temp; dumt]; 
-    
+            end    
             clear dum dt dumt; 
         end
     end
@@ -103,13 +107,16 @@ if ~isempty(files)
             
             %should only have 2 variables
             dum = dum(:,1:2); 
-            dum.Properties.VariableNames = {'GPSEpoch','baro_pressure'}; 
+            if isnumeric(table2array(dum(:,1)))
+                dum.Properties.VariableNames = {'GPSEpoch','baro_pressure'}; 
             
-            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
-            dumt = timetable(dum.baro_pressure,'RowTimes',dt,'VariableNames',{'baro_pressure'}); 
+                dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
+                dumt = timetable(dum.baro_pressure,'RowTimes',dt,'VariableNames',{'baro_pressure'}); 
             
-            baro = [baro; dumt]; 
+                baro = [baro; dumt]; 
+            else
             
+            end
             clear dum dt dumt; 
         end
     end

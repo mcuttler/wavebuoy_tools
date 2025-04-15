@@ -209,7 +209,7 @@ for ii = 1:m
 %         %modify this for spotter v2, datawell 
 %         netcdf.putVar(ncid, varid, ones(size(bulkparams.time,1),1).*nan); 
     if strcmp(varinfo{1,1}{ii,1},'time')
-        imos_time = data.time - datenum(1950,1,1,0,0,0); 
+        imos_time = datenum(data.time) - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'qc_flag_wave') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_wave')| strcmp(varinfo{1,1}{ii,1},'qc_flag_temp') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_temp')
         if isfield(data, varinfo{1,1}{ii,1})
