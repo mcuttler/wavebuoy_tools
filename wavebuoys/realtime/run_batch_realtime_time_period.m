@@ -1,7 +1,8 @@
 %% run batch process
 
 %add wavebuoy_tools to path 
-addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
+
+addpath(genpath('C:\Data\wavebuoy_tools')); 
 
 %suppress warnings
 warning('off')

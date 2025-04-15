@@ -9,138 +9,103 @@
 %   - file creation - MC
 
 %% read nc files 
+clear; clc; 
 
 dpath = 'X:\CUTTLER_wawaves\Data\wawaves\OceanBeach\delayedmode\ProcessedData_DelayedMode'; 
-nc_int =  'UWA_20240701_OCEAN-BEACH_DM_WAVE-PARAMETERS_20240702.nc'; 
-nc_spec = 'UWA_20240701_OCEAN-BEACH_DM_WAVE-SPECTRA_20240702.nc'; 
-nc_disp = 'UWA_20240701_OCEAN-BEACH_DM_WAVE-RAW-DISPLACEMENTS_20240702.nc'; 
+nc_int =  'UWA_20240701_OCEAN-BEACH_DM_WAVE-PARAMETERS_20241204.nc'; 
+nc_spec = 'UWA_20240701_OCEAN-BEACH_DM_WAVE-SPECTRA_20241204.nc'; 
+nc_disp = 'UWA_20241007_OCEAN-BEACH_DM_WAVE-RAW-DISPLACEMENTS_20241021.nc'; 
 
 
 info = ncinfo(fullfile(dpath,nc_int)); 
 for i = 1:length(info.Variables)
     bulkparams.(info.Variables(i).Name) = ncread(fullfile(dpath,nc_int),info.Variables(i).Name); 
+    if strcmp(info.Variables(i).Name,'TIME')
+        bulkparams.TIME = datetime(bulkparams.TIME+datenum(1950,1,1),'convertfrom','datenum');
+    end
+
 end
 
-
+%spectra
 info = ncinfo(fullfile(dpath,nc_spec)); 
 for i = 1:length(info.Variables)
     spec.(info.Variables(i).Name) = ncread(fullfile(dpath,nc_spec),info.Variables(i).Name); 
+    if strcmp(info.Variables(i).Name,'TIME')
+        spec.TIME = datetime(spec.TIME+datenum(1950,1,1),'convertfrom','datenum'); 
+    end
 end
 
-info = ncinfo(fullfile(dpath,nc_disp)); 
-for i = 1:length(info.Variables)
-    spec.(info.Variables(i).Name) = ncread(fullfile(dpath,nc_disp),info.Variables(i).Name); 
-end
+%displacements
+% info = ncinfo(fullfile(dpath,nc_disp)); 
+% for i = 1:length(info.Variables)
+%     spec.(info.Variables(i).Name) = ncread(fullfile(dpath,nc_disp),info.Variables(i).Name); 
+% end
 
 %% make bulk params figures
 
+vars = {'WSSH','WPFM','WPPE','SSWMD','WPDI','WMDS','WPDS'}; 
+labels = {'Hs','Tm','Tp','Dm','Dp','DmSpr','DpSpr'}; 
+
 fid = figure; 
-ax(1) = subplot(421);
-plot(bulkparams.TIME, bulkaprams.WSSH); 
-hold on
-plot(bulkparams.TIME(bulkparams.WAVE_quality_control>1), bulkparams.WSSH(bulkparams.WAVE_quality_control>1),'ro'); 
+for i = 1:size(vars,2)
+    ax(i) = subplot(size(vars,2),1,i);
+    plot(bulkparams.TIME, bulkparams.(vars{i})); 
+    hold on; grid on; 
+    plot(bulkparams.TIME(bulkparams.WAVE_quality_control>1), bulkparams.(vars{i})(bulkparams.WAVE_quality_control>1),'ro')
+    ylabel(labels{i});    
+    set(gca,'xlim',[bulkparams.TIME(1) bulkparams.TIME(end)]); 
+    if i == 1
+        flag_per = sum(bulkparams.WAVE_quality_control>1)/size(bulkparams.TIME,1); 
+        text(0.05, 1.15, ['flagged percentage = ' num2str(round(flag_per,2)) '%'],'units','normalized','fontweight','bold'); 
+         ll = legend('data','flagged data');          
+    end
+end
 
-ax(2) = subplot(422);
-plot(bulkparams.TIME, bulkaprams.WSSH); 
-hold on
-plot(bulkparams.TIME(bulkparams.WAVE_quality_control>1), bulkparams.WSSH(bulkparams.WAVE_quality_control>1),'ro'); 
+set(fid, 'PaperPositionMode', 'manual','PaperUnits','centimeters','units','centimeters',...
+    'position',[1 1 22 22], 'PaperPosition', [0 0 22 22],'color','w')
+ll.Units = 'centimeters';
+ll.Position(2) = ll.Position(2)+0.75;
+clear ax; 
 
-ax(3) = subplot(423);
-plot(bulkparams.TIME, bulkaprams.WSSH); 
-hold on
-plot(bulkparams.TIME(bulkparams.WAVE_quality_control>1), bulkparams.WSSH(bulkparams.WAVE_quality_control>1),'ro'); 
+%% plot lat/lon
 
+%make timetable for re-averaging to ID times when anchor moved - could
+%potenitally try to do something with fortnightly averaged positions...
+positions = timetable(bulkparams.LATITUDE, bulkparams.LONGITUDE,'RowTimes',bulkparams.TIME,'VariableNames',{'latitude','longitude'}); 
+positions_fortnightly = retime(positions,'regular',@nanmean,'TimeStep',days(14)); 
 
+fid = figure;
+set(fid, 'PaperPositionMode', 'manual','PaperUnits','centimeters','units','centimeters',...
+    'position',[1 1 26 12], 'PaperPosition', [0 0 26 12],'color','w')
 
+ax(1) = subplot(1,2,1);
+geoscatter(bulkparams.LATITUDE, bulkparams.LONGITUDE,22,datenum(bulkparams.TIME),'filled'); 
+c = colorbar; 
+c.Label.String = 'time (datenum)'; 
+geolimits([nanmean(bulkparams.LATITUDE)-0.25 nanmean(bulkparams.LATITUDE)+0.25],...
+    [nanmean(bulkparams.LONGITUDE)-0.25 nanmean(bulkparams.LONGITUDE)+0.25]); 
 
-
-
-
-
-%% MH old stuff 
-% plot time vectors to make sure they are sequential
-% 
-% figure()
-% subplot(2,1,1)
-% plot(data.time,'-o')
-% title ('data time')
-% subplot(2,1,2)
-% plot(data.disp_time,'-o')
-% title('disp time')
-
-%encountered one file where time took a step backward at end of file (Cape
-%Bridgewater dep05) need to remove in that case.
-
-%ind_end_time=10070;
-%ind_end_disp_time=45320000;
-
-%for i =27:30
-%    data.(fields{i}) =   data.(fields{i})(1:ind_end_time);
-%end 
-
-%for i =14:17
-%   data.(fields{i}) =   data.(fields{i})(1:ind_end_disp_time);
-%end
-
-%for i =19:25
-%   data.(fields{i}) =   data.(fields{i})(1:ind_end_time,:);
-%end 
-
-% Graphical input on Lat and Lon data to find Start of Stop Time of Deployment Click on Start time and then Stop time
-% Disable if confident in start and end time recorded metadata.
-
-% figure();
-% yyaxis left;
-% plot(data.time,data.lat);
-% 
-% yyaxis right;
-% plot(data.time,data.lon);
-% 
-% %--------------------------------------------------------------------------
-% figure();
-% yyaxis left;
-% plot(data.time,data.lat);
-% 
-% yyaxis right;
-% plot(data.time,data.lon);
-% 
-% xlim([(data.time(1)-5) data.time(floor(length(data.time)/8))]);
-% 
-% [xinp1,yinp1]=ginput(1);
-% 
-% buoy_info.startdate= xinp1;
-% clf;
-% 
-% yyaxis left;
-% plot(data.time,data.lat);
-% 
-% yyaxis right;
-% plot(data.time,data.lon);
-% 
-% xlim([data.time(end-floor(length(data.time)/10)) (data.time(end)+5)]);
-% 
-% [xinp2,yinp2]=ginput(1);
-% 
-% buoy_info.enddate= xinp2;
-% 
-% clearvars xinp1 yinp1 xinp2 yinp2;
-% clf;
-% 
+ax(2) = subplot(1,2,2);
+geoscatter(bulkparams.LATITUDE, bulkparams.LONGITUDE,12,datenum(bulkparams.TIME),'filled'); 
+c = colorbar; 
+c.Label.String = 'time (datenum)'; 
 
 
-%% Graphical input to calculate watch circle. Disable if confident in recorded metadata watch circle. 
-%% ONLY GO VERTICALLY (i.e. choose only latitude)
-%% because longitude to meteres conversion changes with latitude. source of Latitude conversion:
-%% https://www.usgs.gov/faqs/how-much-distance-does-degree-minute-and-second-cover-your-maps
+fid = figure; clear ax 
+set(fid, 'PaperPositionMode', 'manual','PaperUnits','centimeters','units','centimeters',...
+    'position',[1 1 26 12], 'PaperPosition', [0 0 26 12],'color','w')
+
+ax(1) = subplot(1,2,1);
+plot(positions.Time, positions.latitude); hold on; grid on;
+xlabel('Time'); ylabel('Latitude'); 
+
+ax(2) = subplot(1,2,2);
+plot(positions.Time, positions.longitude); hold on; grid on;
+xlabel('Time'); ylabel('Longitude'); 
+
+set(ax,'box','on','units','centimeters'); 
+ %%
 
 
-% figure()
-% scatter(data.lon,data.lat)
-% 
-% [xinp,yinp] = ginput(2);
-% 
-% buoy_info.watch_circle = round((1/2) *(abs(yinp(2) - yinp(1))) * (1849.5/(1/60)));
-% 
-% clearvars xinp yinp;
-% clf;
-% close all;
+
+
