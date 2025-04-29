@@ -183,7 +183,7 @@ for ii = 1:m
     %put data to variable
     if strcmp(varinfo{1,1}{ii,1},'spec_time')
         
-        imos_time = data.time - datenum(1950,1,1,0,0,0); 
+        imos_time = datenum(data.time) - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
         if isfield(data, varinfo{1,1}{ii,1})

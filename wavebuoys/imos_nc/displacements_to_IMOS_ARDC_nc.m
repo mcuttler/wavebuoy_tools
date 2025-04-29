@@ -168,10 +168,10 @@ for ii = 1:m
     
     %put data to variable
     if strcmp(varinfo{1,1}{ii,1},'time')
-        imos_time = displacements.time - datenum(1950,1,1,0,0,0); 
+        imos_time = datenum(displacements.time) - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'time_location')
-        imos_time_loc = displacements.time_location - datenum(1950,1,1,0,0,0); 
+        imos_time_loc = datenum(displacements.time_location) - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time_loc); 
     elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
         if isfield(displacements, varinfo{1,1}{ii,1})
