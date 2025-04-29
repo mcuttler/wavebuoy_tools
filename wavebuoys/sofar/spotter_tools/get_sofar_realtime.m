@@ -13,7 +13,7 @@ import matlab.net.http.*
 header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
 r = RequestMessage('GET', header);
 %wave data
-tstart = datestr(datenum(now) - hours(12),30); 
+tstart = datestr(datenum(now) - hours(24),30); 
 tend = datestr(datenum(now)+ hours(2),30); 
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
@@ -85,10 +85,10 @@ if isfield(resp.Body.Data.data,'wind')
         %isolate HDR and embedded 
         indEmbedded =[]; 
         indHDR = []; 
-        for j = 1:size(resp.Body.Data.data.waves)
-            if strcmp(resp.Body.Data.data.waves(j).processing_source,'embedded')
+        for j = 1:size(resp.Body.Data.data.wind)
+            if strcmp(resp.Body.Data.data.wind(j).processing_source,'embedded')
                 indEmbedded = [indEmbedded; j]; 
-            elseif strcmp(resp.Body.Data.data.waves(j).processing_source,'hdr')
+            elseif strcmp(resp.Body.Data.data.wind(j).processing_source,'hdr')
                 indHDR = [indHDR; j]; 
             end
         end            
