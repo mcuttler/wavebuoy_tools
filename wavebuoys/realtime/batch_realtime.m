@@ -103,6 +103,16 @@ if strcmp(buoy_info.type,'sofar')==1
                 else
                     idx_sys = []; 
                 end
+
+                %add current meter data
+                if isfield(SpotData,'curr_time') & isfield(archive_data,'curr_time')
+                    idx_curr = find(SpotData.curr_time>archive_data.curr_time(end));
+                elseif isfield(SpotData,'curr_time') & ~isfield(archive_data,'curr_time')
+                    idx_curr = [1:length(SpotData.curr_time)]; 
+                else
+                    idx_curr = []; 
+                end
+
             catch
                 log_message = [log_message, ' (4) code failed on indexing SpotData for new data']; 
             end
@@ -123,6 +133,8 @@ if strcmp(buoy_info.type,'sofar')==1
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_s,:); 
                         elseif strcmp(ff{f},'systime') | contains(ff{f},'batt') | contains(ff{f},'solar') | contains(ff{f},'humid')
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_sys,:); 
+                        elseif contains(ff{f},'curr')
+                            SpotData.(ff{f}) = SpotData.(ff{f})(idx_curr,:); 
                         else
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
                         end

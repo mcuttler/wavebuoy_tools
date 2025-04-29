@@ -348,15 +348,20 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
         end
     end
  %smart mooring
-elseif ~isempty(resp_sensor.Body.Data.data)    
+elseif ~isempty(resp_sensor.Body.Data.data)  
+    %get unique sensor positions
+    for j = 1:size(resp_sensor.Body.Data.data,1)
+        sensorPosition(j,1) = resp_sensor.Body.Data.data(j).sensorPosition; 
+    end
+    sensorPosition = unique(sensorPosition); 
     for j = 1:size(resp_sensor.Body.Data.data,1)
         if strcmp(resp_sensor.Body.Data.data(j).unit_type,'temperature')
             if resp_sensor.Body.Data.data(j).sensorPosition==1
                 Spotter.surf_temp = [Spotter.surf_temp; resp_sensor.Body.Data.data(j).value];                 
                 Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
-            elseif resp_sensor.Body.Data.data(j).sensorPosition==2
+            elseif resp_sensor.Body.Data.data(j).sensorPosition==max(sensorPosition)
                 Spotter.bott_temp = [Spotter.bott_temp; resp_sensor.Body.Data.data(j).value]; 
-                Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
+                Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];    
             else
                 Spotter.surf_temp = [Spotter.surf_temp; NaN];
                 Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
@@ -416,6 +421,39 @@ end
 if isfield(Spotter,'bott_temp_time')
     Spotter = rmfield(Spotter,'bott_temp_time'); 
 end
+
+%% smart mooring with current meter 
+Spotter.curr_time = []; 
+Spotter.curr_mag = []; %cm/s
+Spotter.curr_mag_std = [];
+Spotter.curr_dir = []; 
+Spotter.curr_dir_std = []; 
+Spotter.curr_tilt = []; 
+Spotter.curr_tilt_std = []; 
+Spotter.curr_count = []; 
+
+if ~isempty(resp_sensor.Body.Data.data)
+     for j = 1:size(resp_sensor.Body.Data.data,1)
+        if contains(resp_sensor.Body.Data.data(j).data_type_name,'speed_mean')            
+            Spotter.curr_mag = [Spotter.curr_mag; resp_sensor.Body.Data.data(j).value./100];                 
+            Spotter.curr_time = [Spotter.curr_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
+        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'speed_std')            
+            Spotter.curr_mag_std = [Spotter.curr_mag_std; resp_sensor.Body.Data.data(j).value./100]; 
+        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'direction_circ_mean')            
+            Spotter.curr_dir = [Spotter.curr_dir; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
+        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'direction_circ_std')            
+            Spotter.curr_dir_std = [Spotter.curr_dir_std; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
+        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'abs_tilt_mean')            
+            Spotter.curr_tilt = [Spotter.curr_tilt; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
+        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'std_tilt_mean')            
+            Spotter.curr_tilt_std = [Spotter.curr_tilt_std; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
+        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'count')            
+            Spotter.curr_count = [Spotter.curr_count; resp_sensor.Body.Data.data(j).value];  
+        end
+     end
+end
+
+
 %% Check and fill variables when empty
 
 %check temperature 
@@ -435,6 +473,19 @@ if isempty(Spotter.pressure)&&isempty(Spotter.pressure_std)
     Spotter.pressure_std = ones(size(Spotter.time,1),1).*-9999; 
 end
 
+%check current meter
+if isempty(Spotter.curr_mag)&&isempty(Spotter.curr_mag_std)&&isempty(Spotter.curr_dir)&&isempty(Spotter.curr_dir_std) %assume everythign else is bad too 
+    Spotter.curr_time = Spotter.time; 
+    Spotter.curr_mag = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.curr_mag_std = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.curr_dir = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.curr_dir_std = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.curr_tilt = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.curr_tilt_std = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.curr_count = ones(size(Spotter.time,1),1).*-9999;
+end
+
+    
 %% add in humidity and voltage 
 
 if ~isempty(resp_latest.Body.Data.data.waves)

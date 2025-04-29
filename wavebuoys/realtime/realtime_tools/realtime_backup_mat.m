@@ -73,13 +73,25 @@ else
             idx_sys = find(dt_sys(:,1)==ddv(i,1) & dt_sys(:,2)==ddv(i,2)); 
         end
         
+        %account for current meter
+        if isfield(data,'curr_time')
+            dt_curr = datevec(data.curr_time); 
+            idx_curr = find(dt_curr(:,1)==ddv(i,1) & dt_curr(:,2)==ddv(i,2)); 
+        end
+        
+        
         %check that all variables have data for that month        
         if ~isempty(idx_part)&~isempty(idx_spec)&~isempty(idx_press)&~isempty(idx_press_std)&~isempty(idx_temp)&~isempty(idx)&~isempty(idx_sys)
             fields = fieldnames(data);
             for j = 1:length(fields)
-                if strcmp(fields{j},'qf_bott_temp') |strcmp(fields{j},'qf_sst') |strcmp(fields{j},'surf_temp') | strcmp(fields{j},'bott_temp')|strcmp(fields{j},'temp_time') | strcmp(fields{j},'curr_mag') | strcmp(fields{j},'curr_dir') | strcmp(fields{j},'curr_mag_std') | strcmp(fields{j},'curr_dir_std') | strcmp(fields{j},'w') | strcmp(fields{j},'w_std')                
+                if strcmp(fields{j},'qf_bott_temp') |strcmp(fields{j},'qf_sst') |strcmp(fields{j},'surf_temp') | strcmp(fields{j},'bott_temp')|strcmp(fields{j},'temp_time')| strcmp(fields{j},'w') | strcmp(fields{j},'w_std')               
                     buoy_data.(fields{j})=data.(fields{j})(idx_temp,:); 
-                    
+                elseif contains(fields{j},'curr')
+                    if strcmp(buoy_info.type,'datawell')
+                        buoy_data.(fields{j}) = data.(fields{j})(idx_temp,:); 
+                    else
+                        buoy_data.(fields{j}) = data.(fields{j})(idx_curr,:); 
+                    end
                 elseif strcmp(fields{j},'press_std_time')|strcmp(fields{j},'pressure_std')
                     buoy_data.(fields{j}) = data.(fields{j})(idx_press_std,:); 
                     
@@ -104,7 +116,8 @@ else
                 elseif strcmp(fields{j},'part_time')|(contains(fields{j},'sea')&~contains(fields{j},'wind'))|contains(fields{j},'swell')
                     buoy_data.(fields{j}) = data.(fields{j})(idx_part,:); 
                 elseif contains(fields{j},'battery')|strcmp(fields{j},'humidity')|contains(fields{j},'solar')|strcmp(fields{j},'systime')
-                    buoy_data.(fields{j}) = data.(fields{j})(idx_sys,:);                            
+                    buoy_data.(fields{j}) = data.(fields{j})(idx_sys,:);  
+  
                 else
                     if size(data.(fields{j}),1)>1
                         buoy_data.(fields{j})=data.(fields{j})(idx,:);
