@@ -11,11 +11,12 @@ end
 %% check that wind and waves are same size
 %loop through each time point
 for ii = 1:length(num)
-    dv = datevec(data.time(num(ii)));         
+    dv = datevec(data.time(num(ii)));   
+    %monthly archive path 
     archive_path =  [buoy_info.web_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
     
     dataout.time = posixtime(datetime(dv));
-    dataout.timestamp = datestr(dv); 
+    dataout.timestamp = datestr(dv,'dd-mmm-yyyy HH:MM:SS');  
     dataout.sitename = buoy_info.name; 
     dataout.buoy_id = buoy_info.serial; 
     fields = {'hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','wind_speed','wind_dir','curr_mag','curr_dir','lat','lon'};
