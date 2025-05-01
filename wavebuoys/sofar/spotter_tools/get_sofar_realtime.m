@@ -362,11 +362,12 @@ elseif ~isempty(resp_sensor.Body.Data.data)
             elseif resp_sensor.Body.Data.data(j).sensorPosition==max(sensorPosition)
                 Spotter.bott_temp = [Spotter.bott_temp; resp_sensor.Body.Data.data(j).value]; 
                 Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];    
-            else
-                Spotter.surf_temp = [Spotter.surf_temp; NaN];
-                Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
-                Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
-                Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
+            %for extra temperature nodes not at surface or bottom
+            % else 
+            %     Spotter.surf_temp = [Spotter.surf_temp; NaN];
+            %     Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
+            %     Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
+            %     Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
             end
         elseif strcmp(resp_sensor.Body.Data.data(j).unit_type,'pressure')
             %check whether mean or std
@@ -389,26 +390,38 @@ elseif ~isempty(resp_sensor.Body.Data.data)
             end
         end
     end
-    %add check for surface and bottom temperature data
+    %add check for surface and bottom temperature data 
     if size(Spotter.surf_temp,1)~= size(Spotter.bott_temp,1)
         if size(Spotter.surf_temp,1)>size(Spotter.bott_temp,1)
             bdum = ones(size(Spotter.surf_temp,1),1)*nan; 
-            [~,I,~] = intersect(Spotter.temp_time, Spotter.bott_temp_time);             
-            bdum(I) = Spotter.bott_temp; 
+            for kk = 1:size(Spotter.temp_time,1)
+                I = find(Spotter.bott_temp_time==Spotter.temp_time(kk,1));
+                if ~isempty(I)
+                    bdum(kk,1) = Spotter.bott_temp(I); 
+                elseif isempty(I)
+                    bdum(kk,1) = nan; 
+                end
+            end
             Spotter.bott_temp = bdum; 
-            clear bdum I
+            clear bdum I 
         elseif size(Spotter.surf_temp,1)<size(Spotter.bott_temp,1)
-            bdum = ones(size(Spotter.bott_temp,1),1); 
-            [~,I,~] = intersect(Spotter.bott_temp_time, Spotter.temp_time); 
-            bdum(I) = Spotter.surf_temp; 
+            bdum = ones(size(Spotter.bott_temp,1),1)*nan; 
+            for kk = 1:size(Spotter.bott_temp,1)
+                I = find(Spotter.temp_time==Spotter.bott_temp_time(kk,1));
+                if ~isempty(I)
+                    bdum(kk,1) = Spotter.surf_temp(I); 
+                elseif isempty(I)
+                    bdum(kk,1) = nan; 
+                end
+            end
             Spotter.surf_temp = bdum; 
-            clear bdum I
+            clear bdum I 
         end
-       
     end                    
 %if no sensor data, act like normal wave buoy
 else
     Spotter.temp_time = Spotter.time;
+    Spotter.bott_temp_time = Spotter.time; 
     Spotter.press_time = Spotter.time;
     Spotter.press_std_time = Spotter.time;
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
@@ -430,6 +443,7 @@ Spotter.curr_dir = [];
 Spotter.curr_dir_std = []; 
 Spotter.curr_tilt = []; 
 Spotter.curr_tilt_std = []; 
+Spotter.curr_temperature = []; %temperature sensor on current meter 
 Spotter.curr_count = []; 
 
 if ~isempty(resp_sensor.Body.Data.data)
@@ -447,22 +461,28 @@ if ~isempty(resp_sensor.Body.Data.data)
             Spotter.curr_tilt = [Spotter.curr_tilt; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
         elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'std_tilt_mean')            
             Spotter.curr_tilt_std = [Spotter.curr_tilt_std; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
-        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'count')            
-            Spotter.curr_count = [Spotter.curr_count; resp_sensor.Body.Data.data(j).value];  
+        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'count')    
+            % when count = 0, a value for count is logged, but not for others
+            if resp_sensor.Body.Data.data(j).value >0
+                Spotter.curr_count = [Spotter.curr_count; resp_sensor.Body.Data.data(j).value];  
+            end
+        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'aanderaa_temperature')
+            Spotter.curr_temperature = [Spotter.curr_temperature; resp_sensor.Body.Data.data(j).value]; 
         end
      end
 end
+
 
 
 %% Check and fill variables when empty
 
 %check temperature 
 if isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
-    Spotter.temp_time = Spotter.time; 
+    Spotter.temp_time = Spotter.time;     
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999;    
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
 elseif ~isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
-    Spotter.bott_temp = ones(size(Spotter.temp_time,1),1).*-9999; 
+    Spotter.bott_temp = ones(size(Spotter.temp_time,1),1).*-9999;    
 end
 
 %check pressure
@@ -483,6 +503,7 @@ if isempty(Spotter.curr_mag)&&isempty(Spotter.curr_mag_std)&&isempty(Spotter.cur
     Spotter.curr_tilt = ones(size(Spotter.time,1),1).*-9999;
     Spotter.curr_tilt_std = ones(size(Spotter.time,1),1).*-9999;
     Spotter.curr_count = ones(size(Spotter.time,1),1).*-9999;
+    Spotter.curr_temperature = ones(size(Spotter.time,1),1).*-9999;
 end
 
     
@@ -491,7 +512,7 @@ end
 if ~isempty(resp_latest.Body.Data.data.waves)
     Spotter.systime = datenum(resp_latest.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
 else
-    Spotter.systime = Spotter.time(end)
+    Spotter.systime = Spotter.time(end);
 end
 
 if ~isempty(resp_latest.Body.Data.data.batteryVoltage)
