@@ -167,9 +167,9 @@ if strcmp(buoy_info.type,'sofar')==1
                     catch
                         log_message = [log_message, ' (7) code failed on archiving or writing text file'];
                     end
-                    
 
-                    
+
+
                     %output MEM and SST plots --- only most recent time point                     
                     if strcmp(buoy_info.DataType,'spectral')                        
                         try
@@ -181,7 +181,7 @@ if strcmp(buoy_info.type,'sofar')==1
                             log_message = [log_message, ' (8) code failed on making MEM'];
                         end                        
                     end
-                    
+
                     %code to update the buoy info master file for website to read
                     try
                         update_website_buoy_info(buoy_info, data); 
@@ -277,6 +277,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
     dw_data.wind_dir = dd; 
     dw_data.wind_speed = dd; 
     dw_data.wind_time = dw_data.time; 
+    dw_data.systime = dw_data.time; 
     
     %check that it's new data
     if all(check)~=0
@@ -300,7 +301,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 end                           
                 
                 %output MEM and SST plots 
-                plot_idx = find(data.time>archive_data.time(end)); 
+                % plot_idx = find(data.time>archive_data.time(end)); 
+                plot_idx = size(data.time,1); 
                 if strcmp(buoy_info.DataType,'spectral')    
                     try
                         for ii = 1:size(plot_idx,1); 
