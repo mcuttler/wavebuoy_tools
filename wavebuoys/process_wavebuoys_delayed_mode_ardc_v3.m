@@ -14,12 +14,12 @@
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
+mpath = 'C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\TorbayWest_deploy20240614_retrieve20241205_SPOT31558C'; 
-dname = 'wa_delayed_mode_buoys_to_process.csv'; 
+dpath = 'C:\Users\00084142\Data\wavebuoy_test_data'; 
+dname = 'test_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -67,10 +67,12 @@ for b = 1:size(buoy_metadata,1)
                 smart_mooring_bm_agg = smart_mooring_bm_agg(tr,:); 
             elseif istimetable(smart_mooring)
                 smart_mooring = smart_mooring(tr,:); 
-            end                
+            end
+        elseif istimetable(surface_temp)
+            surface_temp = surface_temp(tr,:); 
         end
 
-        %% check watch circle to filter data before QC
+        %% check watch circle to filter data before QC --- this needs to be added to the Datawell workflows too 
         %use mapping toolbox distance function to calculate points outside watch_circle
         clear dum_distance
         wgs84 = wgs84Ellipsoid("m");
@@ -78,7 +80,11 @@ for b = 1:size(buoy_metadata,1)
             dum_distance(i,1) = distance(buoy_info.DeployLat, buoy_info.DeployLon, gps.latitude(i), gps.longitude(i),wgs84); 
         end
 
-        %get points inside watch circle
+        %get points inside watch circle  --- either calculate or just use a fixed value 
+        if isempty(buoy_info.watch_circle)
+            buoy_info.watch_circle = sqrt( buoy_info.mainline_length^2 - buoy_info.DeployDepth^2) + buoy_info.catenary_length;
+        end
+
         ind = find(dum_distance<=buoy_info.watch_circle);     
         gps = gps(ind,:); 
         
@@ -91,7 +97,9 @@ for b = 1:size(buoy_metadata,1)
                 smart_mooring_bm_agg = smart_mooring_bm_agg(tr,:); 
             elseif istimetable(smart_mooring)
                 smart_mooring = smart_mooring(tr,:); 
-            end                
+            end    
+        elseif istimetable(surface_temp)
+            surface_temp = surface_temp(tr,:);
         end
     
         
@@ -222,23 +230,43 @@ for b = 1:size(buoy_metadata,1)
             end
         end
         
-        % down-sample/interpolate
-        data.temp_time = data.time; 
+   %%%% down-sample/interpolate - could make this a 'switch' in the
+        % inputs to preserve temperature time or interpolate 
+
+        % data.temp_time = data.time; 
+        % if contains(buoy_info.instrument,'Smart')
+        %     if istimetable(smart_mooring_bm)  
+        %         data.surf_temp = interp1(smart_mooring_bm_agg.Time, smart_mooring_bm_agg.temp_mean_degC, data.time); 
+        %     else
+        %         data.surf_temp = interp1(smart_mooring.Time(smart_mooring.node==1), smart_mooring.temp_degC(smart_mooring.node==1), data.time); 
+        %     end
+        % else        
+        %     if istimetable(surface_temp)
+        %         %resample to 30min averages to match wave timestep
+        %         dt30 = minutes(30);
+        %         tdum = retime(surface_temp,'regular','mean','TimeStep',dt30);
+        %         data.surf_temp = retime(tdum, data.time,'nearest'); 
+        %         data.surf_temp = table2array(data.surf_temp); 
+        %         clear tdum dt30; 
+        %     else
+        %         data.surf_temp = ones(size(data.time,1),1)*-9999; 
+        %     end
+        % end
+                
         if contains(buoy_info.instrument,'Smart')
             if istimetable(smart_mooring_bm)  
-                data.surf_temp = interp1(smart_mooring_bm_agg.Time, smart_mooring_bm_agg.temp_mean_degC, data.time); 
+                data.temp_time = smart_mooring_bm_agg.Time(smart_mooring.node_position==1); 
+                data.surf_temp = smart_mooring_bm_agg.temp_mean_degC(smart_mooring.node_position==1);
             else
-                data.surf_temp = interp1(smart_mooring.Time(smart_mooring.node==1), smart_mooring.temp_degC(smart_mooring.node==1), data.time); 
+                data.temp_time = smart_mooring.Time(smart_mooring.node==1); 
+                data.surf_temp = smart_mooring.temp_degC(smart_mooring.node==1); 
             end
         else        
             if istimetable(surface_temp)
-                %resample to 30min averages to match wave timestep
-                dt30 = minutes(30);
-                tdum = retime(surface_temp,'regular','mean','TimeStep',dt30);
-                data.surf_temp = retime(tdum, data.time,'nearest'); 
-                data.surf_temp = table2array(data.surf_temp); 
-                clear tdum dt30; 
+                data.temp_time = surface_temp.Time; 
+                data.surf_temp = surface_temp.temperature;          
             else
+                data.temp_time = data.time; 
                 data.surf_temp = ones(size(data.time,1),1)*-9999; 
             end
         end
@@ -262,7 +290,7 @@ for b = 1:size(buoy_metadata,1)
         data.z = buoy_xyz.z; 
         clear buoy_xyz;      
      
-    elseif strcmp(buoy_info.type,'datawell')==1
+    elseif strcmp(buoy_info.type,'datawell')==1 %needs to be re-written to incorporate the displacements and then pushed through same displacements code as above 
         %create blank array for output
         dw_vars = {'serial','E','theta','s','m2','n2','time','a1','a2','b1','b2',...
             'frequency','hs','tm','tp','dp','dpspr', 'curr_mag','curr_dir',...
@@ -341,8 +369,6 @@ for b = 1:size(buoy_metadata,1)
         data = data_nc; 
         clear data_nc
     end
-
-
     
     %%   QAQC data - following QARTOD
     %settings for QAQC
@@ -414,15 +440,6 @@ for b = 1:size(buoy_metadata,1)
     end
 
 
-
-%%%% Calculate actual watch circle from Metadata
-buoy_info.watch_circle_calc = sqrt( buoy_info.mainline_length^2 - buoy_info.DeployDepth^2) + buoy_info.catenary_length;
-
-%%%%% rename so NETCDF attributes correctly written for watch circle 
-buoy_info.watch_circle_max = buoy_info.watch_circle;
-buoy_info.watch_circle=buoy_info.watch_circle_calc;
-buoy_info=rmfield(buoy_info,'watch_circle_calc');
-
 %% Save mat file for internal Use
 buoy_info.startdate = data.time(1); buoy_info.enddate = data.time(end); 
 
@@ -435,9 +452,9 @@ save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp
 %% Organise for netCDF following IMOS-ARDC conventions      
 
 %Clip data to start/stop time of interest 
-ind_wave = find(data.time>=datenum(buoy_info.startdate)&data.time<=datenum(buoy_info.enddate)); 
+ind_wave = find(data.time>=(buoy_info.startdate)&data.time<=(buoy_info.enddate)); 
 ind_tempcurr = find(data.temp_time>=buoy_info.startdate&data.temp_time<=buoy_info.enddate); 
-ind_disp = find(data.disp_time(:,1)>=datenum(buoy_info.startdate)&data.disp_time(:,1)<=datenum(buoy_info.enddate)); 
+ind_disp = find(data.disp_time(:,1)>=(buoy_info.startdate)&data.disp_time(:,1)<=(buoy_info.enddate)); 
 
 fields = fieldnames(data); 
 for i = 1:length(fields); 
@@ -459,6 +476,7 @@ end
 
 %make time a datenum
 data.time = datenum(data.time); 
+data.temp_time = datenum(data.temp_time); 
 data.disp_time = datenum(data.disp_time); 
 %%  Integral Wave Parameters 
 

@@ -24,7 +24,7 @@ disp('concatenating displacements');
 files = dir([sofarpath '\*_FLT.csv']); 
 if ~isempty(files)
     displacements=[];
-    for i = 9:size(files,1)
+    for i = 1:size(files,1)
        
 
         %skip first 0000 files as usually contain no data, also make sure
@@ -99,7 +99,7 @@ if ~isempty(files)
     
     baro=[];
 
-    for i = 1:size(files)
+    for i = 1:size(files,1)
        
         %skip first 0000 files as usually contain no data
         if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
@@ -131,7 +131,7 @@ disp('concatenating smart mooring Bristlemouth');
 files = dir([sofarpath '\*_SENS_IND.csv']); 
 
 if ~isempty(files)
-    for i = 1:size(files)    
+    for i = 1:size(files,1)    
         dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');
         %set common variable names for all BristleMOuth sensor types: 
         % https://sofarocean.notion.site/Spotter-3-Bristlemouth-SD-Card-Data-Guide-50b2a73cd7d74f4987484152878ddad9
@@ -234,7 +234,7 @@ disp('concatenating smart mooring data');
 files = dir([sofarpath '\*_SMD.csv']); 
 
 if ~isempty(files)
-    for i = 1:size(files)    
+    for i = 1:size(files,1)    
         dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');
         if ~isempty(dum)
             %only keep rows with 'data'
@@ -305,7 +305,7 @@ disp('concatenating gps positions');
 files = dir([sofarpath '\*_LOC.csv']); 
 if ~isempty(files)
      gps=[];
-     for i = 1:size(files)
+     for i = 1:size(files,1)
        
         %skip first 0000 files as usually contain no data
         if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
@@ -347,7 +347,7 @@ files = dir([sofarpath '\*_HDR.csv']);
 
 if ~isempty(files)
     displacements_hdr=[];
-    for i = 1:size(files)
+    for i = 1:size(files,1)
         
 
         %skip first 0000 files as usually contain no data
