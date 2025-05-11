@@ -182,7 +182,7 @@ disp('concatenating smart mooring Bristlemouth agg');
 files = dir([sofarpath '\*_SENS_AGG.csv']); 
 
 if ~isempty(files)
-    for i = 1:size(files)    
+    for i = 1:size(files,1)    
         dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');
         %set common variable names for all BristleMOuth sensor types: 
         % https://sofarocean.notion.site/Spotter-3-Bristlemouth-SD-Card-Data-Guide-50b2a73cd7d74f4987484152878ddad9

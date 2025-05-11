@@ -55,7 +55,7 @@ for b = 1:size(buoy_metadata,1)
     %% process data based on buoy type (sofar, datawell, etc.)
     
     if strcmp(buoy_info.type,'sofar')==1        
-        [displacements, ~, surface_temp, baro, gps, ~,smart_mooring_bm, smart_mooring_bm_agg] = process_sofar_SD_card(buoy_info.datapath); 
+        [displacements, ~, surface_temp, baro, gps, smart_mooring,smart_mooring_bm, smart_mooring_bm_agg] = process_sofar_SD_card(buoy_info.datapath); 
         
         %initial clip based on input start/stop times 
         tr = timerange(buoy_info.starttime, buoy_info.endtime);         
@@ -255,8 +255,8 @@ for b = 1:size(buoy_metadata,1)
                 
         if contains(buoy_info.instrument,'Smart')
             if istimetable(smart_mooring_bm)  
-                data.temp_time = smart_mooring_bm_agg.Time(smart_mooring.node_position==1); 
-                data.surf_temp = smart_mooring_bm_agg.temp_mean_degC(smart_mooring.node_position==1);
+                data.temp_time = smart_mooring_bm_agg.Time(smart_mooring_bm_agg.node_position==1); 
+                data.surf_temp = smart_mooring_bm_agg.temp_mean_degC(smart_mooring_bm_agg.node_position==1);
             else
                 data.temp_time = smart_mooring.Time(smart_mooring.node==1); 
                 data.surf_temp = smart_mooring.temp_degC(smart_mooring.node==1); 
