@@ -4,14 +4,14 @@
 
 clear; clc;
 %add wavebuoy_tools to path 
-addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
+addpath(genpath('C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools')); 
 
 %suppress warnings
 warning('off')
 
 %read in metadata for buoys to run
 dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wawaves_buoy_log_metadata2.csv'; 
+dname = 'wawaves_buoy_log_metadata.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 

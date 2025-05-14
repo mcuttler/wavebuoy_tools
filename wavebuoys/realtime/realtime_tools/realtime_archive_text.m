@@ -17,8 +17,8 @@ for ii = 1:length(num)
     
     dataout.time = posixtime(datetime(dv));
     dataout.timestamp = datestr(dv,'dd-mmm-yyyy HH:MM:SS');  
-    dataout.sitename = buoy_info.name; 
-    dataout.buoy_id = buoy_info.serial; 
+    dataout.sitename = data.serialID{num(ii)}; 
+    dataout.buoy_id = data.serialID{num(ii)}; 
     fields = {'hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','wind_speed','wind_dir','curr_mag','curr_dir','lat','lon'};
     for jj = 1:length(fields)
         if isfield(data,fields{jj})
