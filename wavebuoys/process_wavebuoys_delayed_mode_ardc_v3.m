@@ -55,7 +55,7 @@ for b = 1:size(buoy_metadata,1)
     %% process data based on buoy type (sofar, datawell, etc.)
     
     if strcmp(buoy_info.type,'sofar')==1        
-        [displacements, ~, surface_temp, baro, gps, ~,smart_mooring_bm, smart_mooring_bm_agg] = process_sofar_SD_card(buoy_info.datapath); 
+        [displacements, ~, surface_temp, baro, gps, smart_mooring,smart_mooring_bm, smart_mooring_bm_agg] = process_sofar_SD_card(buoy_info.datapath); 
         
         %initial clip based on input start/stop times 
         tr = timerange(buoy_info.starttime, buoy_info.endtime);         
@@ -228,7 +228,12 @@ for b = 1:size(buoy_metadata,1)
             if istimetable(smart_mooring_bm)  
                 data.surf_temp = interp1(smart_mooring_bm_agg.Time, smart_mooring_bm_agg.temp_mean_degC, data.time); 
             else
-                data.surf_temp = interp1(smart_mooring.Time(smart_mooring.node==1), smart_mooring.temp_degC(smart_mooring.node==1), data.time); 
+                nodes = unique(smart_mooring.node);
+                node = nodes(1); 
+                dt = smart_mooring(smart_mooring.node==node,:); 
+                [~,I] = unique(dt.Time); 
+                dt = dt(I,:); 
+                data.surf_temp = interp1(dt.Time, dt.temp_degC, data.time); 
             end
         else        
             if istimetable(surface_temp)
@@ -420,7 +425,10 @@ buoy_info.startdate = data.time(1); buoy_info.enddate = data.time(end);
 fname = make_imos_ardc_filename(buoy_info,'ALL'); 
 fname = strrep(fname,'nc','mat'); 
 
-save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg','-v7.3'); 
+save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring','smart_mooring_bm','smart_mooring_bm_agg','-v7.3'); 
+
+
+
 
 
 %% Organise for netCDF following IMOS-ARDC conventions      

@@ -10,8 +10,8 @@ addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools'));
 warning('off')
 
 %read in metadata for buoys to run
-dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wawaves_buoy_log_metadata2.csv'; 
+dpath = 'X:\CUTTLER_wawaves\Data\website\auswaves'; 
+dname = 'auswaves_backfill.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
