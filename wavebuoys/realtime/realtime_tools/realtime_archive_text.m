@@ -11,18 +11,39 @@ end
 %% check that wind and waves are same size
 %loop through each time point
 for ii = 1:length(num)
-    dv = datevec(data.time(num(ii)));         
+    dv = datevec(data.time(num(ii)));   
+    %monthly archive path 
     archive_path =  [buoy_info.web_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
     
     dataout.time = posixtime(datetime(dv));
-    dataout.timestamp = datestr(dv); 
-    dataout.sitename = buoy_info.name; 
-    dataout.buoy_id = buoy_info.serial; 
+    dataout.timestamp = datestr(dv,'dd-mmm-yyyy HH:MM:SS');  
+    dataout.sitename = data.serialID{num(ii)}; 
+    dataout.buoy_id = data.serialID{num(ii)}; 
     fields = {'hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','wind_speed','wind_dir','curr_mag','curr_dir','lat','lon'};
     for jj = 1:length(fields)
         if isfield(data,fields{jj})
+            %get closest time point for sofar current meter
+            if contains(buoy_info.type,'sofar')&& contains(fields{jj},'curr')
+                cidx = find(abs(data.time(num(ii)) - data.curr_time)==min(abs(data.time(num(ii)) - data.curr_time))); 
+                if length(cidx)>1
+                    cidx = cidx(1); 
+                end
+                %check it's within 30min
+                max_diff = 30/(60*24); 
+                if abs(data.curr_time(cidx)-data.time(num(ii))) < max_diff
+                    cidx = cidx;
+                else
+                    cidx = [];
+                end
+                %add to data out
+                if isempty(cidx)
+                    dataout.(fields{jj}) = -9999; 
+                else
+                    dataout.(fields{jj}) = data.(fields{jj})(cidx); 
+                end
+                
             %round directional data
-            if strcmp(fields{jj},'dp')|strcmp(fields{jj},'dpspr')|strcmp(fields{jj},'dm')|strcmp(fields{jj},'dmspr')
+            elseif strcmp(fields{jj},'dp')|strcmp(fields{jj},'dpspr')|strcmp(fields{jj},'dm')|strcmp(fields{jj},'dmspr')
                 dataout.(fields{jj})=round(data.(fields{jj})(num(ii)),2); 
             else
                 dataout.(fields{jj}) = data.(fields{jj})(num(ii));
@@ -30,7 +51,8 @@ for ii = 1:length(num)
         else
             dataout.(fields{jj}) = -9999; 
         end
-    end        
+    end  
+    
     
     %temperature data for text file 
     if isfield(data, 'temp_time')       

@@ -125,12 +125,12 @@ dimname = 'TIME';
 dimlength = size(data.time,1);
 dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
 
-% temperature should be on same time as wave time 
-% if isfield(data,'temp_time')
-%     dimname = 'TEMP_TIME';
-%     dimlength = size(data.temp_time,1);
-%     dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
-% end
+%only include temperature if it exists 
+if isfield(data,'temp_time')
+    dimname = 'TEMP_TIME';
+    dimlength = size(data.temp_time,1);
+    dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+end
 
 dimname = 'timeSeries';
 dimlength = 1;
@@ -151,16 +151,28 @@ for ii = 1:m
     end
 
     %create and define variable and attributes    
-    if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
+    if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,false,int8(-127));
+    elseif strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TEMP_TIME);        
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,int8(-127));
     elseif strcmp(varinfo{1,2}{ii,1},'TIME')
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,true,-9999);
+    elseif strcmp(varinfo{1,2}{ii,1},'TEMP_TIME')
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TEMP_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,true,-9999);
     elseif strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,false,-9999);
+    elseif strcmp(varinfo{1,2}{ii,1},'TEMP')
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_FLOAT', dimid_TEMP_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,-9999);
     else
@@ -175,7 +187,7 @@ for ii = 1:m
             if ~isnan(attinfo{1,j}(ii))                                 
                 if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
                     netcdf.putAtt(ncid, varid, attnames{j},int8(attinfo{1,j}(ii))); 
-                elseif strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE')
+                elseif strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'TEMP_TIME') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE')
                     netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii)); 
                 else
                     netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii))); 
@@ -205,11 +217,11 @@ for ii = 1:m
     end
     
     %put data to variable
-%     if strcmp(varinfo{1,1}{ii,1},'temp')
-%         %modify this for spotter v2, datawell 
-%         netcdf.putVar(ncid, varid, ones(size(bulkparams.time,1),1).*nan); 
     if strcmp(varinfo{1,1}{ii,1},'time')
-        imos_time = data.time - datenum(1950,1,1,0,0,0); 
+        imos_time = datenum(data.time) - datenum(1950,1,1,0,0,0); 
+        netcdf.putVar(ncid, varid, imos_time); 
+    elseif strcmp(varinfo{1,1}{ii,1},'temp_time')
+        imos_time = datenum(data.temp_time) - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'qc_flag_wave') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_wave')| strcmp(varinfo{1,1}{ii,1},'qc_flag_temp') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_temp')
         if isfield(data, varinfo{1,1}{ii,1})

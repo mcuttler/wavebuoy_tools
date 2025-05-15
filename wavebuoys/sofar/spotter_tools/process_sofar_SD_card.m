@@ -72,13 +72,17 @@ if ~isempty(files)
             
             %should only have 2 variables
             dum = dum(:,1:2); 
-            dum.Properties.VariableNames = {'GPSEpoch','temperature'}; 
+            % check that time stamp is numeric and eliminate if not
+            if isnumeric(table2array(dum(:,1)))
+                dum.Properties.VariableNames = {'GPSEpoch','temperature'}; 
+                dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
+                dumt = timetable(dum.temperature,'RowTimes',dt,'VariableNames',{'temperature'}); 
+                
+
+                surface_temp = [surface_temp; dumt]; 
+            else 
             
-            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
-            dumt = timetable(dum.temperature,'RowTimes',dt,'VariableNames',{'temperature'}); 
-    
-             surface_temp = [surface_temp; dumt]; 
-    
+            end    
             clear dum dt dumt; 
         end
     end
@@ -95,7 +99,7 @@ if ~isempty(files)
     
     baro=[];
 
-    for i = 1:size(files)
+    for i = 1:size(files,1)
        
         %skip first 0000 files as usually contain no data
         if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
@@ -103,13 +107,16 @@ if ~isempty(files)
             
             %should only have 2 variables
             dum = dum(:,1:2); 
-            dum.Properties.VariableNames = {'GPSEpoch','baro_pressure'}; 
+            if isnumeric(table2array(dum(:,1)))
+                dum.Properties.VariableNames = {'GPSEpoch','baro_pressure'}; 
             
-            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
-            dumt = timetable(dum.baro_pressure,'RowTimes',dt,'VariableNames',{'baro_pressure'}); 
+                dt = datetime(dum.GPSEpoch,'convertfrom','posixtime'); 
+                dumt = timetable(dum.baro_pressure,'RowTimes',dt,'VariableNames',{'baro_pressure'}); 
             
-            baro = [baro; dumt]; 
+                baro = [baro; dumt]; 
+            else
             
+            end
             clear dum dt dumt; 
         end
     end
@@ -124,7 +131,7 @@ disp('concatenating smart mooring Bristlemouth');
 files = dir([sofarpath '\*_SENS_IND.csv']); 
 
 if ~isempty(files)
-    for i = 1:size(files)    
+    for i = 1:size(files,1)    
         dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');
         %set common variable names for all BristleMOuth sensor types: 
         % https://sofarocean.notion.site/Spotter-3-Bristlemouth-SD-Card-Data-Guide-50b2a73cd7d74f4987484152878ddad9
@@ -175,7 +182,7 @@ disp('concatenating smart mooring Bristlemouth agg');
 files = dir([sofarpath '\*_SENS_AGG.csv']); 
 
 if ~isempty(files)
-    for i = 1:size(files)    
+    for i = 1:size(files,1)    
         dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');
         %set common variable names for all BristleMOuth sensor types: 
         % https://sofarocean.notion.site/Spotter-3-Bristlemouth-SD-Card-Data-Guide-50b2a73cd7d74f4987484152878ddad9
@@ -227,7 +234,7 @@ disp('concatenating smart mooring data');
 files = dir([sofarpath '\*_SMD.csv']); 
 
 if ~isempty(files)
-    for i = 1:size(files)    
+    for i = 1:size(files,1)    
         dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve');
         if ~isempty(dum)
             %only keep rows with 'data'
@@ -298,7 +305,7 @@ disp('concatenating gps positions');
 files = dir([sofarpath '\*_LOC.csv']); 
 if ~isempty(files)
      gps=[];
-     for i = 1:size(files)
+     for i = 1:size(files,1)
        
         %skip first 0000 files as usually contain no data
         if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
@@ -340,7 +347,7 @@ files = dir([sofarpath '\*_HDR.csv']);
 
 if ~isempty(files)
     displacements_hdr=[];
-    for i = 1:size(files)
+    for i = 1:size(files,1)
         
 
         %skip first 0000 files as usually contain no data
