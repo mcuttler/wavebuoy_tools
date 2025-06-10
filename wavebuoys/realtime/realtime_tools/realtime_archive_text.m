@@ -11,9 +11,11 @@ end
 %% check that wind and waves are same size
 %loop through each time point
 for ii = 1:length(num)
-    dv = datevec(data.time(num(ii)));   
-    %monthly archive path 
-    archive_path =  [buoy_info.web_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
+    dv = datevec(data.time(num(ii)));  
+    %monthly archive path (aws)
+    archive_web_path = [buoy_info.web_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')];
+    %monthly archive path (local)
+    archive_path =  [buoy_info.archive_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
     
     dataout.time = posixtime(datetime(dv));
     dataout.timestamp = datestr(dv,'dd-mmm-yyyy HH:MM:SS');  
@@ -214,8 +216,23 @@ for ii = 1:length(num)
             end
             fclose(fid);
         end
+    end       
+end
+
+%get list of files and sort by modified time 
+tfiles = dir(fullfile(archive_path,'*.csv')); 
+for kk = 1:size(tfiles,1)
+    modtime(kk,1) = datetime(tfiles(kk).datenum,'convertfrom','datenum'); 
+end
+tfiles = tfiles((datetime('now')-modtime)<minutes(15)); 
+%copy to aws
+for kk = 1:size(tfiles,1)
+    if exist(archive_web_path)
+        copyfile(fullfile(tfiles(kk).folder, tfiles(kk).name), fullfile(archive_web_path,tfiles(kk).name))
+    else
+        mkdir(archive_web_path)
+        copyfile(fullfile(tfiles(kk).folder, tfiles(kk).name), fullfile(archive_web_path,tfiles(kk).name));
     end
-    
 end
 
 
