@@ -55,3 +55,7 @@ log_message = ['Elapsed run time is: ' num2str(toc) ' seconds'];
 fprintf(flog, [log_message ' \n']); 
 fclose(flog);
 
+%fore quit matlab
+quit
+
+
