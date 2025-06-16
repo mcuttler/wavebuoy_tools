@@ -2,8 +2,10 @@
 
 function [] = realtime_archive_text(buoy_info, data,limit); 
 % either add just recent data (limit) to file; or all time points
-if limit>0
+if length(limit)==1 & limit>0
     num = size(data.time,1)-(limit-1):size(data.time,1);     
+elseif length(limit)>1
+    num = limit; 
 else
     num = [1:size(data.time)]; 
 end
@@ -19,7 +21,7 @@ for ii = 1:length(num)
     
     dataout.time = posixtime(datetime(dv));
     dataout.timestamp = datestr(dv,'dd-mmm-yyyy HH:MM:SS');  
-    dataout.sitename = data.serialID{num(ii)}; 
+    dataout.sitename = data.name{num(ii)}; 
     dataout.buoy_id = data.serialID{num(ii)}; 
     fields = {'hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','wind_speed','wind_dir','curr_mag','curr_dir','lat','lon'};
     for jj = 1:length(fields)

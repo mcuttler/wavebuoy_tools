@@ -283,6 +283,17 @@ elseif strcmp(buoy_info.type,'datawell')==1
     dw_data.wind_time = dw_data.time; 
     dw_data.systime = dw_data.time; 
     
+    %add 'name' for text writing
+    for i = 1:size(dw_data.time,1)
+        dw_data.name{i,1} = buoy_info.name; 
+    end               
+    
+    if ~isfield(archive_data,'name')
+        for i = 1:size(archive_data.time,1)
+            archive_data.name{i,1} = buoy_info.name;
+        end
+    end 
+    
     %check that it's new data
     if all(check)~=0
         if ~isempty(archive_data)
@@ -298,7 +309,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 try
                     realtime_archive_mat(buoy_info, data);
                     realtime_backup_mat(buoy_info, data);
-                    limit = size(dw_data.time,1) - size(archive_data.time,1);       
+                    limit = size(dw_data.time,1) - size(archive_data.time,1); 
                     realtime_archive_text(buoy_info, data, limit);             
                 catch
                     log_message = [log_message, ' (3) code failed on archiving or making text file'];
