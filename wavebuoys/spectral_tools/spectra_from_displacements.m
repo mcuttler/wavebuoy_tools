@@ -80,6 +80,16 @@ end
 %SET THRESHOLD TO CONTINUE BASED ON 'BAD_DATA_THRESH'
 %Set percentage of windows that are bad data and will cause processing to
 %stop 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Force spectral proccessing to progres regardless of finding bad
+% displacement data, MH adds for testing 20250612
+
+rw_orig=rw;
+rw=[]';
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heave==0))/length(heave)<0.1)
     
     if ~isempty(rw)

@@ -9,19 +9,20 @@
 
 %2025-03
 %   - v3 updates to new version of JH and MC spectral analysis code 
-%   - add buoy_info metadata to a CSV to enable batch post-processing 
+%   - add buoy_info metadata to a CSV to enable batch post-processing
 
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools\wavebuoys'; 
+mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'C:\Users\00084142\Data\wavebuoy_test_data'; 
-dname = 'test_delayed_mode_buoys_to_process.csv'; 
+dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\cape-bridgewater_deploy20240618_retrieve20241027_SPOT31670C'; 
+dname = 'vic_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
+
 
 %% Loop over buoys and process
 for b = 1:size(buoy_metadata,1)
@@ -61,6 +62,7 @@ for b = 1:size(buoy_metadata,1)
         tr = timerange(buoy_info.starttime, buoy_info.endtime);         
         displacements = displacements(tr,:); 
         gps = gps(tr,:); 
+        baro = baro(tr,:);
         if contains(buoy_info.instrument,'Smart')
             if istimetable(smart_mooring_bm)
                 smart_mooring_bm = smart_mooring_bm(tr,:); 
@@ -81,16 +83,20 @@ for b = 1:size(buoy_metadata,1)
         end
 
         %get points inside watch circle  --- either calculate or just use a fixed value 
-        if isempty(buoy_info.watch_circle)
+        if isempty(buoy_info.watch_circle) | isnan(buoy_info.watch_circle)
             buoy_info.watch_circle = sqrt( buoy_info.mainline_length^2 - buoy_info.DeployDepth^2) + buoy_info.catenary_length;
         end
-
-        ind = find(dum_distance<=buoy_info.watch_circle);     
+        
+        buoy_info.watch_circle_multiplier = 1.25;
+        ind = find(dum_distance<=(buoy_info.watch_circle*buoy_info.watch_circle_multiplier));     
+        
+        
         gps = gps(ind,:); 
         
         %set start/stop based on watch circle times 
         tr = timerange(gps.Time(1), gps.Time(end));               
-        displacements = displacements(tr,:);       
+        displacements = displacements(tr,:);
+        baro=baro(tr,:);
         if contains(buoy_info.instrument,'Smart')
             if istimetable(smart_mooring_bm)
                 smart_mooring_bm = smart_mooring_bm(tr,:); 
@@ -384,7 +390,7 @@ for b = 1:size(buoy_metadata,1)
     check.WPTOL = 0.01; % flat line
     check.WDTOL = 0.5;  %flat line
     check.WSPTOL = 0.5; %flat line
-    check.TTOL = 0.01; %flat line 
+    check.TTOL = 0.005; %flat line 
     check.rep_fail = 240;  %  flat line (hrs)
     check.rep_suspect = 144; % flat line (hrs) 
     check.MINWH = 0.10; %min height 
@@ -443,7 +449,7 @@ for b = 1:size(buoy_metadata,1)
 %% Save mat file for internal Use
 buoy_info.startdate = data.time(1); buoy_info.enddate = data.time(end); 
 
-fname = make_imos_ardc_filename(buoy_info,'ALL'); 
+fname = make_imos_ardc_filename(buoy_info,'ALL_segment_filt_off'); 
 fname = strrep(fname,'nc','mat'); 
 
 save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg','-v7.3'); 
@@ -480,7 +486,7 @@ data.temp_time = datenum(data.temp_time);
 data.disp_time = datenum(data.disp_time); 
 %%  Integral Wave Parameters 
 
-globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc_vic.txt']; 
 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
@@ -492,7 +498,7 @@ varsfile_Int = varsfile;
 bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
 
 %% displacements
-globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc_vic.txt']; 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
 else
@@ -536,7 +542,7 @@ varsfile_Disp = varsfile;
 
 
 %% spectral data
-globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc_vic.txt']; 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
 else
@@ -550,8 +556,8 @@ varsfile_Spec = varsfile;
 
 % overwrite previous .mat file with final info 
 %convert back to datetime for easier plotting in future 
-data.time = datetime(data.time,'convertfrom','datenum'); 
 data.disp_time = datetime(data.disp_time,'convertfrom','datenum'); 
+data.time = datetime(data.time,'convertfrom','datenum'); 
 fname = make_imos_ardc_filename(buoy_info,'ALL'); 
 fname = strrep(fname,'nc','mat'); 
 save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg',...
