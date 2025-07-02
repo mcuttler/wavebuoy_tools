@@ -18,8 +18,8 @@ mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\w
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\cape-bridgewater_deploy20240618_retrieve20241027_SPOT31670C'; 
-dname = 'vic_delayed_mode_buoys_to_process.csv'; 
+dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\collaroy_deploy20241205_retrieve20250404_SPOT-31880C'; 
+dname = 'nsw_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -87,7 +87,7 @@ for b = 1:size(buoy_metadata,1)
             buoy_info.watch_circle = sqrt( buoy_info.mainline_length^2 - buoy_info.DeployDepth^2) + buoy_info.catenary_length;
         end
         
-        buoy_info.watch_circle_multiplier = 1.25;
+        buoy_info.watch_circle_multiplier = 2;
         ind = find(dum_distance<=(buoy_info.watch_circle*buoy_info.watch_circle_multiplier));     
         
         
