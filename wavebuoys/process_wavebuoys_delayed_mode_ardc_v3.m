@@ -18,8 +18,8 @@ mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\w
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\collaroy_deploy20241205_retrieve20250404_SPOT-31880C'; 
-dname = 'nsw_delayed_mode_buoys_to_process.csv'; 
+dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240701_retrieve20241205_SPOT31395C'; 
+dname = 'wa_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -36,7 +36,11 @@ for b = 1:size(buoy_metadata,1)
         end
     end
     
-    %parse start/stop times from datapath 
+
+    %parse start/stop times from datapath (this is taking the start of each
+    %day, i.e. YYYYMMDD 00:00:00. Also not sure of implications of time
+    %zone assumptions (i.e. timezone of parsed start/stop times vs timezone
+    %of data)
     cname = strsplit(buoy_info.datapath,'\'); 
     for j = 1:length(cname)
         if contains(cname{j},'deploy')
@@ -74,23 +78,77 @@ for b = 1:size(buoy_metadata,1)
             surface_temp = surface_temp(tr,:); 
         end
 
+        % crop data to (first data point)+3hrs : (last data point)-3hrs
+        %gps
+        [dum dum_inds] = min(abs(gps.Time - (gps.Time(1) + (3*(1/24)))));
+        [dum dum_inde]  = min(abs(gps.Time - (gps.Time(end) - (3*(1/24)))));
+        gps=gps(dum_inds:dum_inde,:);
+        clearvars dum_inds dum_inde dum
+        %surface temp
+        [dum dum_inds] = min(abs(surface_temp.Time - (surface_temp.Time(1) + (3*(1/24)))));
+        [dum dum_inde]  = min(abs(surface_temp.Time - (surface_temp.Time(end) - (3*(1/24)))));
+        surface_temp=surface_temp(dum_inds:dum_inde,:);
+        clearvars dum_inds dum_inde dum
+        %baro
+        [dum dum_inds] = min(abs(baro.Time - (baro.Time(1) + (3*(1/24)))));
+        [dum dum_inde]  = min(abs(baro.Time - (baro.Time(end) - (3*(1/24)))));
+        baro=baro(dum_inds:dum_inde,:);
+        clearvars dum_inds dum_inde dum
+
+        %displacements
+        [dum dum_inds] = min(abs(displacements.Time - (displacements.Time(1) + (3*(1/24)))));
+        [dum dum_inde]  = min(abs(displacements.Time - (displacements.Time(end) - (3*(1/24)))));
+        displacements=displacements(dum_inds:dum_inde,:);
+        clearvars dum_inds dum_inde dum
+
         %% check watch circle to filter data before QC --- this needs to be added to the Datawell workflows too 
         %use mapping toolbox distance function to calculate points outside watch_circle
-        clear dum_distance
+        
+        % calculate mean lat and lon
+        lat_mean=mean(gps.latitude);
+        lon_mean=mean(gps.longitude);
+        clear dum_distance dum_distance2
         wgs84 = wgs84Ellipsoid("m");
         for i = 1:size(gps.Time,1)            
             dum_distance(i,1) = distance(buoy_info.DeployLat, buoy_info.DeployLon, gps.latitude(i), gps.longitude(i),wgs84); 
+            dum_distance2(i,1) = distance(lat_mean, lon_mean, gps.latitude(i), gps.longitude(i),wgs84); 
+        end
+        
+        
+
+        % define a watch circle, within which data points need to be to be considered at deployment site--- either calculate or just use a fixed value 
+        
+        %*********NOTE**********
+        % for fixed value comment out the below. The below calculated watch
+        % circle based on depth, mainline length and catenary length
+                
+        buoy_info.watch_circle = sqrt( buoy_info.mainline_length^2 - buoy_info.DeployDepth^2) + buoy_info.catenary_length;
+        
+        % watch circle multiplier to account for extra mooring length, or shallower than expected depth 
+        buoy_info.watch_circle_multiplier = 1.25;
+        
+        % check for greater than 10% of points falling outside watch circle*multiplier and
+        % stop code if so
+                        
+        ind = find(dum_distance>(buoy_info.watch_circle*buoy_info.watch_circle_multiplier));     
+        ind2 = find(dum_distance2>(buoy_info.watch_circle*buoy_info.watch_circle_multiplier));     
+         
+        disp('fraction of data outside watch circle with metadata deploy lat lon center')
+        disp(num2str(length(ind)/length(dum_distance)));
+        disp('fraction of data outside watch circle with mean lat and lon center')
+        disp(num2str(length(ind2)/length(dum_distance2)));
+        
+        if  length(ind)/length(dum_distance)>0.1
+            disp('greater than 10% (fraction below) points outside watch circle with meta data deployed center')
+            
+            if length(ind2)/length(dum_distance2)>0.1
+                disp('greater than 10% points outside watch circle with mean lat and mean lon deployed center')
+
+            end
+
+            return
         end
 
-        %get points inside watch circle  --- either calculate or just use a fixed value 
-        if isempty(buoy_info.watch_circle) | isnan(buoy_info.watch_circle)
-            buoy_info.watch_circle = sqrt( buoy_info.mainline_length^2 - buoy_info.DeployDepth^2) + buoy_info.catenary_length;
-        end
-        
-        buoy_info.watch_circle_multiplier = 2;
-        ind = find(dum_distance<=(buoy_info.watch_circle*buoy_info.watch_circle_multiplier));     
-        
-        
         gps = gps(ind,:); 
         
         %set start/stop based on watch circle times 
@@ -399,8 +457,8 @@ for b = 1:size(buoy_metadata,1)
     check.MAXWP = 25; %max period
     check.MINSV = 0.07; %min spread
     check.MAXSV = 80.0; %max spread
-    check.MINT = 5; %min temp
-    check.MAXT = 55; %max temp
+    check.MINT = 0; %min temp
+    check.MAXT = 35; %max temp
     check.WHROC= 2; %height rate of change
     check.WPROC= 10; %period rate of change
     check.WDROC= 50; %direction rate of change
@@ -411,8 +469,60 @@ for b = 1:size(buoy_metadata,1)
     check.qaqc_tests = {'15','16','19','20','spike'}; % qaqc tests to use in assigning flags 
 
     [data] = qaqc_bulkparams(data,check);  
-    
-    %remove all indivdiual parameter QAQC tests 
+
+    % Make table of individual test flags for TEMP. export to CSV. for
+    % comparison to Python workflow
+     TEMP=data.surf_temp;
+     TIME_TEMP=data.temp_time;
+     TEMP_quality_control=data.qc_flag_temp;
+     TEMP_QC_TEMP_gross_range_test=data.surf_temp_19;
+     TEMP_QC_TEMP_rate_of_change_test= data.surf_temp_20;
+     TEMP_QC_TEMP_flat_line_test=data.surf_temp_16;
+     TEMP_QC_TEMP_mean_std_test= data.surf_temp_15;
+     TEMP_QC_TEMP_spike_test=data.surf_temp_spike;
+
+     temp_subflag_tests=table(TEMP,TIME_TEMP,TEMP_quality_control,TEMP_QC_TEMP_gross_range_test,TEMP_QC_TEMP_rate_of_change_test,TEMP_QC_TEMP_flat_line_test,TEMP_QC_TEMP_mean_std_test,TEMP_QC_TEMP_spike_test);
+     
+     cd(buoy_info.archive_path)
+     writetable(temp_subflag_tests,'temp_qc_subflags.csv')
+
+     clearvars TEMP TIME_TEMP TEMP_quality_control TEMP_QC_TEMP_gross_range_test TEMP_QC_TEMP_rate_of_change_test TEMP_QC_TEMP_flat_line_test TEMP_QC_TEMP_mean_std_test TEMP_QC_TEMP_spike_test
+   
+     % make table for individual subflag tests BP's. export to csv for
+     % comparison to Python workflow
+    TIME=data.time;
+    WSSH=data.hs;
+    WPFM=data.tm;
+    WPPE=data.tp;
+    SSWMD=data.dm;
+    WPDI=data.dp;
+    WMDS=data.dmspr;
+    WPDS=data.dpspr;
+    LONGITUDE=data.lat;
+    LATITUDE=data.lon;
+    WAVE_quality_control=data.qc_flag_wave;
+    WAVE_QC_WSSH_gross_range_test=data.qf_19(:,1);
+    WAVE_QC_WSSH_rate_of_change_test=data.hs_20;
+    WAVE_QC_WSSH_mean_std_test=data.hs_15;
+    WAVE_QC_WSSH_spike_test=data.hs_spike;
+    WAVE_QC_WPPE_gross_range_test=data.qf_19(:,1);
+    WAVE_QC_WPPE_rate_of_change_test=data.tp_20;
+    WAVE_QC_WPPE_mean_std_test=data.tp_15;
+    WAVE_QC_WPPE_spike_test=data.tp_spike;
+    WAVE_QC_WPDI_gross_range_test=data.qf_19(:,1);
+    WAVE_QC_WPDI_rate_of_change_test=data.dp_20;
+    WAVE_QC_WPDI_mean_std_test=data.dp_15;
+    WAVE_QC_WPDI_spike_test=data.dp_spike;
+
+    bp_subflag_tests=table(TIME,WSSH,WPFM,WPPE,SSWMD,WPDI,WMDS,WPDS,LONGITUDE,LATITUDE,WAVE_quality_control,WAVE_QC_WSSH_gross_range_test,WAVE_QC_WSSH_rate_of_change_test,WAVE_QC_WSSH_mean_std_test,WAVE_QC_WSSH_spike_test,WAVE_QC_WPPE_gross_range_test,WAVE_QC_WPPE_rate_of_change_test,WAVE_QC_WPPE_mean_std_test,WAVE_QC_WPPE_spike_test,WAVE_QC_WPDI_gross_range_test,WAVE_QC_WPDI_rate_of_change_test,WAVE_QC_WPDI_mean_std_test,WAVE_QC_WPDI_spike_test);
+
+    cd(buoy_info.archive_path);
+
+    writetable(bp_subflag_tests,'bulk_qc_subflags.csv')
+
+    clearvars TIME WSSH WPFM WPPE SSWMD WPDI WMDS WPDS LONGITUDE LATITUDE WAVE_quality_control WAVE_QC_WSSH_gross_range_test WAVE_QC_WSSH_rate_of_change_test WAVE_QC_WSSH_mean_std_test WAVE_QC_WSSH_spike_test WAVE_QC_WPPE_gross_range_test WAVE_QC_WPPE_rate_of_change_test WAVE_QC_WPPE_mean_std_test WAVE_QC_WPPE_spike_test WAVE_QC_WPDI_gross_range_test WAVE_QC_WPDI_rate_of_change_test WAVE_QC_WPDI_mean_std_test WAVE_QC_WPDI_spike_test
+
+     %remove all indivdiual parameter QAQC tests 
     fields = fieldnames(data); 
     for i = 1:length(fields); 
         if length(fields{i})>1
@@ -449,13 +559,13 @@ for b = 1:size(buoy_metadata,1)
 %% Save mat file for internal Use
 buoy_info.startdate = data.time(1); buoy_info.enddate = data.time(end); 
 
-fname = make_imos_ardc_filename(buoy_info,'ALL_segment_filt_off'); 
+fname = make_imos_ardc_filename(buoy_info,'ALL'); 
 fname = strrep(fname,'nc','mat'); 
 
 save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg','-v7.3'); 
 
 
-%% Organise for netCDF following IMOS-ARDC conventions      
+    %% Organise for netCDF following IMOS-ARDC conventions      
 
 %Clip data to start/stop time of interest 
 ind_wave = find(data.time>=(buoy_info.startdate)&data.time<=(buoy_info.enddate)); 
@@ -486,7 +596,7 @@ data.temp_time = datenum(data.temp_time);
 data.disp_time = datenum(data.disp_time); 
 %%  Integral Wave Parameters 
 
-globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc_vic.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
@@ -498,7 +608,7 @@ varsfile_Int = varsfile;
 bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
 
 %% displacements
-globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc_vic.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
 else
@@ -542,7 +652,7 @@ varsfile_Disp = varsfile;
 
 
 %% spectral data
-globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc_vic.txt']; 
+globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
 if strcmp(buoy_info.type,'datawell')
     varsfile = [mpath '\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
 else
@@ -558,6 +668,7 @@ varsfile_Spec = varsfile;
 %convert back to datetime for easier plotting in future 
 data.disp_time = datetime(data.disp_time,'convertfrom','datenum'); 
 data.time = datetime(data.time,'convertfrom','datenum'); 
+data.temp_time = datetime(data.temp_time,'convertfrom','datenum'); 
 fname = make_imos_ardc_filename(buoy_info,'ALL'); 
 fname = strrep(fname,'nc','mat'); 
 save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg',...

@@ -1,6 +1,6 @@
 %% qaqc subflag
 % This code determines the 'reason' that data received the primary qa flag
-% Only determines reason for bad or questionable data (primary flag of 3)
+% Only determines reason for bad or questionable data (primary flag of 4 or 3)
 
 function [primary_flag, sub_flag] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests); 
 
