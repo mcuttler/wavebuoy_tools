@@ -513,7 +513,7 @@ data.z = data.z(:);
 d1 = floor(data.disp_time(1)); 
 d2 = ceil(data.disp_time(end)); 
 
-ttdum = d1:4:d2; 
+ttdum = d1:14:d2; 
 for i = 1:length(ttdum)
     if i == length(ttdum)
         ind = find(data.disp_time>=ttdum(i) & data.disp_time<d2);  
