@@ -625,10 +625,14 @@ data.x = data.x(:);
 data.y = data.y(:); 
 data.z = data.z(:); 
 
-ttdum = data.disp_time(1):14:data.disp_time(end); 
+%make whole days to match python (times are in datenum, so use datenum)
+d1 = floor(data.disp_time(1)); 
+d2 = ceil(data.disp_time(end)); 
+
+ttdum = d1:4:d2; 
 for i = 1:length(ttdum)
     if i == length(ttdum)
-        ind = find(data.disp_time>=ttdum(i)); 
+        ind = find(data.disp_time>=ttdum(i) & data.disp_time<d2);  
     else
         ind = find(data.disp_time>=ttdum(i) & data.disp_time<ttdum(i+1));
     end

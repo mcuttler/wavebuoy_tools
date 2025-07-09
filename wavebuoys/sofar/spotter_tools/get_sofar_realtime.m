@@ -19,6 +19,8 @@ tend = datestr(datenum(now)+ hours(2),30);
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
 
+%URL will ignore the processingSource term in buoys_metadata (but it's used
+%below for filtering)
 uri_waves=URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial...
     '&includeSurfaceTempData=true&includeWindData=true&includeFrequencyData=true&includeDirectionalMoments=true&'...
     'includePartitionData=true&includeBarometerData=true&processingSources=all'...
@@ -28,12 +30,15 @@ resp = send(r,uri_waves);
 status = resp.StatusCode;
 disp([status]); 
 
-
+%URL will ignore the processingSource term in buoys_metadata (but it's used
+%below for filtering)
 uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]); 
 resp_sensor = send(r,uri_sensor);
 status = resp_sensor.StatusCode;
 disp([status]); 
 
+%URL will ignore the processingSource term in buoys_metadata (but it's used
+%below for filtering)
 uri_latest = URI(['https://api.sofarocean.com/api/latest-data?spotterId=' buoy_info.serial]);
 resp_latest = send(r,uri_latest);
 status = resp_latest.StatusCode;
@@ -54,9 +59,11 @@ if isfield(resp.Body.Data.data,'waves')
         end
     end            
     
-    %use HDR if available
-    if ~isempty(indHDR)
-        indEmbedded = indHDR; 
+    %based on info in buoys_metadata.csv
+    if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+        indEmbedded = indHDR;
+    else
+        indEmbedded = indEmbedded; 
     end    
 
     for j = 1:size(indEmbedded,1)
@@ -92,13 +99,15 @@ if isfield(resp.Body.Data.data,'wind')
             elseif strcmp(resp.Body.Data.data.wind(j).processing_source,'hdr')
                 indHDR = [indHDR; j]; 
             end
-        end            
-        
-        %use HDR if available
-        if ~isempty(indHDR)
-            indEmbedded = indHDR; 
         end 
-        
+
+        %based on info in buoys_metadata.csv
+        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+            indEmbedded = indHDR;
+        else
+            indEmbedded = indEmbedded; 
+        end  
+
         for j = 1:size(indEmbedded,1)      
             Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(indEmbedded(j)).speed;    
             Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(indEmbedded(j)).direction;
@@ -192,7 +201,7 @@ if isfield(resp.Body.Data.data,'frequencyData')
         end
         
         %use HDR if available
-        if ~isempty(indHDR)
+        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
             indSpec = indHDR; 
         else
             indSpec = indEmbedded;
@@ -251,7 +260,7 @@ if isfield(resp.Body.Data.data,'partitionData')
         end
         
         %use HDR if available
-        if ~isempty(indHDR)
+        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
             indPart = indHDR; 
         else
             indPart = indEmbedded;
@@ -327,7 +336,7 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
     end    
     
     %use HDR if available 
-    if ~isempty(indHDR)
+    if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
         indTemp = indHDR; 
     else
         indTemp = indEmbedded; 
@@ -348,6 +357,7 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
             Spotter.bott_temp(j,1)= -9999; 
         end
     end
+    
  %smart mooring
 elseif ~isempty(resp_sensor.Body.Data.data)  
     %get unique sensor positions

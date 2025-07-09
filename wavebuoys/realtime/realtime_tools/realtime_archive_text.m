@@ -2,8 +2,10 @@
 
 function [] = realtime_archive_text(buoy_info, data,limit); 
 % either add just recent data (limit) to file; or all time points
-if limit>0
+if length(limit)==1 & limit>0
     num = size(data.time,1)-(limit-1):size(data.time,1);     
+elseif length(limit)>1
+    num = limit; 
 else
     num = [1:size(data.time)]; 
 end
@@ -11,14 +13,16 @@ end
 %% check that wind and waves are same size
 %loop through each time point
 for ii = 1:length(num)
-    dv = datevec(data.time(num(ii)));   
-    %monthly archive path 
-    archive_path =  [buoy_info.web_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
+    dv = datevec(data.time(num(ii)));  
+    %monthly archive path (aws)
+    archive_web_path = [buoy_info.web_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')];
+    %monthly archive path (local)
+    archive_path =  [buoy_info.archive_path '\' buoy_info.name '\text_archive\' num2str(dv(1)) '\' num2str(dv(2),'%02d')]; 
     
     dataout.time = posixtime(datetime(dv));
     dataout.timestamp = datestr(dv,'dd-mmm-yyyy HH:MM:SS');  
-    dataout.sitename = buoy_info.name; 
-    dataout.buoy_id = buoy_info.serial; 
+    dataout.sitename = data.name{num(ii)}; 
+    dataout.buoy_id = data.serialID{num(ii)}; 
     fields = {'hsig','tp','tm','dp','dpspr','dm','dmspr','qf_waves','wind_speed','wind_dir','curr_mag','curr_dir','lat','lon'};
     for jj = 1:length(fields)
         if isfield(data,fields{jj})
@@ -214,8 +218,23 @@ for ii = 1:length(num)
             end
             fclose(fid);
         end
+    end       
+end
+
+%get list of files and sort by modified time 
+tfiles = dir(fullfile(archive_path,'*.csv')); 
+for kk = 1:size(tfiles,1)
+    modtime(kk,1) = datetime(tfiles(kk).datenum,'convertfrom','datenum'); 
+end
+tfiles = tfiles((datetime('now')-modtime)<minutes(15)); 
+%copy to aws
+for kk = 1:size(tfiles,1)
+    if exist(archive_web_path)
+        copyfile(fullfile(tfiles(kk).folder, tfiles(kk).name), fullfile(archive_web_path,tfiles(kk).name))
+    else
+        mkdir(archive_web_path)
+        copyfile(fullfile(tfiles(kk).folder, tfiles(kk).name), fullfile(archive_web_path,tfiles(kk).name));
     end
-    
 end
 
 
