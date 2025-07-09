@@ -10,8 +10,8 @@ addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools'));
 warning('off')
 
 %read in metadata for buoys to run
-dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wawaves_buoy_log_metadata2.csv'; 
+dpath = 'X:\CUTTLER_wawaves\Data\sawaves'; 
+dname = 'sawaves_buoy_log_metadata.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -96,10 +96,10 @@ for dd = 1:size(sites,1)
              disp(['archiving mat files']);      
              if ~isfield(data,'systime')
                  data.systime = data.time; 
-                 data.batteryVoltage = ones(size(data.hsig,1)).*nan; 
-                 data.batteryPower = ones(size(data.hsig,1)).*nan; 
-                 data.humidity = ones(size(data.hsig,1)).*nan; 
-                 data.solarVoltage = ones(size(data.hsig,1)).*nan; 
+                 data.batteryVoltage = ones(size(data.hsig,1),1).*nan; 
+                 data.batteryPower = ones(size(data.hsig,1),1).*nan; 
+                 data.humidity = ones(size(data.hsig,1),1).*nan; 
+                 data.solarVoltage = ones(size(data.hsig,1),1).*nan; 
              end
              realtime_archive_mat(buoy_info, data);          
              

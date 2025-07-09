@@ -176,7 +176,9 @@ if strcmp(buoy_info.type,'sofar')==1
                             [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
                                 SpotData.b2(end,:),SpotData.varianceDensity(end,:));
                             make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
-                                SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)        
+                                SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)  
+                            %force close figures
+                            close all 
                         catch
                             log_message = [log_message, ' (8) code failed on making MEM'];
                         end                        
@@ -213,7 +215,9 @@ if strcmp(buoy_info.type,'sofar')==1
                     [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
                         SpotData.b2(end,:),SpotData.varianceDensity(end,:));
                     make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...                        
-                    SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)      
+                    SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)
+                    %force close figures
+                    close all 
                 catch
                     log_message = [log_message, ' (8) code failed on making MEM'];
                 end
@@ -279,6 +283,17 @@ elseif strcmp(buoy_info.type,'datawell')==1
     dw_data.wind_time = dw_data.time; 
     dw_data.systime = dw_data.time; 
     
+    %add 'name' for text writing
+    for i = 1:size(dw_data.time,1)
+        dw_data.name{i,1} = buoy_info.name; 
+    end               
+    
+    if ~isfield(archive_data,'name')
+        for i = 1:size(archive_data.time,1)
+            archive_data.name{i,1} = buoy_info.name;
+        end
+    end 
+    
     %check that it's new data
     if all(check)~=0
         if ~isempty(archive_data)
@@ -294,7 +309,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 try
                     realtime_archive_mat(buoy_info, data);
                     realtime_backup_mat(buoy_info, data);
-                    limit = size(dw_data.time,1) - size(archive_data.time,1);       
+                    limit = size(dw_data.time,1) - size(archive_data.time,1); 
                     realtime_archive_text(buoy_info, data, limit);             
                 catch
                     log_message = [log_message, ' (3) code failed on archiving or making text file'];
@@ -309,6 +324,8 @@ elseif strcmp(buoy_info.type,'datawell')==1
                             [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
                             make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
                         end
+                        %force close figures
+                        close all 
                     catch
                         log_message = [log_message, ' (4) code failed on making MEM'];
                     end
@@ -346,6 +363,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 for ii = 1:size(dw_data.a1,1); 
                     [NS, NE, ndirec] = lygre_krogstad_MC(dw_data.a1(ii,:),dw_data.a2(ii,:),dw_data.b1(ii,:),dw_data.b2(ii,:),dw_data.E(ii,:),3);
                     make_MEM_plot(ndirec, dw_data.frequency', NE, dw_data.hsig(ii), dw_data.tp(ii), dw_data.dp(ii), dw_data.time(ii), buoy_info)    
+                    close all
                 end    
             catch
                 log_message = [log_message, ' (4) code failed on making MEM'];

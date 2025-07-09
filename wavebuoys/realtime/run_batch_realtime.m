@@ -38,7 +38,7 @@ for jj = 1:size(buoy_metadata,1)
     end
     
     %run the realtime workflow 
-    disp(['running ' buoy_info.name]); %comment out when running for real 
+    % disp(['running ' buoy_info.name]); %comment out when running for real 
     try
         [log_message] = batch_realtime(buoy_info);
         fprintf(flog, [buoy_info.name ': ' log_message ' \n']);         
@@ -54,4 +54,8 @@ end
 log_message = ['Elapsed run time is: ' num2str(toc) ' seconds']; 
 fprintf(flog, [log_message ' \n']); 
 fclose(flog);
+
+%fore quit matlab
+quit
+
 
