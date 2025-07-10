@@ -8,8 +8,10 @@
 %verify results 
 
 %2025-03
-%   - v3 updates to new version of JH and MC spectral analysis code 
+%   - v4 updates from v3 (a new version of JH and MC spectral analysis code) 
 %   - add buoy_info metadata to a CSV to enable batch post-processing 
+%   - V4 adds additional metadata and control around cropping and filtering
+%     data (for undesired points) before spectral processing
 
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
