@@ -5,8 +5,8 @@
 %assumptions defined by user. 
 %Remaining data that is outside this adjusted circle is then further
 %analysed to determine whether suspect or fail
-    % suspect when data is greater than adjusted watch circle, but less than 2 * adjusted watch circle
-    % fail when data is greater than 2 * adjusted watch circle 
+    % suspect when data is greater than adjusted watch circle, but less than 'buoy_info.watch_circle_fail' * adjusted watch circle
+    % fail when data is greater than 'buoy_info.watch_circle_fail' * adjusted watch circle 
 
 
 function [data,watch_circle_flag] = qaqc_watch_circle(buoy_info, data)
@@ -31,6 +31,10 @@ for i = 1:size(data.time,1)
 end
 
 ind = find(dum_distance > buoy_info.watch_circle);   
+ind2 = find(dum_distance > buoy_info.watch_circle*buoy_info.watch_circle_fail);
+data.qc_flag_watch = ones(size(data.time,1),2); % Make subflag results
+data.qc_flag_watch(ind,1)=3; %write flag 3 (4's will be overwritten later where appropriate in next line)
+data.qc_flag_watch(ind2,1)=4;
 
 %check how much data this is
 out_of_radius = (size(ind,1)/size(dum_distance,1))*100; 
@@ -40,7 +44,7 @@ if out_of_radius >= buoy_info.out_of_radius_tolerance
     %get mainline length from metadata, include error for slop in mooring build
     mainline = buoy_info.mainline_length+buoy_info.mainline_length_error; 
     %get mainline length from metadata, include error for slop in mooring build
-    catenary = buoy_info.catenary_length+ buoy_info.catenary_length_error; 
+    catenary = buoy_info.catenary_length+buoy_info.catenary_length_error; 
     
     %account for stretch factor to give a bit extra in watch circle 
     mainline = mainline + (mainline * buoy_info.mooring_stretch_factor); 
@@ -48,7 +52,9 @@ if out_of_radius >= buoy_info.out_of_radius_tolerance
     %calculate watch circle, and add extra error for GPS uncertainty 
     buoy_info.watch_circle =  sqrt( mainline^2 - buoy_info.DeployDepth^2) + catenary + buoy_info.watch_circle_gps_error;            
     
-    clear dum_distance ind out_of_radius
+    %currently this for loop below is redundant becasue it (dum_distance)
+    %was calculated above and nothing has changed
+    clear dum_distance ind ind2 out_of_radius
     for i = 1:size(data.time,1)            
         if data.lat(i) > -180
             dum_distance(i,1) = distance(buoy_info.DeployLat, buoy_info.DeployLon, data.lat(i), data.lon(i),wgs84); 
@@ -59,6 +65,10 @@ if out_of_radius >= buoy_info.out_of_radius_tolerance
     
     %calculate percentage of data outside of watch circle
     ind = find(dum_distance > buoy_info.watch_circle); 
+    ind2 = find(dum_distance > buoy_info.watch_circle*buoy_info.watch_circle_fail);
+    data.qc_flag_watch(ind,2)=3; %write flag 3 (4's will be overwritten later where appropriate in next line)
+    data.qc_flag_watch(ind2,2)=4;
+
     out_of_radius = (size(ind,1)/size(dum_distance,1)) * 100;     
 
     if out_of_radius > buoy_info.out_of_radius_tolerance

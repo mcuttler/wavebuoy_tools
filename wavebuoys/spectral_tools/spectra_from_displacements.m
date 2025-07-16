@@ -85,8 +85,8 @@ end
 % Force spectral proccessing to progres regardless of finding bad
 % displacement data, MH adds for testing 20250612
 
-rw_orig=rw;
-rw=[]';
+%rw_orig=rw;
+%rw=[]';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
