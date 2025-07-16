@@ -78,7 +78,9 @@ for b = 1:size(buoy_metadata,1)
 
         %crop remaining variables; 
         gps.Time.TimeZone = 'UTC'; 
+        baro.Time.TimeZone = 'UTC'; 
         gps = gps(tr,:); 
+        baro = baro(tr,:); 
         if contains(buoy_info.instrument,'Smart')
             if istimetable(smart_mooring_bm)
                 smart_mooring_bm.Time.TimeZone = 'UTC'; 
@@ -396,6 +398,51 @@ for b = 1:size(buoy_metadata,1)
     check.qaqc_tests = {'15','16','19','20','spike'}; % qaqc tests to use in assigning flags 
     
     [data] = qaqc_bulkparams(data,check);  
+
+
+    % Make table of individual test flags for TEMP. export to CSV. for
+    % comparison to Python workflow
+     TEMP=data.surf_temp;
+     TIME_TEMP=data.temp_time;
+     TEMP_quality_control=data.qc_flag_temp;
+     TEMP_QC_TEMP_gross_range_test=data.surf_temp_19;
+     TEMP_QC_TEMP_rate_of_change_test= data.surf_temp_20;
+     TEMP_QC_TEMP_flat_line_test=data.surf_temp_16;
+     TEMP_QC_TEMP_mean_std_test= data.surf_temp_15;
+     TEMP_QC_TEMP_spike_test=data.surf_temp_spike;
+
+     temp_subflag_tests=table(TEMP,TIME_TEMP,TEMP_quality_control,TEMP_QC_TEMP_gross_range_test,TEMP_QC_TEMP_rate_of_change_test,TEMP_QC_TEMP_flat_line_test,TEMP_QC_TEMP_mean_std_test,TEMP_QC_TEMP_spike_test);
+     
+     cd(buoy_info.archive_path)
+     writetable(temp_subflag_tests,'temp_qc_subflags.csv')
+
+     clearvars TEMP TIME_TEMP TEMP_quality_control TEMP_QC_TEMP_gross_range_test TEMP_QC_TEMP_rate_of_change_test TEMP_QC_TEMP_flat_line_test TEMP_QC_TEMP_mean_std_test TEMP_QC_TEMP_spike_test
+   
+     % make table for individual subflag tests BP's. export to csv for
+     % comparison to Python workflow
+    TIME=data.time;
+    WSSH=data.hs;
+    WPFM=data.tm;
+    WPPE=data.tp;
+    SSWMD=data.dm;
+    WPDI=data.dp;
+    WMDS=data.dmspr;
+    WPDS=data.dpspr;
+    LONGITUDE=data.lat;
+    LATITUDE=data.lon;
+    WAVE_quality_control=data.qc_flag_wave;
+    WAVE_QC_WSSH_gross_range_test=data.qf_19(:,1);
+    WAVE_QC_WSSH_rate_of_change_test=data.hs_20;
+    WAVE_QC_WSSH_mean_std_test=data.hs_15;
+    WAVE_QC_WSSH_spike_test=data.hs_spike;
+    WAVE_QC_WPPE_gross_range_test=data.qf_19(:,1);
+    WAVE_QC_WPPE_rate_of_change_test=data.tp_20;
+    WAVE_QC_WPPE_mean_std_test=data.tp_15;
+    WAVE_QC_WPPE_spike_test=data.tp_spike;
+    WAVE_QC_WPDI_gross_range_test=data.qf_19(:,1);
+    WAVE_QC_WPDI_rate_of_change_test=data.dp_20;
+    WAVE_QC_WPDI_mean_std_test=data.dp_15;
+    WAVE_QC_WPDI_spike_test=data.dp_spike;
     
     %remove all indivdiual parameter QAQC tests 
     fields = fieldnames(data); 
@@ -430,11 +477,29 @@ for b = 1:size(buoy_metadata,1)
         end
     end
 
-    %run final QC using watch circle 
-    [data,watch_circle_flag,buoy_info] = qaqc_watch_circle(buoy_info, data); 
+    %run final QC using watch circle, note this function overwrties the
+    %qc_flag_wave where watch circle test is suspect (3) and fail
+    %(4). It also overwrites qc_subflag_wave with (37) when outside watch circle.
+    % watch_circle_flag tells whether any (1) or none (0) data were
+    % outside the watch circle. 
+
+    [data,watch_circle_flag] = qaqc_watch_circle(buoy_info, data); 
 
     %quickly calculate total number of suspect and fail data
     qc_fail = (size(data.qc_flag_wave(data.qc_flag_wave>1),1)/size(data.time,1))*100; 
+
+     
+    %Write Bulk parameters subflags csv
+    WATCH_quality_control_primary = data.qc_flag_watch(:,1);
+    WATCH_quality_control_secondary = data.qc_flag_watch(:,2);
+
+    bp_subflag_tests=table(TIME,WSSH,WPFM,WPPE,SSWMD,WPDI,WMDS,WPDS,LONGITUDE,LATITUDE,WAVE_quality_control,WAVE_QC_WSSH_gross_range_test,WAVE_QC_WSSH_rate_of_change_test,WAVE_QC_WSSH_mean_std_test,WAVE_QC_WSSH_spike_test,WAVE_QC_WPPE_gross_range_test,WAVE_QC_WPPE_rate_of_change_test,WAVE_QC_WPPE_mean_std_test,WAVE_QC_WPPE_spike_test,WAVE_QC_WPDI_gross_range_test,WAVE_QC_WPDI_rate_of_change_test,WAVE_QC_WPDI_mean_std_test,WAVE_QC_WPDI_spike_test,WATCH_quality_control_primary,WATCH_quality_control_secondary);
+
+    cd(buoy_info.archive_path);
+
+    writetable(bp_subflag_tests,'bulk_qc_subflags.csv')
+
+    clearvars TIME WSSH WPFM WPPE SSWMD WPDI WMDS WPDS LONGITUDE LATITUDE WAVE_quality_control WAVE_QC_WSSH_gross_range_test WAVE_QC_WSSH_rate_of_change_test WAVE_QC_WSSH_mean_std_test WAVE_QC_WSSH_spike_test WAVE_QC_WPPE_gross_range_test WAVE_QC_WPPE_rate_of_change_test WAVE_QC_WPPE_mean_std_test WAVE_QC_WPPE_spike_test WAVE_QC_WPDI_gross_range_test WAVE_QC_WPDI_rate_of_change_test WAVE_QC_WPDI_mean_std_test WAVE_QC_WPDI_spike_test WATCH_quality_control_primary WATCH_quality_control_secondary
 
 
 %% Save mat file for internal Use
@@ -445,7 +510,7 @@ for b = 1:size(buoy_metadata,1)
     fname = make_imos_ardc_filename(buoy_info,'ALL'); 
     fname = strrep(fname,'nc','mat'); 
     
-    save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg','-v7.3'); 
+    save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg','watch_circle_flag','qc_fail','-v7.3'); 
     
     
     %write outputs if passes the final watch circle QC; otherwise, write log file with issues to check
@@ -457,7 +522,7 @@ for b = 1:size(buoy_metadata,1)
         fprintf(flog, [buoy_info.name ' failed the watch circle QAQC tests OR too much flagged data and needs a closer look.']); 
         fclose(flog); 
     else
-        %% Organise for netCDF following IMOS-ARDC conventions      
+       %% Organise for netCDF following IMOS-ARDC conventions      
         
         % %Clip data to start/stop time of interest 
         % ind_wave = find(data.time>=(buoy_info.startdate)&data.time<=(buoy_info.enddate)); 
