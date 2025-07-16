@@ -13,12 +13,12 @@
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
+mpath = 'D:\CUTTLER_GitHub\wavebuoy_tools'; 
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240701_retrieve20241205_SPOT31395C'; 
-dname = 'wa_delayed_mode_buoys_to_process.csv'; 
+dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
+dname = 'test_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -479,12 +479,13 @@ for b = 1:size(buoy_metadata,1)
     end
 
     %run final QC using watch circle, note this function overwrties the
-    %qc_flag_wave where watch circle test is suspect (3) and fail
+    %qc_flag_wave when watch circle test is suspect (3) and fail
     %(4). It also overwrites qc_subflag_wave with (37) when outside watch circle.
-    % watch_circle_flag tells whether any (1) or none (0) data were
-    % outside the watch circle. 
+    % watch_circle_flag tells whether more (1) or less (2) than certain
+    % percentage of data outside watch circle (percentage defined in
+    % metadata)
 
-    [data,watch_circle_flag] = qaqc_watch_circle(buoy_info, data); 
+    [data,watch_circle_flag, buoy_info] = qaqc_watch_circle(buoy_info, data); 
 
     %quickly calculate total number of suspect and fail data
     qc_fail = (size(data.qc_flag_wave(data.qc_flag_wave>1),1)/size(data.time,1))*100; 
