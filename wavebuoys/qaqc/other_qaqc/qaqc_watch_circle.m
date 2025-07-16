@@ -52,8 +52,6 @@ if out_of_radius >= buoy_info.out_of_radius_tolerance
     %calculate watch circle, and add extra error for GPS uncertainty 
     buoy_info.watch_circle =  sqrt( mainline^2 - buoy_info.DeployDepth^2) + catenary + buoy_info.watch_circle_gps_error;            
     
-    %currently this for loop below is redundant becasue it (dum_distance)
-    %was calculated above and nothing has changed
     clear dum_distance ind ind2 out_of_radius
     for i = 1:size(data.time,1)            
         if data.lat(i) > -180

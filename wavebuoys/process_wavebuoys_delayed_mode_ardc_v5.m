@@ -413,6 +413,7 @@ for b = 1:size(buoy_metadata,1)
 
      temp_subflag_tests=table(TEMP,TIME_TEMP,TEMP_quality_control,TEMP_QC_TEMP_gross_range_test,TEMP_QC_TEMP_rate_of_change_test,TEMP_QC_TEMP_flat_line_test,TEMP_QC_TEMP_mean_std_test,TEMP_QC_TEMP_spike_test);
      
+    
      cd(buoy_info.archive_path)
      writetable(temp_subflag_tests,'temp_qc_subflags.csv')
 
