@@ -9,7 +9,7 @@
     % fail when data is greater than 'buoy_info.watch_circle_fail' * adjusted watch circle 
 
 
-function [data,watch_circle_flag] = qaqc_watch_circle(buoy_info, data)
+    function [data,watch_circle_flag, buoy_info] = qaqc_watch_circle(buoy_info, data)
 %% first calculate watch circle using stretch factor and assumed GPS error
 %get mainline (should include any chain at bottom)
 mainline = buoy_info.mainline_length + (buoy_info.mainline_length*buoy_info.mooring_stretch_factor); 
