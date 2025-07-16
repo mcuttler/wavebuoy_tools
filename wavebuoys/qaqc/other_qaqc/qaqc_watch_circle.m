@@ -66,15 +66,19 @@ if out_of_radius >= buoy_info.out_of_radius_tolerance
     else
         watch_circle_flag = 0;
     end
-
+else
+    watch_circle_flag=0;
 end
 %% set qc flags
-data.qc_subflag_wave(ind,1) = 37; %hard coded from wave_subflag_mapping.csv 
+if ~isempty(ind)
+    data.qc_subflag_wave(ind,1) = 37; %hard coded from wave_subflag_mapping.csv 
+    
+    %determine suspect or fail based on distance outside watch circle
+    data.qc_flag_wave(dum_distance > buoy_info.watch_circle,1) = 3; 
+    % overwrite any suspect in previous line that are bigger than threshold 
+    data.qc_flag_wave(dum_distance > buoy_info.watch_circle*buoy_info.watch_circle_fail,1) = 4; 
+end
 
-%determine suspect or fail based on distance outside watch circle
-data.qc_flag_wave(dum_distance > buoy_info.watch_circle,1) = 3; 
-% overwrite any suspect in previous line that are bigger than threshold 
-data.qc_flag_wave(dum_distance > buoy_info.watch_circle*buoy_info.watch_circle_fail,1) = 4; 
 end
 
 
