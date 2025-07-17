@@ -483,7 +483,7 @@ for b = 1:size(buoy_metadata,1)
     % watch_circle_flag tells whether any (1) or none (0) data were
     % outside the watch circle. 
 
-    [data,watch_circle_flag,buoy_info] = qaqc_watch_circle(buoy_info, data); 
+    [data,watch_circle_flag] = qaqc_watch_circle(buoy_info, data); 
 
     %quickly calculate total number of suspect and fail data
     qc_fail = (size(data.qc_flag_wave(data.qc_flag_wave>1),1)/size(data.time,1))*100; 
