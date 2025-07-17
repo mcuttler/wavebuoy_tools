@@ -13,12 +13,12 @@
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools\wavebuoys'; 
+mpath = 'D:\CUTTLER_GitHub\wavebuoy_tools'; 
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240701_retrieve20241205_SPOT31395C'; 
-dname = 'wa_delayed_mode_buoys_to_process.csv'; 
+dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
+dname = 'test_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -102,9 +102,9 @@ for b = 1:size(buoy_metadata,1)
         buoy_xyz = displacements; 
         clear displacements displacements_hdr             
 
-        %get start time from input CSV
-        tstart = buoy_info.starttime; 
-        tend = buoy_info.endtime;  
+        %set start/stop time for buliding spectral analysis time blocks 
+        tstart = buoy_info.starttimeUTC +hours(buoy_info.time_crop_start);
+        tend = buoy_info.endtimeUTC +hours(buoy_info.time_crop_end); 
         
         %set spectral processing time window
         spec_window = 30; %minutes 
@@ -413,6 +413,7 @@ for b = 1:size(buoy_metadata,1)
 
      temp_subflag_tests=table(TEMP,TIME_TEMP,TEMP_quality_control,TEMP_QC_TEMP_gross_range_test,TEMP_QC_TEMP_rate_of_change_test,TEMP_QC_TEMP_flat_line_test,TEMP_QC_TEMP_mean_std_test,TEMP_QC_TEMP_spike_test);
      
+    
      cd(buoy_info.archive_path)
      writetable(temp_subflag_tests,'temp_qc_subflags.csv')
 
@@ -478,12 +479,13 @@ for b = 1:size(buoy_metadata,1)
     end
 
     %run final QC using watch circle, note this function overwrties the
-    %qc_flag_wave where watch circle test is suspect (3) and fail
+    %qc_flag_wave when watch circle test is suspect (3) and fail
     %(4). It also overwrites qc_subflag_wave with (37) when outside watch circle.
-    % watch_circle_flag tells whether any (1) or none (0) data were
-    % outside the watch circle. 
+    % watch_circle_flag tells whether more (1) or less (2) than certain
+    % percentage of data outside watch circle (percentage defined in
+    % metadata)
 
-    [data,watch_circle_flag] = qaqc_watch_circle(buoy_info, data); 
+    [data,watch_circle_flag, buoy_info] = qaqc_watch_circle(buoy_info, data); 
 
     %quickly calculate total number of suspect and fail data
     qc_fail = (size(data.qc_flag_wave(data.qc_flag_wave>1),1)/size(data.time,1))*100; 
@@ -503,7 +505,8 @@ for b = 1:size(buoy_metadata,1)
 
 
 %% Save mat file for internal Use
-
+    
+    %set start date based on final dataset start/stop (UTC)
     buoy_info.startdate = data.time(1); buoy_info.enddate = data.time(end); 
     
     fname = make_imos_ardc_filename(buoy_info,'ALL'); 
@@ -523,30 +526,30 @@ for b = 1:size(buoy_metadata,1)
     else
        %% Organise for netCDF following IMOS-ARDC conventions      
         
-        %Clip data to start/stop time of interest 
-        ind_wave = find(data.time>=(buoy_info.startdate)&data.time<=(buoy_info.enddate)); 
-        ind_tempcurr = find(data.temp_time>=buoy_info.startdate&data.temp_time<=buoy_info.enddate); 
-        ind_disp = find(data.disp_time(:,1)>=(buoy_info.startdate)&data.disp_time(:,1)<=(buoy_info.enddate)); 
+        % %Clip data to start/stop time of interest 
+        % ind_wave = find(data.time>=(buoy_info.startdate)&data.time<=(buoy_info.enddate)); 
+        % ind_tempcurr = find(data.temp_time>=buoy_info.startdate&data.temp_time<=buoy_info.enddate); 
+        % ind_disp = find(data.disp_time(:,1)>=(buoy_info.startdate)&data.disp_time(:,1)<=(buoy_info.enddate)); 
+        % 
+        % fields = fieldnames(data); 
+        % for i = 1:length(fields); 
+        %     if strcmp(fields{i},'disp_time') | strcmp(fields{i},'x') | strcmp(fields{i},'y') | strcmp(fields{i},'z')
+        %         data.(fields{i}) = data.(fields{i})(ind_disp,:); 
+        %     elseif strcmp(fields{i},'temp_time') | strcmp(fields{i},'surf_temp') | strcmp(fields{i},'bott_temp') | strcmp(fields{i},'qc_flag_temp') | strcmp(fields{i},'qc_subflag_temp') 
+        %         data.(fields{i}) = data.(fields{i})(ind_tempcurr,:); 
+        %     elseif strcmp(fields{i},'curr_mag') | strcmp(fields{i},'curr_dir') | strcmp(fields{i},'curr_mag_std') | strcmp(fields{i},'curr_dir_std') | strcmp(fields{i},'w') | strcmp(fields{i},'w_std')  
+        %         data.(fields{i}) = data.(fields{i})(ind_tempcurr,:); 
+        %     elseif strcmp(fields{i},'frequency')
+        %         data.(fields{i}) = data.(fields{i})(1,:);
+        %     elseif contains(fields{i},'limits') | contains(fields{i},'0') | strcmp(fields{i},'crests') | strcmp(fields{i},'troughs')
+        %         continue
+        %     else
+        %         data.(fields{i}) = data.(fields{i})(ind_wave,:); 
+        %     end
+        % end    
         
-        fields = fieldnames(data); 
-        for i = 1:length(fields); 
-            if strcmp(fields{i},'disp_time') | strcmp(fields{i},'x') | strcmp(fields{i},'y') | strcmp(fields{i},'z')
-                data.(fields{i}) = data.(fields{i})(ind_disp,:); 
-            elseif strcmp(fields{i},'temp_time') | strcmp(fields{i},'surf_temp') | strcmp(fields{i},'bott_temp') | strcmp(fields{i},'qc_flag_temp') | strcmp(fields{i},'qc_subflag_temp') 
-                data.(fields{i}) = data.(fields{i})(ind_tempcurr,:); 
-            elseif strcmp(fields{i},'curr_mag') | strcmp(fields{i},'curr_dir') | strcmp(fields{i},'curr_mag_std') | strcmp(fields{i},'curr_dir_std') | strcmp(fields{i},'w') | strcmp(fields{i},'w_std')  
-                data.(fields{i}) = data.(fields{i})(ind_tempcurr,:); 
-            elseif strcmp(fields{i},'frequency')
-                data.(fields{i}) = data.(fields{i})(1,:);
-            elseif contains(fields{i},'limits') | contains(fields{i},'0') | strcmp(fields{i},'crests') | strcmp(fields{i},'troughs')
-                continue
-            else
-                data.(fields{i}) = data.(fields{i})(ind_wave,:); 
-            end
-        end    
         
-        
-        %make time a datenum
+        %make time a datenum for netCDF codes 
         data.time = datenum(data.time); 
         data.temp_time = datenum(data.temp_time); 
         data.disp_time = datenum(data.disp_time); 
@@ -624,11 +627,11 @@ for b = 1:size(buoy_metadata,1)
         
         globfile_Spec = globfile;
         varsfile_Spec = varsfile;
-        
-        % overwrite previous .mat file with final info 
+        %%  overwrite previous .mat file with final info 
         %convert back to datetime for easier plotting in future 
-        data.time = datetime(data.time,'convertfrom','datenum'); 
-        data.disp_time = datetime(data.disp_time,'convertfrom','datenum'); 
+        data.time = datetime(data.time,'convertfrom','datenum'); data.time.TimeZone = 'UTC'; 
+        data.disp_time = datetime(data.disp_time,'convertfrom','datenum'); data.disp_time.TimeZone='UTC'; 
+        data.temp_time = datetime(data.temp_time,'convertfrom','datenum'); data.temp_time.TimeZone='UTC'; 
         fname = make_imos_ardc_filename(buoy_info,'ALL'); 
         fname = strrep(fname,'nc','mat'); 
         save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg',...
