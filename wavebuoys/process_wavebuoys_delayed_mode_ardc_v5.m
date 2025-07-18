@@ -13,12 +13,12 @@
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'D:\CUTTLER_GitHub\wavebuoy_tools'; 
+mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools'; 
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'test_delayed_mode_buoys_to_process.csv'; 
+dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240701_retrieve20241205_SPOT31395C'; 
+dname = 'wa_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -429,8 +429,8 @@ for b = 1:size(buoy_metadata,1)
     WPDI=data.dp;
     WMDS=data.dmspr;
     WPDS=data.dpspr;
-    LONGITUDE=data.lat;
-    LATITUDE=data.lon;
+    LONGITUDE=data.lon;
+    LATITUDE=data.lat;
     WAVE_quality_control=data.qc_flag_wave;
     WAVE_QC_WSSH_gross_range_test=data.qf_19(:,1);
     WAVE_QC_WSSH_rate_of_change_test=data.hs_20;

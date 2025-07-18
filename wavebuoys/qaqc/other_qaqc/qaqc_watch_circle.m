@@ -32,11 +32,11 @@ end
 
 ind = find(dum_distance > buoy_info.watch_circle);  
 
-%don't need this here as handled at the end 
-% ind2 = find(dum_distance > buoy_info.watch_circle*buoy_info.watch_circle_fail);
-% data.qc_flag_watch = ones(size(data.time,1),2); % Make subflag results
-% data.qc_flag_watch(ind,1)=3; %write flag 3 (4's will be overwritten later where appropriate in next line)
-% data.qc_flag_watch(ind2,1)=4;
+% Mh adds below 4 lines to bring watch subtest circle flag out of function
+ ind2 = find(dum_distance > buoy_info.watch_circle*buoy_info.watch_circle_fail);
+ data.qc_flag_watch = ones(size(data.time,1),2); % Make subflag results
+ data.qc_flag_watch(ind,1)=3; %write flag 3 (4's will be overwritten later where appropriate in next line)
+ data.qc_flag_watch(ind2,1)=4;
 
 %check how much data this is
 out_of_radius = (size(ind,1)/size(dum_distance,1))*100; 
@@ -66,10 +66,11 @@ if out_of_radius >= buoy_info.out_of_radius_tolerance
     %calculate percentage of data outside of watch circle
     ind = find(dum_distance > buoy_info.watch_circle); 
 
-    %don't need 'ind2' and updating the flags should be done at the end
-    % ind2 = find(dum_distance > buoy_info.watch_circle*buoy_info.watch_circle_fail);
-    % data.qc_flag_watch(ind,2)=3; %write flag 3 (4's will be overwritten later where appropriate in next line)
-    % data.qc_flag_watch(ind2,2)=4;
+    % don't need 'ind2' and updating the flags should be done at the end,
+    % however matt adds below 3 lines for testing 
+    ind2 = find(dum_distance > buoy_info.watch_circle*buoy_info.watch_circle_fail);
+    data.qc_flag_watch(ind,2)=3; %write flag 3 (4's will be overwritten later where appropriate in next line)
+    data.qc_flag_watch(ind2,2)=4;
 
     out_of_radius = (size(ind,1)/size(dum_distance,1)) * 100;     
 
