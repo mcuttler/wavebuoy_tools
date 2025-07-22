@@ -59,7 +59,17 @@ outfields={'hs_16','tm_16','tp_16','dm_16','dp_16','meanspr_16','pkspr_16','surf
 
 for f = 1:length(fields)
     if isfield(bulkparams, fields{f}); 
-        [bulkparams.(outfields{f})] = qartod_16_flat_line(check, check.(tol{f}), bulkparams.(fields{f})); 
+        %use different settings for temperature
+        if strcmp(fields{f},'surf_temp')
+            %create new for temperature 
+            check_temp = check; 
+            check_temp.rep_fail = check_temp.rep_fail_temp; 
+            check_temp.rep_suspect = check_temp.rep_suspect_temp;             
+            bulkparams.(outfields{f}) = qartod_16_flat_line(check, check.(tol{f}), bulkparams.(fields{f}));
+            % clear check_temp; 
+        else
+            [bulkparams.(outfields{f})] = qartod_16_flat_line(check, check.(tol{f}), bulkparams.(fields{f})); 
+        end
     else
         bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
     end        
