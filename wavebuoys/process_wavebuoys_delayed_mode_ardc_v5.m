@@ -17,8 +17,8 @@ mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\w
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240701_retrieve20241205_SPOT31395C'; 
-dname = 'wa_delayed_mode_buoys_to_process.csv'; 
+dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\collaroy_deploy20241205_retrieve20250404_SPOT-31880C'; 
+dname = 'nsw_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -556,12 +556,12 @@ for b = 1:size(buoy_metadata,1)
         
         %%  Integral Wave Parameters 
         
-        globfile = [mpath '\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
+        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
         
         if strcmp(buoy_info.type,'datawell')
-            varsfile = [mpath '\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
+            varsfile = [mpath '\wavebuoys\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
         else
-            varsfile = [mpath '\imos_nc\metadata\bulkwave_parameters_DM_mapping.csv']; 
+            varsfile = [mpath '\wavebuoys\imos_nc\metadata\bulkwave_parameters_DM_mapping.csv']; 
         end
         globfile_Int = globfile;
         varsfile_Int = varsfile;
@@ -569,11 +569,11 @@ for b = 1:size(buoy_metadata,1)
         
         %% displacements
         
-        globfile = [mpath '\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
+        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
         if strcmp(buoy_info.type,'datawell')
-            varsfile = [mpath '\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
+            varsfile = [mpath '\wavebuoys\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
         else
-            varsfile = [mpath '\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
+            varsfile = [mpath '\wavebuoys\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
         end
         
         %divide displacements into 2week blocks and may x, y, z and time single
@@ -616,11 +616,11 @@ for b = 1:size(buoy_metadata,1)
         varsfile_Disp = varsfile;              
         %% spectral data
         
-        globfile = [mpath '\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
+        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
         if strcmp(buoy_info.type,'datawell')
-            varsfile = [mpath '\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
+            varsfile = [mpath '\wavebuoys\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
         else
-            varsfile = [mpath '\imos_nc\metadata\spectral_parameters_DM_mapping.csv']; 
+            varsfile = [mpath '\wavebuoys\imos_nc\metadata\spectral_parameters_DM_mapping.csv']; 
         end
         
         spec_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile);
