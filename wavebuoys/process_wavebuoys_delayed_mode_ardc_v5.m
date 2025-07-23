@@ -72,11 +72,11 @@ for b = 1:size(buoy_metadata,1)
         %variables
         displacements.Time.TimeZone = 'UTC'; 
 
-        %create time range based on cropped displacements - buffer by 5 min
+        %create time range based on cropped displacements - buffer by 2 min
         %to account for different sampling times and averaging. This
         %ensures no missing gps/baro data when these datasets are
         %interpolated to final wave timestamps 
-        tr = timerange(displacements.Time(1)-minutes(5), displacements.Time(end),'closed'); 
+        tr = timerange(displacements.Time(1)-minutes(2), displacements.Time(end),'closed'); 
 
         %crop remaining variables; 
         gps.Time.TimeZone = 'UTC'; 
