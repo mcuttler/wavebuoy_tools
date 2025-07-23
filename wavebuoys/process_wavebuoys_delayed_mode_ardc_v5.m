@@ -22,7 +22,6 @@ dname = 'nsw_delayed_mode_buoys_to_process.csv';
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
-
 %% Loop over buoys and process
 for b = 1:size(buoy_metadata,1)
     %% create buoy_info variable from metadata sheet
@@ -73,14 +72,21 @@ for b = 1:size(buoy_metadata,1)
         %variables
         displacements.Time.TimeZone = 'UTC'; 
 
-        %create time range based on cropped displacements
-        tr = timerange(displacements.Time(1), displacements.Time(end),'closed'); 
+        %create time range based on cropped displacements - buffer by 5 min
+        %to account for different sampling times and averaging. This
+        %ensures no missing gps/baro data when these datasets are
+        %interpolated to final wave timestamps 
+        tr = timerange(displacements.Time(1)-minutes(5), displacements.Time(end),'closed'); 
 
         %crop remaining variables; 
         gps.Time.TimeZone = 'UTC'; 
         baro.Time.TimeZone = 'UTC'; 
         gps = gps(tr,:); 
         baro = baro(tr,:); 
+        
+        %create time range based on cropped displacements - keep temp. time
+        %stamps. 
+        tr = timerange(displacements.Time(1), displacements.Time(end),'closed'); 
         if contains(buoy_info.instrument,'Smart')
             if istimetable(smart_mooring_bm)
                 smart_mooring_bm.Time.TimeZone = 'UTC'; 
