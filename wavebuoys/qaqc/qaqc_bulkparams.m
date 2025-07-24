@@ -65,7 +65,7 @@ for f = 1:length(fields)
             check_temp = check; 
             check_temp.rep_fail = check_temp.rep_fail_temp; 
             check_temp.rep_suspect = check_temp.rep_suspect_temp;             
-            bulkparams.(outfields{f}) = qartod_16_flat_line(check, check.(tol{f}), bulkparams.(fields{f}));
+            bulkparams.(outfields{f}) = qartod_16_flat_line(check_temp, check_temp.(tol{f}), bulkparams.(fields{f}));
             % clear check_temp; 
         else
             [bulkparams.(outfields{f})] = qartod_16_flat_line(check, check.(tol{f}), bulkparams.(fields{f})); 
