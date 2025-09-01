@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'Y:\CUTTLER_wawaves\Data\wawaves\TorbayWest\delayedmode\ProcessedData_DelayedMode\dep03';
+filepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240701_retrieve20241205_SPOT31395C\processed2';
 %IMOS file name
-filename = ['IMOS_NTP-WAVE_20210712_TORBAY-WEST_DM_WAVE-SPECTRA_20210826.nc'];
+filename = ['IMOS_COASTAL-WAVE-BUOYS_20240701_OCEAN-BEACH_DM_WAVE-SPECTRA_20241204.nc'];
 
 ncfile = fullfile(filepath, filename); 
 
@@ -111,6 +111,8 @@ ylim([0 0.4]);
 datetick
 ylabel('frequency');
 title ('ENERGY .... Szz?')
+caxis([0 2]);
+colorbar;
 
 
 %polar plot spectrum
