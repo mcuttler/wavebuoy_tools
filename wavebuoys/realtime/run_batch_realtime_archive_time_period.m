@@ -32,7 +32,7 @@ for dd = 1:size(sites,1)
             end
         end
         %run the realtime workflow 
-        % disp(['running ' sites{dd}]); 
+        disp(['running ' sites{dd}]); 
         
         
         data = []; 
