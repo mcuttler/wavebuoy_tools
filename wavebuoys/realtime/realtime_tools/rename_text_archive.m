@@ -1,9 +1,9 @@
 %% change filename
 
-files = dir('E:\scratch\CUTTLER_wawaves\Data\auswaves_realtime_backup\wawaves\ExmouthGulfNorth\text_archive\**\*.csv'); 
+files = dir('G:\auswaves\sawaves\VictorHarborInshore\text_archive\**\*.csv'); 
 
-site = 'ExmouthGulf02';
-sitenew = 'ExmouthGulfNorth'; 
+site = 'VictorHarbourInshore';
+sitenew = 'VictorHarborInshore'; 
 
 for i = 1:size(files,1)
     if contains(files(i).name,site)
