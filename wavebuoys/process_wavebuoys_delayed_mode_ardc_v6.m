@@ -454,6 +454,23 @@ for b = 1:size(buoy_metadata,1)
     WAVE_QC_WPDI_mean_std_test=data.dp_15;
     WAVE_QC_WPDI_spike_test=data.dp_spike;
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %run final QC using watch circle, note this function overwrties the
+    %qc_flag_wave when watch circle test is suspect (3) and fail
+    %(4). It also overwrites qc_subflag_wave with (37) when outside watch circle.
+    % watch_circle_flag tells whether more (1) or less (2) than certain
+    % percentage of data outside watch circle (percentage defined in
+    % metadata)
+
+    [data,watch_circle_flag, buoy_info] = qaqc_watch_circle(buoy_info, data); 
+    
+    %Write Bulk parameters subflags csv 
+    WATCH_quality_control_primary = data.qc_flag_watch(:,1);
+    WATCH_quality_control_secondary = data.qc_flag_watch(:,2);    
+    
+    bp_subflag_tests=table(TIME,WSSH,WPFM,WPPE,SSWMD,WPDI,WMDS,WPDS,LONGITUDE,LATITUDE,WAVE_quality_control,WAVE_QC_WSSH_gross_range_test,WAVE_QC_WSSH_rate_of_change_test,WAVE_QC_WSSH_mean_std_test,WAVE_QC_WSSH_spike_test,WAVE_QC_WPPE_gross_range_test,WAVE_QC_WPPE_rate_of_change_test,WAVE_QC_WPPE_mean_std_test,WAVE_QC_WPPE_spike_test,WAVE_QC_WPDI_gross_range_test,WAVE_QC_WPDI_rate_of_change_test,WAVE_QC_WPDI_mean_std_test,WAVE_QC_WPDI_spike_test,WATCH_quality_control_primary,WATCH_quality_control_secondary);
+    cd(buoy_info.archive_path);
+
+    writetable(bp_subflag_tests,'bulk_qc_subflags.csv')
 
     %remove all indivdiual parameter QAQC tests 
     fields = fieldnames(data); 
@@ -488,29 +505,12 @@ for b = 1:size(buoy_metadata,1)
         end
     end
 
-    %run final QC using watch circle, note this function overwrties the
-    %qc_flag_wave when watch circle test is suspect (3) and fail
-    %(4). It also overwrites qc_subflag_wave with (37) when outside watch circle.
-    % watch_circle_flag tells whether more (1) or less (2) than certain
-    % percentage of data outside watch circle (percentage defined in
-    % metadata)
-
-    [data,watch_circle_flag, buoy_info] = qaqc_watch_circle(buoy_info, data); 
-
     %quickly calculate total number of suspect and fail data - ADD THIS TO
     %THE DATA STRUCTURE 
     qc_fail = (size(data.qc_flag_wave(data.qc_flag_wave>1),1)/size(data.time,1))*100; 
 
-     
-    %Write Bulk parameters subflags csv
-    WATCH_quality_control_primary = data.qc_flag_watch(:,1);
-    WATCH_quality_control_secondary = data.qc_flag_watch(:,2);
+    
 
-    bp_subflag_tests=table(TIME,WSSH,WPFM,WPPE,SSWMD,WPDI,WMDS,WPDS,LONGITUDE,LATITUDE,WAVE_quality_control,WAVE_QC_WSSH_gross_range_test,WAVE_QC_WSSH_rate_of_change_test,WAVE_QC_WSSH_mean_std_test,WAVE_QC_WSSH_spike_test,WAVE_QC_WPPE_gross_range_test,WAVE_QC_WPPE_rate_of_change_test,WAVE_QC_WPPE_mean_std_test,WAVE_QC_WPPE_spike_test,WAVE_QC_WPDI_gross_range_test,WAVE_QC_WPDI_rate_of_change_test,WAVE_QC_WPDI_mean_std_test,WAVE_QC_WPDI_spike_test,WATCH_quality_control_primary,WATCH_quality_control_secondary);
-
-    cd(buoy_info.archive_path);
-
-    writetable(bp_subflag_tests,'bulk_qc_subflags.csv')
 
     clearvars TIME WSSH WPFM WPPE SSWMD WPDI WMDS WPDS LONGITUDE LATITUDE WAVE_quality_control WAVE_QC_WSSH_gross_range_test WAVE_QC_WSSH_rate_of_change_test WAVE_QC_WSSH_mean_std_test WAVE_QC_WSSH_spike_test WAVE_QC_WPPE_gross_range_test WAVE_QC_WPPE_rate_of_change_test WAVE_QC_WPPE_mean_std_test WAVE_QC_WPPE_spike_test WAVE_QC_WPDI_gross_range_test WAVE_QC_WPDI_rate_of_change_test WAVE_QC_WPDI_mean_std_test WAVE_QC_WPDI_spike_test WATCH_quality_control_primary WATCH_quality_control_secondary
 
