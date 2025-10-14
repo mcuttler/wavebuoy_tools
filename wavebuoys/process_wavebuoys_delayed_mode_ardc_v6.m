@@ -7,17 +7,18 @@
 %after running this code, can runa 'netCDF checker code to make plots and
 %verify results 
 
-%2025-07
-%   - v5 updates include new time cropping and updated watch circle qaqc 
+%2025-10
+%   - v6 updates include new QAQC config reading and other small changes to
+%   match python workflow 
 
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\IMOS AODN\Github\wavebuoy_tools'; 
+mpath = 'C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools'; 
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240119_retrieve20240614_SPOT31395C'; 
+dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
 dname = 'wa_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
@@ -371,16 +372,29 @@ for b = 1:size(buoy_metadata,1)
         clear data_nc
     end
     
-    %%   QAQC data - following QARTOD
+    %%   QAQC data 
+
+
+    %read QAQC config file
+    qc_config = readtable(buoy_info.qc_config_file,'VariableNamingRule','preserve'); 
+    %keep settings based on qc_config to use
+    qc_config = qc_config(qc_config.config_id==buoy_info.qc_config,:); 
+
+    %get the enabled vars
+    qc_config = qc_config(qc_config.enable_checks==1,:); 
+    
+     [data] = qaqc_bulkparams(data,qc_config);  
+
     %settings for QAQC
     check.time = data.time; 
     check.temp_time = data.temp_time; 
-    check.WVHGT = data.hs;
-    check.WVPD = data.tp; %parameter for range test (could also be mean) 
-    check.WVDIR = data.dp; %parameter for range test (could also be mean)
-    check.SST = data.surf_temp; 
-    check.STD = 3; % mean + std test
-    check.time_window = 72; %hours for calculating mean + std    
+    check.WVHGT = data.(qc_config.parameter_matlab{contains(qc_config.parameter_matlab,'h')}); 
+    check.WVPD = data.(qc_config.parameter_matlab{contains(qc_config.parameter_matlab,'t')}); 
+    check.WVDIR = data.(qc_config.parameter_matlab{contains(qc_config.parameter_matlab,'d')}); 
+    check.SST = data.(qc_config.parameter_matlab{contains(qc_config.parameter_matlab,'temp')}); 
+
+    check.STD = ; % mean + std test
+    check.time_window = qc_config.mean_std_time_window(contains(qc_config.parameter_matlab,'h'));  %hours for calculating mean + std    
     check.WHTOL = 0.025; % flat line
     check.WPTOL = 0.01; % flat line
     check.WDTOL = 0.5;  %flat line
@@ -403,11 +417,11 @@ for b = 1:size(buoy_metadata,1)
     check.WDROC= 50; %direction rate of change
     check.WSPROC= 25; %spreading rate of change
     check.TROC = 2; %temp rate of change
-    check.wave_fields = {'hs','tp','dp'}; %fields for assigning primary/secondary subflags 
-    check.temp_fields = {'surf_temp'}; %fields for assigning primary/secondary subflags 
+    check.wave_fields = qc_config.parameter_matlab(qc_config.enable_checks==1 & contains(qc_config.parameter_name,'wave')); %fields for assigning primary/secondary subflags 
+    check.temp_fields = qc_config.parameter_matlab(qc_config.enable_checks==1 & contains(qc_config.parameter_name,'temp')); %fields for assigning primary/secondary subflags 
     check.qaqc_tests = {'15','16','19','20','spike'}; % qaqc tests to use in assigning flags 
     
-    [data] = qaqc_bulkparams(data,check);  
+   
 
   %%% this needs to be added to the QAQC workflow, not this main function%%
     % Make table of individual test flags for TEMP. export to CSV. for
