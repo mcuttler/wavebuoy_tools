@@ -1,79 +1,54 @@
 %% code for running QA/QC on bulk parameters 
 
 
-function [bulkparams] = qaqc_bulkparams(bulkparams, check)
-%% QARTOD TESTS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  QARTOD TEST 15 - LT time series mean and standard deviation
+function [bulkparams] = qaqc_bulkparams(bulkparams, qc_config)
 
-%    User defined test criteria
-% check.STD = 3; 
-% check.time_window = 72; %hours for calculating mean + std
-% check.time = bulkparams.time; 
 
-if isfield(bulkparams,'meanspr')
-    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','surf_temp'};
-elseif isfield(bulkparams,'dmspr')
-     fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
-end
-
-outfields={'hs_15','tm_15','tp_15','dm_15','dp_15','meanspr_15','pkspr_15','surf_temp_15'}; 
-
-for f = 1:length(fields)
-    if isfield(bulkparams, fields{f}); 
-        if strcmp(fields{f},'surf_temp')
-            in.time = check.temp_time; 
-        else
-            in.time = check.time; 
-        end
-        in.time_window = check.time_window; 
-        in.STD = check.STD;             
-        [bulkparams.(outfields{f})] = qartod_15_mean_std(in, bulkparams.(fields{f})); 
+%loop over qc_config 
+for qc = 1:size(qc_config,1)
+    
+    %% QARTOD TESTS
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %  QARTOD TEST 15 - LT time series mean and standard deviation
+    
+    %    User defined test criteria
+    % check.STD = 3; 
+    % check.time_window = 72; %hours for calculating mean + std
+    % check.time = bulkparams.time;     
+    
+    outfields = [qc_config.parameter_matlab{qc} '_15']; 
+    
+    if contains(qc_config.parameter_matlab{qc},'temp')
+        in.time = bulkparams.temp_time; 
     else
-        bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
-    end
-end
+        in.time = bulkparams.time; 
+    end    
+    
+    in.time_window = qc_config.mean_std_time_window(qc);  
+    in.STD =  qc_config.mean_std_std(qc);    
+    [bulkparams.(outfields)] = qartod_15_mean_std(in, bulkparams.(qc_config.parameter_matlab{qc})); 
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % QARTOD TEST 16 - LT time series flat line 
+    %    User defined test criteria - absolute difference from preceding points
+    %    to denote 'flatline' 
+    % check.WHTOL = 0.025; 
+    % check.WPTOL = 0.01;
+    % check.WDTOL = 0.5; 
+    % check.WSPTOL = 0.5; 
+    % check.TTOL = 0.01; 
+    % check.rep_fail = 240;  % might be in hrs.
+    % check.rep_suspect = 144; % might be in hrs.
+    
+    clear in
+    tol = qc_config.flat_line_tol_dm(qc); 
+    outfields = [qc_config.parameter_matlab{qc} '_16']; 
+    
+    in.rep_suspect = qc_config.flat_line_suspect_time_dm(qc);
+    in.rep_fail = qc_config.flat_line_fail_time_dm(qc); 
 
+    [bulkparams.(outfields)] = qartod_16_flat_line(in, tol, bulkparams.(qc_config.parameter_matlab{qc}));        
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% QARTOD TEST 16 - LT time series flat line 
-
-%    User defined test criteria - absolute difference from preceding points
-%    to denote 'flatline' 
-% check.WHTOL = 0.025; 
-% check.WPTOL = 0.01;
-% check.WDTOL = 0.5; 
-% check.WSPTOL = 0.5; 
-% check.TTOL = 0.01; 
-% check.rep_fail = 240;  % might be in hrs.
-% check.rep_suspect = 144; % might be in hrs.
-
-if isfield(bulkparams,'meanspr')
-    fields = {'hs','tm','tp','dm','dp','meanspr','pkspr','surf_temp'};
-elseif isfield(bulkparams,'dmspr')
-     fields = {'hs','tm','tp','dm','dp','dmspr','dpspr','surf_temp'};
-end
-
-tol = {'WHTOL','WPTOL','WPTOL', 'WDTOL','WDTOL','WSPTOL','WSPTOL','TTOL'};
-outfields={'hs_16','tm_16','tp_16','dm_16','dp_16','meanspr_16','pkspr_16','surf_temp_16'}; 
-
-for f = 1:length(fields)
-    if isfield(bulkparams, fields{f}); 
-        %use different settings for temperature
-        if strcmp(fields{f},'surf_temp')
-            %create new for temperature 
-            check_temp = check; 
-            check_temp.rep_fail = check_temp.rep_fail_temp; 
-            check_temp.rep_suspect = check_temp.rep_suspect_temp;             
-            bulkparams.(outfields{f}) = qartod_16_flat_line(check_temp, check_temp.(tol{f}), bulkparams.(fields{f}));
-            % clear check_temp; 
-        else
-            [bulkparams.(outfields{f})] = qartod_16_flat_line(check, check.(tol{f}), bulkparams.(fields{f})); 
-        end
-    else
-        bulkparams.(outfields{f}) = ones(size(bulkparams.time,1),1)*2; 
-    end        
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % QARTOD TEST 19 - LT time series bulk wave parameters max/min/acceptable

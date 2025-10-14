@@ -19,7 +19,7 @@
 % in.WDTOL - directional tolerance 
 % in.WSPTOL - spreading tolerance
 % in.rep_fail - number of previous time poins to compare for fail
-% in.rep_fail - number of previous time poins to compare for suspect
+% in.rep_suspect - number of previous time poins to compare for suspect
 
 
 %
