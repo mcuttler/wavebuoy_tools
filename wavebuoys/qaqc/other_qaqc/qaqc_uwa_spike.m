@@ -4,34 +4,28 @@
 % 2 = not assessed (insufficient data)
 % 4 = fail
 
-function [QCFlag] = qaqc_uwa_spike(time, data, roc)
+function [QCFlag] = qaqc_uwa_spike(data, roc,type)
 %% wave data 
-QCFlag =[]; 
+
 %spike test
-for i = 1:size(time,1)
-    if i == 1
-        QCFlag = [QCFlag; 2]; 
-    elseif i == size(time,1)
-        QCFlag = [QCFlag; 2]; 
+for i = 1:size(data,1)
+    if i == 1 | i == size(data,1)
+        QCFlag(i,1) = 2; 
     else
-        dum = diff(data(i-1:i+1)); 
-        
-        %check spikes
-        if dum(1)>0&dum(2)<0&abs(dum)>roc
-            check_data = 4; 
-        %negative spike
-        elseif dum(1)<0&dum(2)>0&abs(dum)>roc
-            check_data = 4; 
+        if strcmp(type,'directional')
+            spike1 = abs(mod(data(i) - data(i-1) + 180,360)) - 180; 
+            spike2 = abs(mod(data(i) - data(i-1) + 180,360)) - 180;             
+
         else
-            check_data = 1;
+            spike1 = data(i) - data(i-1);
+            spike2 = data(i+1) - data(i); 
         end
         
-        %add QC value 
-        if check_data==4
-            QCFlag = [QCFlag; 4];
+        if abs(spike1) > roc & abs(spike2) > roc
+            QCFlag(i,1) = 4; 
         else
-            QCFlag = [QCFlag; 1];
-        end
+            QCFlag(i,1) =1; 
+        end                        
     end
 end
 
