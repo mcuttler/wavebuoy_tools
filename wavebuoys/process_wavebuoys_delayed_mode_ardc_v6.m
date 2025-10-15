@@ -378,12 +378,12 @@ for b = 1:size(buoy_metadata,1)
     %read QAQC config file
     qc_config = readtable(buoy_info.qc_config_file,'VariableNamingRule','preserve'); 
     %keep settings based on qc_config to use
-    qc_config = qc_config(qc_config.config_id==buoy_info.qc_config,:); 
-
+    qc_config = qc_config(qc_config.config_id==buoy_info.qc_config,:);     
     %get the enabled vars
-    qc_config = qc_config(qc_config.enable_checks==1,:);     
+    data.qc_config = qc_config(qc_config.enable_checks==1,:);     
+    clear qc_config
     
-    [data, buoy_info] = qaqc_bulkparams(data,qc_config, buoy_info);             
+    [data, buoy_info] = qaqc_bulkparams(data,data.qc_config, buoy_info);           
 
     %remove all indivdiual parameter QAQC tests 
     fields = fieldnames(data); 
@@ -430,15 +430,33 @@ for b = 1:size(buoy_metadata,1)
     %read metadata file to get operating institution name 
     regional_metadata = readtable(buoy_info.regional_metadata,'VariableNamingRule','preserve'); 
     site_metadata = readtable(buoy_info.metadata_file,'VariableNamingRule','preserve'); 
+    site_vars = site_metadata.Properties.VariableNames; 
+    
+    %loop over the regional_metadata spreadsheet to find correct
+    %institution and metadata
+    if contains(site_metadata.(site_vars{3}){contains(site_metadata.Parameter,'Operating')},'IMOS')
+        site_info = regional_metadata(contains(regional_metadata.operating_institution,'IMOS'),:);
+    else
+        for jj =1 :size(regional_metadata,1)
+            if contains(site_metadata.(site_vars{3}){contains(site_metadata.Parameter,'Operating')},regional_metadata.operating_institution{jj})
+                site_info = regional_metadata(jj,:); 
+            end
+        end
+    end      
 
-    if contains(site_metadata.("Metadata Wave Buoy(1)")(contains(site_metadata.Parameter,'Operating')),'IMOS')
-    end
-
+    vars = site_info.Properties.VariableNames; 
+    for jj =1:length(vars)
+        if iscell(site_info.(vars{jj}))
+            buoy_info.(vars{jj}) = site_info.(vars{jj}){1}; 
+        else
+            buoy_info.(vars{jj}) = site_info.(vars{jj});
+        end
+    end    
 
     fname = make_imos_ardc_filename(buoy_info,'ALL'); 
-    fname = strrep(fname,'nc','mat'); 
-    
-    save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg','watch_circle_flag','qc_fail','-v7.3'); 
+    fname = strrep(fname,'nc','mat');     
+   
+    save(fname,'baro','buoy_info','buoy_metadata','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg','-v7.3'); 
     
     
     %write outputs if passes the final watch circle QC; otherwise, write log file with issues to check
@@ -451,16 +469,18 @@ for b = 1:size(buoy_metadata,1)
         fclose(flog); 
     else
        %% Organise for netCDF following IMOS-ARDC conventions      
-        
-               
+                       
         %make time a datenum for netCDF codes 
         data.time = datenum(data.time); 
         data.temp_time = datenum(data.temp_time); 
         data.disp_time = datenum(data.disp_time); 
+
+        %modify author name
+        buoy_info.author = strrep(buoy_info.author,'-',', '); 
         
         %%  Integral Wave Parameters 
         
-        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_integralParams_ardc_20250828.txt']; 
+        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
         
         if strcmp(buoy_info.type,'datawell')
             varsfile = [mpath '\wavebuoys\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
@@ -473,7 +493,7 @@ for b = 1:size(buoy_metadata,1)
         
         %% displacements
         
-        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_rawDispl_ardc_20250828.txt']; 
+        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
         if strcmp(buoy_info.type,'datawell')
             varsfile = [mpath '\wavebuoys\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
         else
@@ -512,6 +532,15 @@ for b = 1:size(buoy_metadata,1)
             displacements.time_location = data.time(ind);
             disp_buoy_info.startdate = displacements.time(1); 
             disp_buoy_info.enddate = displacements.time(end);
+            disp_buoy_info.operating_institution_long_name = buoy_info.operating_institution_long_name; 
+            disp_buoy_info.instrument = buoy_info.instrument; 
+            disp_buoy_info.site_name = buoy_info.site_name; 
+            disp_buoy_info.acknowledgement = buoy_info.acknowledgement; 
+            disp_buoy_info.citation = buoy_info.citation; 
+            disp_buoy_info.author = buoy_info.author; 
+            disp_buoy_info.principal_investigator = buoy_info.principal_investigator; 
+            disp_buoy_info.principal_investigator_email = buoy_info.principal_investigator_email; 
+
             
             displacements_to_IMOS_ARDC_nc(displacements, disp_buoy_info, globfile, varsfile); 
         end
@@ -520,7 +549,7 @@ for b = 1:size(buoy_metadata,1)
         varsfile_Disp = varsfile;              
         %% spectral data
         
-        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_spectral_ardc_20250828.txt']; 
+        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
         if strcmp(buoy_info.type,'datawell')
             varsfile = [mpath '\wavebuoys\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
         else
@@ -538,7 +567,7 @@ for b = 1:size(buoy_metadata,1)
         data.temp_time = datetime(data.temp_time,'convertfrom','datenum'); data.temp_time.TimeZone='UTC'; 
         fname = make_imos_ardc_filename(buoy_info,'ALL'); 
         fname = strrep(fname,'nc','mat'); 
-        save(fname,'baro','buoy_info','buoy_metadata','check','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg',...
+        save(fname,'baro','buoy_info','buoy_metadata','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg',...
             'globfile_Spec','globfile_Disp','globfile_Int','varsfile_Spec','varsfile_Disp','varsfile_Int','buoy_info','check','disp_buoy_info','mpath','-v7.3'); 
     end
 end
