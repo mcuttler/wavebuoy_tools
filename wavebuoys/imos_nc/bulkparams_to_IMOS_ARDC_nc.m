@@ -1,6 +1,6 @@
 %% IMOS-compliant netCDF
 
-function [] = bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
+function [] = bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile)
 
 
 if ~exist(buoy_info.archive_path)
@@ -32,7 +32,36 @@ for ii = 1:size(globatts{1,1},1);
     attname = attname(idx); 
     attvalue = globatts{1,2}{ii}; 
     
-    if strcmp(attname, 'project')
+    if strcmp(attname,'title') | strcmp(attname,'abstract')
+        tt = ['Delayed mode integral wave parameters from wave buoys collected by '...
+            buoy_info.operating_institution_long_name ' using a ' buoy_info.instrument ' at ' buoy_info.site_name];
+        netcdf.putAtt(ncid,varid, attname, tt);        
+        clear tt;         
+    elseif strcmp(attname,'acknowledgement')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.acknowledgement);        
+    elseif strcmp(attname,'citation')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.citation);     
+    elseif strcmp(attname,'author')    
+        netcdf.putAtt(ncid,varid, attname, buoy_info.author);   
+    elseif strcmp(attname,'author_email')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.author_email);   
+    elseif strcmp(attname,'spotter_id')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.serial);   
+    elseif strcmp(attname,'history')
+        tdum = datestr(now - datenum(0,0,0,8,0,0),31); 
+        tdum(11) = 'T'; tdum(end+1)='Z';
+        tt = ['This file was created on: ' tdum]; 
+        netcdf.putAtt(ncid,varid, attname, tt);        
+        clear tt tdum
+    elseif strcmp(attname,'naming_authority')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.naming_authority);   
+    elseif strcmp(attname,'principal_investigator')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.principal_investigator)
+    elseif strcmp(attname,'principal_investigator_email')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.principal_investigator_email)
+    elseif strcmp(attname,'institution')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.operating_institution_long_name)
+    elseif strcmp(attname, 'project')
         netcdf.putAtt(ncid,varid, attname, buoy_info.project);        
     elseif strcmp(attname, 'date_created')
         tdum = datestr(now - datenum(0,0,0,8,0,0),31); 
@@ -125,12 +154,12 @@ dimname = 'TIME';
 dimlength = size(data.time,1);
 dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);     
 
-% temperature should be on same time as wave time 
-% if isfield(data,'temp_time')
-%     dimname = 'TEMP_TIME';
-%     dimlength = size(data.temp_time,1);
-%     dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
-% end
+%only include temperature if it exists 
+if isfield(data,'temp_time')
+    dimname = 'TIME_TEMP';
+    dimlength = size(data.temp_time,1);
+    dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
+end
 
 dimname = 'timeSeries';
 dimlength = 1;
@@ -151,16 +180,28 @@ for ii = 1:m
     end
 
     %create and define variable and attributes    
-    if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
+    if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TIME);        
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,false,int8(-127));
+    elseif strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_BYTE', dimid_TEMP_TIME);        
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,int8(-127));
     elseif strcmp(varinfo{1,2}{ii,1},'TIME')
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,true,-9999);
+    elseif strcmp(varinfo{1,2}{ii,1},'TIME_TEMP')
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TEMP_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,true,-9999);
     elseif strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE') 
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
+        varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
+        netcdf.defVarFill(ncid,varid,false,-9999);
+    elseif strcmp(varinfo{1,2}{ii,1},'TEMP')
+        netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_FLOAT', dimid_TEMP_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,false,-9999);
     else
@@ -175,7 +216,7 @@ for ii = 1:m
             if ~isnan(attinfo{1,j}(ii))                                 
                 if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
                     netcdf.putAtt(ncid, varid, attnames{j},int8(attinfo{1,j}(ii))); 
-                elseif strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE')
+                elseif strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'TIME_TEMP') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE')
                     netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii)); 
                 else
                     netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii))); 
@@ -205,11 +246,11 @@ for ii = 1:m
     end
     
     %put data to variable
-%     if strcmp(varinfo{1,1}{ii,1},'temp')
-%         %modify this for spotter v2, datawell 
-%         netcdf.putVar(ncid, varid, ones(size(bulkparams.time,1),1).*nan); 
     if strcmp(varinfo{1,1}{ii,1},'time')
-        imos_time = data.time - datenum(1950,1,1,0,0,0); 
+        imos_time = datenum(data.time) - datenum(1950,1,1,0,0,0); 
+        netcdf.putVar(ncid, varid, imos_time); 
+    elseif strcmp(varinfo{1,1}{ii,1},'temp_time')
+        imos_time = datenum(data.temp_time) - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'qc_flag_wave') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_wave')| strcmp(varinfo{1,1}{ii,1},'qc_flag_temp') | strcmp(varinfo{1,1}{ii,1},'qc_subflag_temp')
         if isfield(data, varinfo{1,1}{ii,1})

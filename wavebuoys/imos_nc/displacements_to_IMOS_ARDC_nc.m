@@ -34,9 +34,38 @@ for ii = 1:size(globatts{1,1},1);
     %get rid of trailing spaces
     idx = find(attname~= ' '); 
     attname = attname(idx); 
-    attvalue = globatts{1,2}{ii}; 
+    attvalue = globatts{1,2}{ii};     
     
-    if strcmp(attname, 'project')
+    if strcmp(attname,'title') | strcmp(attname,'abstract')
+        tt = ['Delayed mode raw displacements from wave buoys collected by '...
+            disp_buoy_info.operating_institution_long_name ' using a ' disp_buoy_info.instrument ' at ' disp_buoy_info.site_name];
+        netcdf.putAtt(ncid,varid, attname, tt);        
+        clear tt;         
+    elseif strcmp(attname,'acknowledgement')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.acknowledgement);        
+    elseif strcmp(attname,'citation')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.citation);     
+    elseif strcmp(attname,'author')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.author);  
+    elseif strcmp(attname,'author_email')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.author_email);  
+    elseif strcmp(attname,'spotter_id')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.serial);   
+    elseif strcmp(attname,'history')
+        tdum = datestr(now - datenum(0,0,0,8,0,0),31); 
+        tdum(11) = 'T'; tdum(end+1)='Z';
+        tt = ['This file was created on: ' tdum]; 
+        netcdf.putAtt(ncid,varid, attname, tt);        
+        clear tt tdum
+    elseif strcmp(attname,'naming_authority')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.naming_authority);   
+    elseif strcmp(attname,'principal_investigator')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.principal_investigator)
+    elseif strcmp(attname,'principal_investigator_email')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.principal_investigator_email)
+    elseif strcmp(attname,'institution')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.operating_institution_long_name)
+    elseif strcmp(attname, 'project')
         netcdf.putAtt(ncid,varid, attname, disp_buoy_info.project);        
     elseif strcmp(attname, 'date_created')
         tdum = datestr(now - datenum(0,0,0,8,0,0),31); 
@@ -168,10 +197,10 @@ for ii = 1:m
     
     %put data to variable
     if strcmp(varinfo{1,1}{ii,1},'time')
-        imos_time = displacements.time - datenum(1950,1,1,0,0,0); 
+        imos_time = datenum(displacements.time) - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time); 
     elseif strcmp(varinfo{1,1}{ii,1},'time_location')
-        imos_time_loc = displacements.time_location - datenum(1950,1,1,0,0,0); 
+        imos_time_loc = datenum(displacements.time_location) - datenum(1950,1,1,0,0,0); 
         netcdf.putVar(ncid, varid, imos_time_loc); 
     elseif strcmp(varinfo{1,1}{ii,1},'lat') | strcmp(varinfo{1,1}{ii,1},'lon')
         if isfield(displacements, varinfo{1,1}{ii,1})

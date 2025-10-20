@@ -37,8 +37,13 @@ function [] = make_MEM_plot(ndirec, freq, NE, hs, tp, dp, time, buoy_info)
         text(0.85,0.0,['Tp = ' num2str(round(tp,1)) 's'],'units','normalized','fontweight','bold','fontsize',12);                      
 
         text(0.85,-0.05,['Dp = ' num2str(round(dp)) 'deg'],'units','normalized','fontweight','bold','fontsize',12);
-        
-        t = title([datestr(time+datenum(0,0,0,8,0,0)) 'WST']);
+
+        %make timezone dependent datestr 
+        %set original time from Spotter to UTC
+        time = datetime(time,'convertfrom','datenum',TimeZone='Etc/UTC');
+        time_local = datetime(time,TimeZone=buoy_info.timezone); 
+
+        t = title([datestr(time_local) '(' buoy_info.timezone ')']);
         t.Position = [0 1.4 0];
         % set(fid,'color',[0.65 0.65 0.65]);
         set(fid,'color','w');

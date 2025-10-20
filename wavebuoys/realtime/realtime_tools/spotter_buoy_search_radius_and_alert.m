@@ -32,9 +32,10 @@ if tnow - SpotData.time(end) > in_cut/24 %if time difference greater than cutoff
     setpref('Internet','SMTP_Server','smtp.gmail.com');
     setpref('Internet','E_mail','wa.wavebuoy.alert@gmail.com');
     setpref('Internet','SMTP_Username','wa.wavebuoy.alert');
-    %ADD PASSCODE: rvwqxkuaiaqfarht
-    %Or password: UWAwavebuoys1
-    setpref('Internet','SMTP_Password','rvwqxkuaiaqfarht');
+    %ADD PASSCODE: 
+    %Or password: UWAwavebuoys2
+    setpref('Internet','SMTP_Password','insirgbnvojqsznr');
+    % setpref('Internet','SMTP_Password','UWAwavebuoys2');
     props = java.lang.System.getProperties;
     props.setProperty('mail.smtp.auth','true');
     props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
@@ -57,6 +58,7 @@ if tnow - SpotData.time(end) > in_cut/24 %if time difference greater than cutoff
         sendmail('carlin.alerts@outlook.com.au', mail_title, mail_message) ;
         sendmail('matt.hatcher@uwa.edu.au', mail_title, mail_message) ;
         sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
+        sendmail('thiago.caminha@uwa.edu.au', mail_title, mail_message) ;
     end
 else
     warning.time = 0; 
@@ -68,7 +70,9 @@ if dist_dev>dev_watch %if development site buoy offsite
     setpref('Internet','SMTP_Server','smtp.gmail.com');
     setpref('Internet','E_mail','wa.wavebuoy.alert@gmail.com');
     setpref('Internet','SMTP_Username','wa.wavebuoy.alert');
-    setpref('Internet','SMTP_Password','rvwqxkuaiaqfarht');
+    %Or password or passcode for MFA - look for app password on Gmail
+    setpref('Internet','SMTP_Password','insirgbnvojqsznr');
+    % setpref('Internet','SMTP_Password','UWAwavebuoys2');    
     props = java.lang.System.getProperties;
     props.setProperty('mail.smtp.auth','true');
     props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
@@ -78,12 +82,21 @@ if dist_dev>dev_watch %if development site buoy offsite
     mail_title = [buoy_info.name ' buoy out of radius']; 
     mail_message = [buoy_info.name ' buoy is ' num2str(dist_dev) ' m from deployment location. '...
         'Current position is Lat=' num2str(lat_dev,9) ' Long=' num2str(long_dev,9) '.']; 
-    
-    sendmail('jeff.hansen@uwa.edu.au',mail_title, mail_message);
-    sendmail('carlin.alerts@outlook.com.au',mail_title, mail_message);
-    sendmail('michael.cuttler@uwa.edu.au',mail_title, mail_message);
-    sendmail('matt.hatcher@uwa.edu.au',mail_title, mail_message);
-    sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
+        
+    if isfield(buoy_info,'alert_emails')
+        alert_emails = strsplit(buoy_info.alert_emails,';'); 
+        for aa = 1:length(alert_emails)
+            sendmail(strrep(alert_emails{aa},' ',''), mail_title, mail_message); 
+        end
+    else        
+        sendmail('jeff.hansen@uwa.edu.au',mail_title,mail_message) ;
+        sendmail('michael.cuttler@uwa.edu.au', mail_title, mail_message) ;
+        sendmail('carlin.alerts@outlook.com.au', mail_title, mail_message) ;
+        sendmail('matt.hatcher@uwa.edu.au', mail_title, mail_message) ;
+        sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
+        sendmail('thiago.caminha@uwa.edu.au', mail_title, mail_message) ;
+
+    end
 else
     warning.gps = 0; 
 end

@@ -11,7 +11,7 @@ clear; clc
 
 %buoy type and deployment info number and deployment info 
 buoy_info.type = 'sofar'; 
-buoy_info.serial = 'SPOT-31400C'; %spotter serial number, or just Datawell 
+buoy_info.serial = 'SPOT-30851C'; %spotter serial number, or just Datawell 
 buoy_info.name = 'KingGeorgeSound'; 
 buoy_info.datawell_name = 'nan'; 
 buoy_info.version = 'V3'; %or DWR4 for Datawell, for example

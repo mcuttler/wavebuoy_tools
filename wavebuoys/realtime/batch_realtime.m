@@ -14,11 +14,19 @@ if strcmp(buoy_info.type,'sofar')==1
         [SpotData] = get_sofar_realtime(buoy_info, limit);         
         flag = 1;                                
     catch
-        if buoy_info.send_alert_emails==1
-            [warning] = spotter_get_data_fail_warning(buoy_info);
+        %try running one more time to make sure it's not a random data grab
+        %fail
+        try
+            limit = buoy_info.UpdateTime*2; %not used in v2 code
+            [SpotData] = get_sofar_realtime(buoy_info, limit);         
+            flag = 1;   
+        catch
+            if buoy_info.send_alert_emails==1
+                [warning] = spotter_get_data_fail_warning(buoy_info);
+            end
+            flag = 0; 
+            log_message = [log_message,' (1) code failed on getting Spotter data - no new data or wrong API token'];
         end
-        flag = 0; 
-        log_message = [log_message,' (1) code failed on getting Spotter data - no new data or wrong API token'];
     end                            
     
     if flag == 1
@@ -103,6 +111,16 @@ if strcmp(buoy_info.type,'sofar')==1
                 else
                     idx_sys = []; 
                 end
+
+                %add current meter data
+                if isfield(SpotData,'curr_time') & isfield(archive_data,'curr_time')
+                    idx_curr = find(SpotData.curr_time>archive_data.curr_time(end));
+                elseif isfield(SpotData,'curr_time') & ~isfield(archive_data,'curr_time')
+                    idx_curr = [1:length(SpotData.curr_time)]; 
+                else
+                    idx_curr = []; 
+                end
+
             catch
                 log_message = [log_message, ' (4) code failed on indexing SpotData for new data']; 
             end
@@ -123,6 +141,8 @@ if strcmp(buoy_info.type,'sofar')==1
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_s,:); 
                         elseif strcmp(ff{f},'systime') | contains(ff{f},'batt') | contains(ff{f},'solar') | contains(ff{f},'humid')
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_sys,:); 
+                        elseif contains(ff{f},'curr')
+                            SpotData.(ff{f}) = SpotData.(ff{f})(idx_curr,:); 
                         else
                             SpotData.(ff{f}) = SpotData.(ff{f})(idx_w,:);
                         end
@@ -150,26 +170,32 @@ if strcmp(buoy_info.type,'sofar')==1
                     %save data to different formats 
                     try
                         realtime_archive_mat(buoy_info, data);
-                        realtime_backup_mat(buoy_info, data);                        
                         realtime_archive_text(buoy_info, data, size(SpotData.time,1)); 
+                        try
+                            realtime_backup_mat(buoy_info, data);   
+                        catch
+                            log_message = [log_message, ' (7) code failed on backing up to IRDS'];
+                        end
                     catch
                         log_message = [log_message, ' (7) code failed on archiving or writing text file'];
                     end
-                    
 
-                    
+
+
                     %output MEM and SST plots --- only most recent time point                     
                     if strcmp(buoy_info.DataType,'spectral')                        
                         try
                             [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
                                 SpotData.b2(end,:),SpotData.varianceDensity(end,:));
                             make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...
-                                SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)        
+                                SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)  
+                            %force close figures
+                            close all 
                         catch
                             log_message = [log_message, ' (8) code failed on making MEM'];
                         end                        
                     end
-                    
+
                     %code to update the buoy info master file for website to read
                     try
                         update_website_buoy_info(buoy_info, data); 
@@ -201,7 +227,9 @@ if strcmp(buoy_info.type,'sofar')==1
                     [NS, NE, ndirec] = lygre_krogstad(SpotData.a1(end,:),SpotData.a2(end,:),SpotData.b1(end,:),...
                         SpotData.b2(end,:),SpotData.varianceDensity(end,:));
                     make_MEM_plot(ndirec, SpotData.frequency(end,:), NE, SpotData.hsig(end,1),...                        
-                    SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)      
+                    SpotData.tp(end,1), SpotData.dp(end,1), SpotData.time(end,1), buoy_info)
+                    %force close figures
+                    close all 
                 catch
                     log_message = [log_message, ' (8) code failed on making MEM'];
                 end
@@ -265,6 +293,18 @@ elseif strcmp(buoy_info.type,'datawell')==1
     dw_data.wind_dir = dd; 
     dw_data.wind_speed = dd; 
     dw_data.wind_time = dw_data.time; 
+    dw_data.systime = dw_data.time; 
+    
+    %add 'name' for text writing
+    for i = 1:size(dw_data.time,1)
+        dw_data.name{i,1} = buoy_info.name; 
+    end               
+    
+    if ~isfield(archive_data,'name')
+        for i = 1:size(archive_data.time,1)
+            archive_data.name{i,1} = buoy_info.name;
+        end
+    end 
     
     %check that it's new data
     if all(check)~=0
@@ -281,20 +321,23 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 try
                     realtime_archive_mat(buoy_info, data);
                     realtime_backup_mat(buoy_info, data);
-                    limit = size(dw_data.time,1) - size(archive_data.time,1);       
+                    limit = size(dw_data.time,1) - size(archive_data.time,1); 
                     realtime_archive_text(buoy_info, data, limit);             
                 catch
                     log_message = [log_message, ' (3) code failed on archiving or making text file'];
                 end                           
                 
                 %output MEM and SST plots 
-                plot_idx = find(data.time>archive_data.time(end)); 
+                % plot_idx = find(data.time>archive_data.time(end)); 
+                plot_idx = size(data.time,1); 
                 if strcmp(buoy_info.DataType,'spectral')    
                     try
                         for ii = 1:size(plot_idx,1); 
                             [NS, NE, ndirec] = lygre_krogstad_MC(data.a1(plot_idx(ii),:),data.a2(plot_idx(ii),:),data.b1(plot_idx(ii),:),data.b2(plot_idx(ii),:),data.E(plot_idx(ii),:),3);
                             make_MEM_plot(ndirec, data.frequency, NE, data.hsig(plot_idx(ii)), data.tp(plot_idx(ii)), data.dp(plot_idx(ii)), data.time(plot_idx(ii)), buoy_info)    
                         end
+                        %force close figures
+                        close all 
                     catch
                         log_message = [log_message, ' (4) code failed on making MEM'];
                     end
@@ -332,6 +375,7 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 for ii = 1:size(dw_data.a1,1); 
                     [NS, NE, ndirec] = lygre_krogstad_MC(dw_data.a1(ii,:),dw_data.a2(ii,:),dw_data.b1(ii,:),dw_data.b2(ii,:),dw_data.E(ii,:),3);
                     make_MEM_plot(ndirec, dw_data.frequency', NE, dw_data.hsig(ii), dw_data.tp(ii), dw_data.dp(ii), dw_data.time(ii), buoy_info)    
+                    close all
                 end    
             catch
                 log_message = [log_message, ' (4) code failed on making MEM'];

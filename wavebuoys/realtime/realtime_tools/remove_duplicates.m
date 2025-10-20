@@ -38,6 +38,8 @@ for i = 1:length(t_wave)
             dum = 1;
         elseif contains(fields{j},'batt') | contains(fields{j},'sys') | contains(fields{j},'Volt')|contains(fields{j},'humid')
             dum = 1; 
+        elseif contains(fields{j},'curr')
+            dum=1; 
         elseif strcmp(fields{j},'serialID')|strcmp(fields{j},'name')
             dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1))];             
         else
@@ -61,8 +63,8 @@ for i = 1:length(t_wave)
     clear idx t1 t2 
 end
 
-%temp data
-if isfield(data,'temp_time')
+%temp data (Datawell)
+if isfield(data,'temp_time')&~contains(data.serialID{1},'SPOT')
     t_temp = unique(data.temp_time); 
     for i = 1:length(t_temp)
         dataout.temp_time(i,1) = t_temp(i); 
@@ -89,6 +91,36 @@ if isfield(data,'temp_time')
         clear idx t1 t2
     end
 end
+
+%temp data (Spotter)
+if isfield(data,'temp_time')&contains(data.serialID{1},'SPOT')
+    t_temp = unique(data.temp_time); 
+    for i = 1:length(t_temp)
+        dataout.temp_time(i,1) = t_temp(i); 
+        idx = find(data.temp_time==t_temp(i));     
+        for j = 1:length(fields)
+            if strcmp(fields{j},'surf_temp')|strcmp(fields{j},'bott_temp') 
+                if length(idx)>1
+                    t1 = data.(fields{j})(idx(1));
+                    t2 = data.(fields{j})(idx(2));                 
+                    if isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
+                    elseif isnan(t1)&~isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
+                    elseif ~isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
+                    else
+                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
+                    end
+                else
+                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+                end                            
+            end
+        end
+        clear idx t1 t2
+    end
+end
+
 %pressure data
 if isfield(data,'press_time')
     p_temp = unique(data.press_time); 
@@ -117,6 +149,7 @@ if isfield(data,'press_time')
         clear idx t1 t2
     end
 end
+
 %pressure std data
 if isfield(data,'press_std_time')
     p_temp = unique(data.press_std_time); 
@@ -278,6 +311,34 @@ if isfield(data,'systime')
     end
 end
 
+%current meter data - Spotter Smart Mooring
+if isfield(data,'curr_time')
+    t_spec = unique(data.curr_time); 
+    for i = 1:length(t_spec)
+        dataout.curr_time(i,1) = t_spec(i); 
+        idx = find(data.curr_time==t_spec(i));     
+        for j = 1:length(fields)
+            if contains(fields{j},'curr')&~contains(fields{j},'time')
+                if length(idx)>1
+                    t1 = data.(fields{j})(idx(1));
+                    t2 = data.(fields{j})(idx(2));                 
+                    if isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); nan]; 
+                    elseif isnan(t1)&~isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(2),:)]; 
+                    elseif ~isnan(t1)&isnan(t2)
+                        dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx(1),:)]; 
+                    else
+                        dataout.(fields{j})=[dataout.(fields{j}); data.(fields{j})(idx(1),:)];
+                    end
+                else
+                    dataout.(fields{j}) = [dataout.(fields{j}); data.(fields{j})(idx,:)];
+                end                            
+            end
+        end
+        clear idx t1 t2
+    end
+end
 
 end
         

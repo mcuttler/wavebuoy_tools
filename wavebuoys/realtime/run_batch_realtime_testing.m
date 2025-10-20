@@ -8,7 +8,7 @@ warning('off')
 
 %read in metadata for buoys to run
 dpath = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\auswaves'; 
-dname = 'buoys_metadata_test.csv'; 
+dname = 'buoys_metadata_for_code_testing.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -38,7 +38,7 @@ for jj = 1:size(buoy_metadata)
     end
     
     %run the realtime workflow 
-%     disp(['running ' buoy_info.name]); %comment out when running for real 
+    disp(['running ' buoy_info.name]); %comment out when running for real 
     try
         [log_message] = batch_realtime(buoy_info);
         fprintf(flog, [buoy_info.name ': ' log_message ' \n']); 

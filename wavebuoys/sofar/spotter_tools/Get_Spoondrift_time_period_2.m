@@ -1,71 +1,66 @@
 %% Get Spoondrift Buoy Data
 
-%Use this code for all Sofar --- Spotters and Smart Moorings
-% For Spotters, the smart mooring data grab will just be empty 
+% Alteration of code "Get_Spoondrift_time_period" by MH to try to get
+% spectral and partition data. 
+
+% Code for Sofar Spotters (V3) - can be wave (parameters or spectral and partition) +
+% temp sensors or pressure sensors
+
+% AQL token: a1b3c0dbaa16bb21d5f0befcbcca51
+% Please don't use the latest-data endpoint
+% Instead use the sensor-data endpoint rather than the wave-data endpoint
 
 
 %%
-function [Spotter,flag] = get_sofar_realtime(buoy_info,limit);
+function [Spotter,flag] = Get_Spoondrift_time_period(buoy_info, startDate, endDate)
 
-%re-code so that it just grabs the 'limit' for waves, and the last 1
-import matlab.net.*
-import matlab.net.http.*
-header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
-r = RequestMessage('GET', header);
+% break into days for data requests - could do months, but may run into
+% reuqest limit depending on whether getting spectral data or not 
 
-%wave data
-tstart = datestr(datenum(now) - hours(12),30); 
-tend = datestr(datenum(now)+ hours(2),30); 
-startDate = [tstart 'Z']; 
-endDate = [tend 'Z']; 
+dumt = [startDate:endDate]'; 
+check = []; 
 
-%URL will ignore the processingSource term in buoys_metadata (but it's used
-%below for filtering)
-uri_waves=URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial...
+for ii =1:size(dumt,1)
+    disp(['Grabbing data for ' datestr(dumt(ii))]); 
+    % get times in correct format for Sofar API 
+    tstart = datestr(dumt(ii,:),'yyyy-mm-ddTHH:MM:SS');  
+    tend = datestr(dumt(ii,:)+0.999999,'yyyy-mm-ddTHH:MM:SS'); 
+       
+   
+    import matlab.net.*
+    import matlab.net.http.*
+    header = matlab.net.http.HeaderField('token',buoy_info.sofar_token,'spotterId',buoy_info.serial);
+    r = RequestMessage('GET', header);
+    %wave data
+    startDate = [tstart 'Z']; 
+    endDate = [tend 'Z']; 
+
+    uri_waves=URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial...
     '&includeSurfaceTempData=true&includeWindData=true&includeFrequencyData=true&includeDirectionalMoments=true&'...
     'includePartitionData=true&includeBarometerData=true&processingSources=all'...
     '&startDate=' startDate '&endDate=' endDate]); 
 
-resp = send(r,uri_waves);
-status = resp.StatusCode;
-disp([status]); 
+    resp = send(r,uri_waves);
+    status = resp.StatusCode;
+    disp([status]); 
 
-%URL will ignore the processingSource term in buoys_metadata (but it's used
-%below for filtering)
-uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]); 
-resp_sensor = send(r,uri_sensor);
-status = resp_sensor.StatusCode;
-disp([status]); 
 
-%URL will ignore the processingSource term in buoys_metadata (but it's used
-%below for filtering)
-uri_latest = URI(['https://api.sofarocean.com/api/latest-data?spotterId=' buoy_info.serial]);
-resp_latest = send(r,uri_latest);
-status = resp_latest.StatusCode;
-disp([status]); 
-
+    uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]); 
+    resp_sensor = send(r,uri_sensor);
+    status = resp_sensor.StatusCode;
+    disp([status]); 
 
 
 %%   WAVE PARAMETERS AND WIND
 if isfield(resp.Body.Data.data,'waves')
-    %isolate HDR and embedded 
+    %use embedded data instead of HDR for parameters    
     indEmbedded =[]; 
-    indHDR = []; 
     for j = 1:size(resp.Body.Data.data.waves)
         if strcmp(resp.Body.Data.data.waves(j).processing_source,'embedded')
             indEmbedded = [indEmbedded; j]; 
-        elseif strcmp(resp.Body.Data.data.waves(j).processing_source,'hdr')
-            indHDR = [indHDR; j]; 
         end
-    end            
-    
-    %based on info in buoys_metadata.csv
-    if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
-        indEmbedded = indHDR;
-    else
-        indEmbedded = indEmbedded; 
     end    
-
+        
     for j = 1:size(indEmbedded,1)
         Spotter.serialID{j,1} = buoy_info.serial; 
         Spotter.time(j,1) = datenum(resp.Body.Data.data.waves(indEmbedded(j)).timestamp,'yyyy-mm-ddTHH:MM:SS');
@@ -90,24 +85,14 @@ end
 %check for wind data 
 if isfield(resp.Body.Data.data,'wind')
     if ~isempty(resp.Body.Data.data.wind)
-        %isolate HDR and embedded 
+        %use embedded data instead of HDR for wind
         indEmbedded =[]; 
-        indHDR = []; 
         for j = 1:size(resp.Body.Data.data.wind)
             if strcmp(resp.Body.Data.data.wind(j).processing_source,'embedded')
                 indEmbedded = [indEmbedded; j]; 
-            elseif strcmp(resp.Body.Data.data.wind(j).processing_source,'hdr')
-                indHDR = [indHDR; j]; 
             end
-        end 
-
-        %based on info in buoys_metadata.csv
-        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
-            indEmbedded = indHDR;
-        else
-            indEmbedded = indEmbedded; 
-        end  
-
+        end
+        
         for j = 1:size(indEmbedded,1)      
             Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(indEmbedded(j)).speed;    
             Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(indEmbedded(j)).direction;
@@ -201,7 +186,7 @@ if isfield(resp.Body.Data.data,'frequencyData')
         end
         
         %use HDR if available
-        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+        if ~isempty(indHDR)
             indSpec = indHDR; 
         else
             indSpec = indEmbedded;
@@ -260,7 +245,7 @@ if isfield(resp.Body.Data.data,'partitionData')
         end
         
         %use HDR if available
-        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+        if ~isempty(indHDR)
             indPart = indHDR; 
         else
             indPart = indEmbedded;
@@ -314,7 +299,6 @@ end
     
 %% SMART MOORING vs SPOTTER TEMPERAUTRE AND PRESSURE
 Spotter.temp_time = []; 
-Spotter.bott_temp_time = [];
 Spotter.surf_temp = []; 
 Spotter.bott_temp = []; 
 Spotter.pressure =[]; 
@@ -336,7 +320,7 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
     end    
     
     %use HDR if available 
-    if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+    if ~isempty(indHDR)
         indTemp = indHDR; 
     else
         indTemp = indEmbedded; 
@@ -357,28 +341,19 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
             Spotter.bott_temp(j,1)= -9999; 
         end
     end
-    
  %smart mooring
-elseif ~isempty(resp_sensor.Body.Data.data)  
-    %get unique sensor positions
-    for j = 1:size(resp_sensor.Body.Data.data,1)
-        sensorPosition(j,1) = resp_sensor.Body.Data.data(j).sensorPosition; 
-    end
-    sensorPosition = unique(sensorPosition); 
+elseif ~isempty(resp_sensor.Body.Data.data)    
     for j = 1:size(resp_sensor.Body.Data.data,1)
         if strcmp(resp_sensor.Body.Data.data(j).unit_type,'temperature')
             if resp_sensor.Body.Data.data(j).sensorPosition==1
                 Spotter.surf_temp = [Spotter.surf_temp; resp_sensor.Body.Data.data(j).value];                 
                 Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
-            elseif resp_sensor.Body.Data.data(j).sensorPosition==max(sensorPosition)
+            elseif resp_sensor.Body.Data.data(j).sensorPosition==2
                 Spotter.bott_temp = [Spotter.bott_temp; resp_sensor.Body.Data.data(j).value]; 
-                Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];    
-            %for extra temperature nodes not at surface or bottom
-            % else 
-            %     Spotter.surf_temp = [Spotter.surf_temp; NaN];
-            %     Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
-            %     Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
-            %     Spotter.bott_temp_time = [Spotter.bott_temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
+            else
+                Spotter.surf_temp = [Spotter.surf_temp; NaN];
+                Spotter.bott_temp = [Spotter.bott_temp; NaN]; 
+                Spotter.temp_time = [Spotter.temp_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')];
             end
         elseif strcmp(resp_sensor.Body.Data.data(j).unit_type,'pressure')
             %check whether mean or std
@@ -401,99 +376,25 @@ elseif ~isempty(resp_sensor.Body.Data.data)
             end
         end
     end
-    %add check for surface and bottom temperature data 
-    if size(Spotter.surf_temp,1)~= size(Spotter.bott_temp,1)
-        if size(Spotter.surf_temp,1)>size(Spotter.bott_temp,1)
-            bdum = ones(size(Spotter.surf_temp,1),1)*nan; 
-            for kk = 1:size(Spotter.temp_time,1)
-                I = find(Spotter.bott_temp_time==Spotter.temp_time(kk,1));
-                if ~isempty(I)
-                    bdum(kk,1) = Spotter.bott_temp(I); 
-                elseif isempty(I)
-                    bdum(kk,1) = nan; 
-                end
-            end
-            Spotter.bott_temp = bdum; 
-            clear bdum I 
-        elseif size(Spotter.surf_temp,1)<size(Spotter.bott_temp,1)
-            bdum = ones(size(Spotter.bott_temp,1),1)*nan; 
-            for kk = 1:size(Spotter.bott_temp,1)
-                I = find(Spotter.temp_time==Spotter.bott_temp_time(kk,1));
-                if ~isempty(I)
-                    bdum(kk,1) = Spotter.surf_temp(I); 
-                elseif isempty(I)
-                    bdum(kk,1) = nan; 
-                end
-            end
-            Spotter.surf_temp = bdum; 
-            clear bdum I 
-        end
-    end                    
-%if no sensor data, act like normal wave buoy
+    %if no sensor data, act like normal wave buoy
 else
     Spotter.temp_time = Spotter.time;
-    Spotter.bott_temp_time = Spotter.time; 
     Spotter.press_time = Spotter.time;
     Spotter.press_std_time = Spotter.time;
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure = ones(size(Spotter.time,1),1).*-9999; 
     Spotter.pressure_std =ones(size(Spotter.time,1),1).*-9999; 
-end   
-
-%remove bott temp time if exists
-if isfield(Spotter,'bott_temp_time')
-    Spotter = rmfield(Spotter,'bott_temp_time'); 
-end
-
-%% smart mooring with current meter 
-Spotter.curr_time = []; 
-Spotter.curr_mag = []; %cm/s
-Spotter.curr_mag_std = [];
-Spotter.curr_dir = []; 
-Spotter.curr_dir_std = []; 
-Spotter.curr_tilt = []; 
-Spotter.curr_tilt_std = []; 
-Spotter.curr_temperature = []; %temperature sensor on current meter 
-Spotter.curr_count = []; 
-
-if ~isempty(resp_sensor.Body.Data.data)
-     for j = 1:size(resp_sensor.Body.Data.data,1)
-        if contains(resp_sensor.Body.Data.data(j).data_type_name,'speed_mean')            
-            Spotter.curr_mag = [Spotter.curr_mag; resp_sensor.Body.Data.data(j).value./100];                 
-            Spotter.curr_time = [Spotter.curr_time; datenum(resp_sensor.Body.Data.data(j).timestamp,'yyyy-mm-ddTHH:MM:SS')]; 
-        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'speed_std')            
-            Spotter.curr_mag_std = [Spotter.curr_mag_std; resp_sensor.Body.Data.data(j).value./100]; 
-        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'direction_circ_mean')            
-            Spotter.curr_dir = [Spotter.curr_dir; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
-        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'direction_circ_std')            
-            Spotter.curr_dir_std = [Spotter.curr_dir_std; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
-        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'abs_tilt_mean')            
-            Spotter.curr_tilt = [Spotter.curr_tilt; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
-        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'std_tilt_mean')            
-            Spotter.curr_tilt_std = [Spotter.curr_tilt_std; rad2deg(resp_sensor.Body.Data.data(j).value)]; 
-        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'count')    
-            % when count = 0, a value for count is logged, but not for others
-            if resp_sensor.Body.Data.data(j).value >0
-                Spotter.curr_count = [Spotter.curr_count; resp_sensor.Body.Data.data(j).value];  
-            end
-        elseif contains(resp_sensor.Body.Data.data(j).data_type_name,'aanderaa_temperature')
-            Spotter.curr_temperature = [Spotter.curr_temperature; resp_sensor.Body.Data.data(j).value]; 
-        end
-     end
-end
-
-
-
+end        
 %% Check and fill variables when empty
 
 %check temperature 
 if isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
-    Spotter.temp_time = Spotter.time;     
+    Spotter.temp_time = Spotter.time; 
     Spotter.surf_temp = ones(size(Spotter.time,1),1).*-9999;    
     Spotter.bott_temp = ones(size(Spotter.time,1),1).*-9999; 
 elseif ~isempty(Spotter.surf_temp)&&isempty(Spotter.bott_temp)
-    Spotter.bott_temp = ones(size(Spotter.temp_time,1),1).*-9999;    
+    Spotter.bott_temp = ones(size(Spotter.temp_time,1),1).*-9999; 
 end
 
 %check pressure
@@ -504,63 +405,34 @@ if isempty(Spotter.pressure)&&isempty(Spotter.pressure_std)
     Spotter.pressure_std = ones(size(Spotter.time,1),1).*-9999; 
 end
 
-%check current meter
-if isempty(Spotter.curr_mag)&&isempty(Spotter.curr_mag_std)&&isempty(Spotter.curr_dir)&&isempty(Spotter.curr_dir_std) %assume everythign else is bad too 
-    Spotter.curr_time = Spotter.time; 
-    Spotter.curr_mag = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.curr_mag_std = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.curr_dir = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.curr_dir_std = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.curr_tilt = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.curr_tilt_std = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.curr_count = ones(size(Spotter.time,1),1).*-9999;
-    Spotter.curr_temperature = ones(size(Spotter.time,1),1).*-9999;
-end
-
-    
-%% add in humidity and voltage 
-
-if ~isempty(resp_latest.Body.Data.data.waves)
-    Spotter.systime = datenum(resp_latest.Body.Data.data.waves(end).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
-else
-    Spotter.systime = Spotter.time(end);
-end
-
-if ~isempty(resp_latest.Body.Data.data.batteryVoltage)
-    Spotter.batteryVoltage = resp_latest.Body.Data.data.batteryVoltage;
-else
-    Spotter.batteryVoltage=nan; 
-end
-
-if ~isempty(resp_latest.Body.Data.data.batteryPower)
-    Spotter.batteryPower =  resp_latest.Body.Data.data.batteryPower;
-else
-    Spotter.batteryPower = nan;
-end
-
-if ~isempty(resp_latest.Body.Data.data.solarVoltage)
-    Spotter.solarVoltage =  resp_latest.Body.Data.data.solarVoltage;
-else
-    Spotter.solarVoltage = nan;
-end
- 
-if ~isempty(resp_latest.Body.Data.data.humidity)
-    Spotter.humidity =  resp_latest.Body.Data.data.humidity;
-else
-    Spotter.humidity = nan; 
-end
 
 
 %% check that mooring data has correc time stamps to continue
 
-% if Spotter.temp_time(end)>=Spotter.time(end)
-%     flag = 1; 
-% else
-%     flag = 0;
-% end
+if Spotter.temp_time(end)>Spotter.time(end)
+    flag = 1; 
+else
+    flag = 0;
+end
 % flag = 1; 
 
+   
 
+
+    if ii == 1
+        Spotter_temp = Spotter; 
+    else
+        fields = fieldnames(Spotter); 
+        for j = 1:length(fields)
+            Spotter_temp.(fields{j}) = [Spotter_temp.(fields{j}); Spotter.(fields{j})]; 
+        end        
+    end
+    clearvars Spotter
+end
+    
+    Spotter = Spotter_temp;
+    clearvars Spotter_temp;
+    
 end
 
 

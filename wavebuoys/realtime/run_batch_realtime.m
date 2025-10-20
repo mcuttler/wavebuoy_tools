@@ -26,7 +26,7 @@ log_name = ['log_file_' datestr(now,'yyyymmdd_HHMMSS') '.log'];
 flog = fopen(fullfile(log_path,log_name),'a'); 
 
 % loop over buoys and execute 
-for jj = 1:size(buoy_metadata)
+for jj = 1:size(buoy_metadata,1)
     %build buoy info from metadata
     buoy_info_fields = buoy_metadata.Properties.VariableNames; 
     for kk = 1:length(buoy_info_fields)
@@ -38,10 +38,10 @@ for jj = 1:size(buoy_metadata)
     end
     
     %run the realtime workflow 
-%     disp(['running ' buoy_info.name]); %comment out when running for real 
+    % disp(['running ' buoy_info.name]); %comment out when running for real 
     try
         [log_message] = batch_realtime(buoy_info);
-        fprintf(flog, [buoy_info.name ': ' log_message ' \n']); 
+        fprintf(flog, [buoy_info.name ': ' log_message ' \n']);         
     catch   
 %         disp([buoy_info.name ' could not be completed \n']); %comment out when running for real 
         %add message to log if a buoy fails 
@@ -54,4 +54,8 @@ end
 log_message = ['Elapsed run time is: ' num2str(toc) ' seconds']; 
 fprintf(flog, [log_message ' \n']); 
 fclose(flog);
+
+%fore quit matlab
+quit
+
 

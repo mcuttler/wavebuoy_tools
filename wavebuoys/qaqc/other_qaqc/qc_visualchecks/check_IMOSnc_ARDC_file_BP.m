@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'F:\wawaves\CapeBridgewater\delayedmode\ProcessedData_DelayedMode\dep05';
+filepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240701_retrieve20241205_SPOT31395C\processed2';
 %IMOS file name
-filename = 'VIC-DEAKIN-UNI_20230510_CAPE-BRIDGEWATER_DM_WAVE-PARAMETERS_20231205.nc';
+filename = 'IMOS_COASTAL-WAVE-BUOYS_20240701_OCEAN-BEACH_DM_WAVE-PARAMETERS_20241204.nc';
 
 ncfile = fullfile(filepath, filename); 
 
@@ -146,17 +146,18 @@ ylabel('WAVE quality control');
 
 
 data.TEMP = ncread(ncfile,'TEMP'); 
+data.TEMP_TIME = ncread(ncfile,'TEMP_TIME'); 
 data.TEMP_quality_control = ncread(ncfile,'TEMP_quality_control'); 
 
 
 figure()
 subplot(2,1,1)
-plot(data.TIME,data.TEMP)
+plot(data.TEMP_TIME,data.TEMP)
 title('TEMP')
 datetick
 
 subplot(2,1,2)
-plot(data.TIME,data.TEMP_quality_control)
+plot(data.TEMP_TIME,data.TEMP_quality_control)
 title('TEMP quality control')
 datetick
 

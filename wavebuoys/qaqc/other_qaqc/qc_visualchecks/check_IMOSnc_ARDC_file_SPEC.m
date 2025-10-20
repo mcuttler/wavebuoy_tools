@@ -6,9 +6,9 @@ clc
 
 %% read netCDF file
 %set file path (wherever file downloaded to)
-filepath = 'F:\wawaves\CapeBridgewater\delayedmode\ProcessedData_DelayedMode\dep05';
+filepath = 'C:\Users\00104893\LocalDocuments\Projects\Wave buoys\Spotters\data\OceanBeach_deploy20240701_retrieve20241205_SPOT31395C\processed2';
 %IMOS file name
-filename = 'VIC-DEAKIN-UNI_20230510_CAPE-BRIDGEWATER_DM_WAVE-SPECTRA_20231205.nc';
+filename = ['IMOS_COASTAL-WAVE-BUOYS_20240701_OCEAN-BEACH_DM_WAVE-SPECTRA_20241204.nc'];
 
 ncfile = fullfile(filepath, filename); 
 
@@ -68,7 +68,7 @@ plot(C.coastlon,C.coastlat,'k')
 
 figure()
 subplot(2,1,1)
-plot(data.FREQUENCY,data.ENERGY(1,:))
+plot(data.FREQUENCY,data.ENERGY(1,:),'-*')
 hold on
 plot(data.FREQUENCY,data.ENERGY(2,:))
 plot(data.FREQUENCY,data.ENERGY(3,:))
@@ -110,7 +110,9 @@ caxis([nanmean(nanmean(data.ENERGY))-0.07 nanmean(nanmean(data.ENERGY))+10])
 ylim([0 0.4]);
 datetick
 ylabel('frequency');
-
+title ('ENERGY .... Szz?')
+caxis([0 2]);
+colorbar;
 
 
 %polar plot spectrum
