@@ -40,20 +40,25 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [QCFlag] = qartod_20_rate_of_change(roc,data)
+function [QCFlag] = qartod_20_rate_of_change(roc,data,type)
 
 % intialize QC flag vector
-
-QCFlag  = zeros(length(data),1);
+% QCFlag  = zeros(length(data),1);
  
 for ii=1:length(data)
     if ii == 1
-        QCFlag(ii) = 2; 
+        QCFlag(ii,1) = 2; 
+    elseif strcmp(type,'directional')
+        if abs(mod(data(ii) - data(ii-1) + 180,360)) - 180 >= roc
+            QCFlag(ii,1) = 4;
+        else
+            QCFlag(ii,1) = 1; 
+        end
     else
         if abs(data(ii)-data(ii-1))>=roc        
-            QCFlag(ii)=4;
+            QCFlag(ii,1)=4;
         else
-            QCFlag(ii)=1; 
+            QCFlag(ii,1)=1; 
         end
     end
 end

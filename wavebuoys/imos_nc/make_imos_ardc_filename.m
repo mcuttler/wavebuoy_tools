@@ -104,7 +104,7 @@ function [imos_filename] = make_imos_ardc_filename(buoy_info,product_type)
 
 %build file name
  
-filename = strcat(buoy_info.institution, '_', datestr(buoy_info.startdate,'yyyymmdd'), '_', buoy_info.site_name, '_', buoy_info.data_mode, '_', product_type, '_', datestr(buoy_info.enddate,'yyyymmdd'), '.nc'); 
+filename = strcat(buoy_info.operating_institution_nc_preffix, '_', datestr(buoy_info.startdate,'yyyymmdd'), '_', buoy_info.site_name, '_', buoy_info.data_mode, '_', product_type, '_', datestr(buoy_info.enddate,'yyyymmdd'), '.nc'); 
 imos_filename = fullfile(buoy_info.archive_path, filename); 
 
 
