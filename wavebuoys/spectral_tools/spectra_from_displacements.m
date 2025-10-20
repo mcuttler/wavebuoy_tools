@@ -60,6 +60,7 @@ end
 
 %FIND SEGMENTS WITH NaNs AND BAD DATA
 cnt=1;
+rw = []; 
 for jj=1:windows
     ff=find(isnan([hv_segs(:,jj) ; nt_segs(:,jj) ; et_segs(:,jj)])); %combine heave, east, north into one and just look for any nans
     %look for unrealistic values- compare individual segment values but those from the overall record- 
@@ -69,7 +70,8 @@ for jj=1:windows
             jj;
         elseif max(periods)> info.t0_thresh*T0
             jj;
-        end            
+        end      
+        rw(jj)=cnt; 
         cnt=cnt+1;
     end
 end
