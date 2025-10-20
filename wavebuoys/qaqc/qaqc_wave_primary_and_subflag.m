@@ -27,13 +27,13 @@ for i = 1:size(bulkparams.time,1)
         else %something not 1, so figure out which was outside range 
             check_idx = find(dum(test19,:)==max(dum(test19,:))); 
             primary_flag(i,1) = dum(test19,check_idx(1)); 
-            %look at second column for test 19 to determine cause
-            if bulkparams.qf_19(i,2)==1
+            %build new matrix to check which one failed 
+            if contains(fields{check_idx},'h')
                 sub_flag(i,1) = 16; %hs
-            elseif bulkparams.qf_19(i,2)==2
+            elseif contains(fields{check_idx},'t')
                 sub_flag(i,1) = 17; %tp
-            elseif bulkparams.qf_19(i,2) ==3
-                sub_flag(i,1) = 18; %dp
+            elseif contains(fields{check_idx},'d')
+                sub_flag(i,1) = 18; %dp            
             end                       
         end
     else

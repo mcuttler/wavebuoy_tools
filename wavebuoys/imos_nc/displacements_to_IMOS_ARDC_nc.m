@@ -46,7 +46,19 @@ for ii = 1:size(globatts{1,1},1);
     elseif strcmp(attname,'citation')
         netcdf.putAtt(ncid,varid, attname, disp_buoy_info.citation);     
     elseif strcmp(attname,'author')
-        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.author);   
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.author);  
+    elseif strcmp(attname,'author_email')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.author_email);  
+    elseif strcmp(attname,'spotter_id')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.serial);   
+    elseif strcmp(attname,'history')
+        tdum = datestr(now - datenum(0,0,0,8,0,0),31); 
+        tdum(11) = 'T'; tdum(end+1)='Z';
+        tt = ['This file was created on: ' tdum]; 
+        netcdf.putAtt(ncid,varid, attname, tt);        
+        clear tt tdum
+    elseif strcmp(attname,'naming_authority')
+        netcdf.putAtt(ncid,varid, attname, disp_buoy_info.naming_authority);   
     elseif strcmp(attname,'principal_investigator')
         netcdf.putAtt(ncid,varid, attname, disp_buoy_info.principal_investigator)
     elseif strcmp(attname,'principal_investigator_email')

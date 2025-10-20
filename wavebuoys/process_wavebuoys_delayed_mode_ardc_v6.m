@@ -18,10 +18,12 @@ mpath = 'C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools';
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wa_delayed_mode_buoys_to_process.csv'; 
+dpath = 'X:\CUTTLER_wawaves\Data\nswwaves'; 
+dname = 'nsw_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
+%only keep buoys that are set to be processed 
+buoy_metadata = buoy_metadata(buoy_metadata.process==1,:); 
 
 %% Loop over buoys and process
 for b = 1:size(buoy_metadata,1)
@@ -398,7 +400,7 @@ for b = 1:size(buoy_metadata,1)
     %quickly denan and replace with fill values
     fields = fieldnames(data); 
     for i = 1:length(fields)
-        if strcmp(fields{i},'serial') | contains(fields{i},'time') | contains(fields{i},'0') | strcmp(fields{i},'crests') | strcmp(fields{i},'troughs')
+        if strcmp(fields{i},'serial') | contains(fields{i},'time') | contains(fields{i},'0') | strcmp(fields{i},'crests') | strcmp(fields{i},'troughs') | strcmp(fields{i},'qc_config')
             continue        
         elseif strcmp(fields{i},'qc_flag_wave') | strcmp(fields{i},'qc_subflag_wave') | strcmp(fields{i},'qc_flag_temp') | strcmp(fields{i},'qc_subflag_wave')
             data.(fields{i})(isnan(data.(fields{i}))) = -127; 
@@ -532,15 +534,11 @@ for b = 1:size(buoy_metadata,1)
             displacements.time_location = data.time(ind);
             disp_buoy_info.startdate = displacements.time(1); 
             disp_buoy_info.enddate = displacements.time(end);
-            disp_buoy_info.operating_institution_long_name = buoy_info.operating_institution_long_name; 
-            disp_buoy_info.instrument = buoy_info.instrument; 
-            disp_buoy_info.site_name = buoy_info.site_name; 
-            disp_buoy_info.acknowledgement = buoy_info.acknowledgement; 
-            disp_buoy_info.citation = buoy_info.citation; 
-            disp_buoy_info.author = buoy_info.author; 
-            disp_buoy_info.principal_investigator = buoy_info.principal_investigator; 
-            disp_buoy_info.principal_investigator_email = buoy_info.principal_investigator_email; 
-
+            dfields = {'operating_institution_long_name', 'instrument', 'site_name','acknowledgement','citation',...
+                'principal_investigator','principal_investigator_email','serial','naming_authority'}; 
+            for mm = 1:length(dfields)
+                disp_buoy_info.(dfields{mm}) = buoy_info.(dfields{mm}); 
+            end
             
             displacements_to_IMOS_ARDC_nc(displacements, disp_buoy_info, globfile, varsfile); 
         end
@@ -568,7 +566,7 @@ for b = 1:size(buoy_metadata,1)
         fname = make_imos_ardc_filename(buoy_info,'ALL'); 
         fname = strrep(fname,'nc','mat'); 
         save(fname,'baro','buoy_info','buoy_metadata','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg',...
-            'globfile_Spec','globfile_Disp','globfile_Int','varsfile_Spec','varsfile_Disp','varsfile_Int','buoy_info','check','disp_buoy_info','mpath','-v7.3'); 
+            'globfile_Spec','globfile_Disp','globfile_Int','varsfile_Spec','varsfile_Disp','varsfile_Int','buoy_info','disp_buoy_info','mpath','-v7.3'); 
     end
 end
 

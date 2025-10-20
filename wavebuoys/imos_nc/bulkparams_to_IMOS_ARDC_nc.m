@@ -41,8 +41,20 @@ for ii = 1:size(globatts{1,1},1);
         netcdf.putAtt(ncid,varid, attname, buoy_info.acknowledgement);        
     elseif strcmp(attname,'citation')
         netcdf.putAtt(ncid,varid, attname, buoy_info.citation);     
-    elseif strcmp(attname,'author')
+    elseif strcmp(attname,'author')    
         netcdf.putAtt(ncid,varid, attname, buoy_info.author);   
+    elseif strcmp(attname,'author_email')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.author_email);   
+    elseif strcmp(attname,'spotter_id')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.serial);   
+    elseif strcmp(attname,'history')
+        tdum = datestr(now - datenum(0,0,0,8,0,0),31); 
+        tdum(11) = 'T'; tdum(end+1)='Z';
+        tt = ['This file was created on: ' tdum]; 
+        netcdf.putAtt(ncid,varid, attname, tt);        
+        clear tt tdum
+    elseif strcmp(attname,'naming_authority')
+        netcdf.putAtt(ncid,varid, attname, buoy_info.naming_authority);   
     elseif strcmp(attname,'principal_investigator')
         netcdf.putAtt(ncid,varid, attname, buoy_info.principal_investigator)
     elseif strcmp(attname,'principal_investigator_email')
@@ -144,7 +156,7 @@ dimid_TIME = netcdf.defDim(ncid, dimname, dimlength);
 
 %only include temperature if it exists 
 if isfield(data,'temp_time')
-    dimname = 'TEMP_TIME';
+    dimname = 'TIME_TEMP';
     dimlength = size(data.temp_time,1);
     dimid_TEMP_TIME = netcdf.defDim(ncid, dimname, dimlength);   
 end
@@ -180,7 +192,7 @@ for ii = 1:m
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,true,-9999);
-    elseif strcmp(varinfo{1,2}{ii,1},'TEMP_TIME')
+    elseif strcmp(varinfo{1,2}{ii,1},'TIME_TEMP')
         netcdf.defVar(ncid, varinfo{1,2}{ii,1}, 'NC_DOUBLE', dimid_TEMP_TIME);
         varid = netcdf.inqVarID(ncid,varinfo{1,2}{ii});  
         netcdf.defVarFill(ncid,varid,true,-9999);
@@ -204,7 +216,7 @@ for ii = 1:m
             if ~isnan(attinfo{1,j}(ii))                                 
                 if strcmp(varinfo{1,2}{ii,1},'WAVE_quality_control') | strcmp(varinfo{1,2}{ii,1},'TEMP_quality_control') 
                     netcdf.putAtt(ncid, varid, attnames{j},int8(attinfo{1,j}(ii))); 
-                elseif strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'TEMP_TIME') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE')
+                elseif strcmp(varinfo{1,2}{ii,1},'TIME') | strcmp(varinfo{1,2}{ii,1},'TIME_TEMP') | strcmp(varinfo{1,2}{ii,1},'LATITUDE') | strcmp(varinfo{1,2}{ii,1},'LONGITUDE')
                     netcdf.putAtt(ncid, varid, attnames{j},attinfo{1,j}(ii)); 
                 else
                     netcdf.putAtt(ncid, varid, attnames{j},single(attinfo{1,j}(ii))); 
