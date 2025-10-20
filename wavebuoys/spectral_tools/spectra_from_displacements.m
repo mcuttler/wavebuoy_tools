@@ -71,7 +71,7 @@ for jj=1:windows
         elseif max(periods)> info.t0_thresh*T0
             jj;
         end      
-        rw(jj)=cnt; 
+        rw(cnt)=jj;
         cnt=cnt+1;
     end
 end
