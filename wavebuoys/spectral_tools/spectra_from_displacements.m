@@ -60,7 +60,6 @@ end
 
 %FIND SEGMENTS WITH NaNs AND BAD DATA
 cnt=1;
-rw=[];
 for jj=1:windows
     ff=find(isnan([hv_segs(:,jj) ; nt_segs(:,jj) ; et_segs(:,jj)])); %combine heave, east, north into one and just look for any nans
     %look for unrealistic values- compare individual segment values but those from the overall record- 
@@ -71,7 +70,6 @@ for jj=1:windows
         elseif max(periods)> info.t0_thresh*T0
             jj;
         end            
-        rw(cnt)=jj;
         cnt=cnt+1;
     end
 end
@@ -80,15 +78,6 @@ end
 %SET THRESHOLD TO CONTINUE BASED ON 'BAD_DATA_THRESH'
 %Set percentage of windows that are bad data and will cause processing to
 %stop 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Force spectral proccessing to progres regardless of finding bad
-% displacement data, MH adds for testing 20250612
-
-%rw_orig=rw;
-%rw=[]';
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heave==0))/length(heave)<0.1)
     
