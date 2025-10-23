@@ -1,7 +1,7 @@
 %% code for running QA/QC on bulk parameters 
 
 
-function [bulkparams, buoy_info] = qaqc_bulkparams(bulkparams, qc_config, buoy_info)
+function [bulkparams, buoy_info] = qaqc_bulkparams(bulkparams, qc_config, buoy_info,saveTable)
 
 
 %loop over qc_config 
@@ -140,44 +140,46 @@ qaqc_tests = strrep(qaqc_tests,[qc_config.parameter_matlab{1} '_'],'');
 
 %% save table with outputs of qaqc tests
 
-%build waves table
-qaqc_check_waves.TIME=bulkparams.time;
-qaqc_check_waves.LONGITUDE=bulkparams.lon;
-qaqc_check_waves.LATITUDE=bulkparams.lat;
-for qc = 1:size(qc_config,1)
-    if ~contains(qc_config.parameter_matlab{qc},'temp')
-        qaqc_check_waves.(qc_config.parameter{qc}) = bulkparams.(qc_config.parameter_matlab{qc});     
-        vars = fieldnames(bulkparams); 
-        for j = 1:length(vars)
-            if contains(vars{j},qc_config.parameter_matlab{qc}) & contains(vars{j},'test')
-                qaqc_check_waves.(['WAVE_QC_' qc_config.parameter{qc} '_' strrep(vars{j},qc_config.parameter_matlab{qc},'')]) = bulkparams.(vars{j}); 
-            end
-        end    
+if saveTable==1
+    %build waves table
+    qaqc_check_waves.TIME=bulkparams.time;
+    qaqc_check_waves.LONGITUDE=bulkparams.lon;
+    qaqc_check_waves.LATITUDE=bulkparams.lat;
+    for qc = 1:size(qc_config,1)
+        if ~contains(qc_config.parameter_matlab{qc},'temp')
+            qaqc_check_waves.(qc_config.parameter{qc}) = bulkparams.(qc_config.parameter_matlab{qc});     
+            vars = fieldnames(bulkparams); 
+            for j = 1:length(vars)
+                if contains(vars{j},qc_config.parameter_matlab{qc}) & contains(vars{j},'test')
+                    qaqc_check_waves.(['WAVE_QC_' qc_config.parameter{qc} '_' strrep(vars{j},qc_config.parameter_matlab{qc},'')]) = bulkparams.(vars{j}); 
+                end
+            end    
+        end
     end
-end
-qaqc_check_waves.WAVE_quality_control=bulkparams.qc_flag_wave;
-qaqc_check_waves.WATCH_quality_control = bulkparams.qc_flag_watch;
+    qaqc_check_waves.WAVE_quality_control=bulkparams.qc_flag_wave;
+    qaqc_check_waves.WATCH_quality_control = bulkparams.qc_flag_watch;
   
-qaqc_check_temp.TIME_TEMP=bulkparams.temp_time;
-for qc = 1:size(qc_config,1)
-    if contains(qc_config.parameter_matlab{qc},'temp')
-        qaqc_check_temp.(qc_config.parameter{qc}) = bulkparams.(qc_config.parameter_matlab{qc});         
-        vars = fieldnames(bulkparams); 
-        for j = 1:length(vars)
-            if contains(vars{j},qc_config.parameter_matlab{qc}) & contains(vars{j},'test')
-                qaqc_check_temp.(['TEMP_QC_TEMP' qc_config.parameter{qc} '_' strrep(vars{j},qc_config.parameter_matlab{qc},'')]) = bulkparams.(vars{j}); 
-            end
-        end   
+    qaqc_check_temp.TIME_TEMP=bulkparams.temp_time;
+    for qc = 1:size(qc_config,1)
+        if contains(qc_config.parameter_matlab{qc},'temp')
+            qaqc_check_temp.(qc_config.parameter{qc}) = bulkparams.(qc_config.parameter_matlab{qc});         
+            vars = fieldnames(bulkparams); 
+            for j = 1:length(vars)
+                if contains(vars{j},qc_config.parameter_matlab{qc}) & contains(vars{j},'test')
+                    qaqc_check_temp.(['TEMP_QC_TEMP' qc_config.parameter{qc} '_' strrep(vars{j},qc_config.parameter_matlab{qc},'')]) = bulkparams.(vars{j}); 
+                end
+            end   
+        end
     end
+    qaqc_check_temp.TEMP_quality_control=bulkparams.qc_flag_temp;
+
+    qaqc_check_waves = struct2table(qaqc_check_waves); 
+    qaqc_check_temp = struct2table(qaqc_check_temp); 
+
+    writetable(qaqc_check_waves,fullfile(buoy_info.archive_path,'bulk_qc_subflags.csv')); 
+    writetable(qaqc_check_temp,fullfile(buoy_info.archive_path,'temp_qc_subflags.csv')); 
 end
-qaqc_check_temp.TEMP_quality_control=bulkparams.qc_flag_temp;
 
-qaqc_check_waves = struct2table(qaqc_check_waves); 
-qaqc_check_temp = struct2table(qaqc_check_temp); 
-
-
-writetable(qaqc_check_waves,fullfile(buoy_info.archive_path,'bulk_qc_subflags.csv')); 
-writetable(qaqc_check_temp,fullfile(buoy_info.archive_path,'temp_qc_subflags.csv')); 
 
 end
 
