@@ -1,7 +1,7 @@
 %% code for running QA/QC on bulk parameters 
 
 
-function [bulkparams, buoy_info] = qaqc_bulkparams(bulkparams, qc_config, buoy_info,saveTable)
+function [bulkparams, buoy_info] = qaqc_bulkparams(bulkparams, qc_config, buoy_info,saveTable,tableName)
 
 
 %loop over qc_config 
@@ -176,8 +176,8 @@ if saveTable==1
     qaqc_check_waves = struct2table(qaqc_check_waves); 
     qaqc_check_temp = struct2table(qaqc_check_temp); 
 
-    writetable(qaqc_check_waves,fullfile(buoy_info.archive_path,'bulk_qc_subflags.csv')); 
-    writetable(qaqc_check_temp,fullfile(buoy_info.archive_path,'temp_qc_subflags.csv')); 
+    writetable(qaqc_check_waves,fullfile(buoy_info.archive_path,['qaqc_waves_' tableName  '.csv'])); 
+    writetable(qaqc_check_temp,fullfile(buoy_info.archive_path,['qaqc_temperature_ ' tableName '.csv'])); 
 end
 
 

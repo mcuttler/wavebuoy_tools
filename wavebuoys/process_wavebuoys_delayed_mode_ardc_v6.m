@@ -384,8 +384,16 @@ for b = 1:size(buoy_metadata,1)
     %get the enabled vars
     data.qc_config = qc_config(qc_config.enable_checks==1,:);     
     clear qc_config
+
+    %info for exporting qaqc results
+    saveTable=1;
+    vnames = data.qc_config.parameter_matlab; 
+    tableName =['qc_config=' num2str(buoy_info.qc_config)]; 
+    for j = 1:length(vnames)
+        tableName = [tableName '_' vnames{j}]; 
+    end   
     
-    [data, buoy_info] = qaqc_bulkparams(data,data.qc_config, buoy_info);           
+    [data, buoy_info] = qaqc_bulkparams(data,data.qc_config, buoy_info, saveTable, tableName);           
 
     %remove all indivdiual parameter QAQC tests 
     fields = fieldnames(data); 
