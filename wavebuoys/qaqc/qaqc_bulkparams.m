@@ -175,7 +175,11 @@ if saveTable==1
 
     qaqc_check_waves = struct2table(qaqc_check_waves); 
     qaqc_check_temp = struct2table(qaqc_check_temp); 
-
+    
+    if ~exist(buoy_info.archive_path)
+        mkdir(buoy_info.archive_path); 
+    end
+    
     writetable(qaqc_check_waves,fullfile(buoy_info.archive_path,['qaqc_waves_' tableName  '.csv'])); 
     writetable(qaqc_check_temp,fullfile(buoy_info.archive_path,['qaqc_temperature_ ' tableName '.csv'])); 
 end
