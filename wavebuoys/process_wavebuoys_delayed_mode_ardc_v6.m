@@ -439,20 +439,20 @@ for b = 1:size(buoy_metadata,1)
     
     %read metadata file to get operating institution name 
     regional_metadata = readtable(buoy_info.regional_metadata,'VariableNamingRule','preserve'); 
-    site_metadata = readtable(buoy_info.metadata_file,'VariableNamingRule','preserve'); 
-    site_vars = site_metadata.Properties.VariableNames; 
+    site_metadata = readcell(buoy_info.metadata_file); 
+    site_vars = site_metadata(1,:);  
     
     %loop over the regional_metadata spreadsheet to find correct
     %institution and metadata
-    if contains(site_metadata.(site_vars{3}){contains(site_metadata.Parameter,'Operating')},'IMOS')
+    if contains(site_metadata(contains(site_metadata(:,1),'Operating'),3),'IMOS')
         site_info = regional_metadata(contains(regional_metadata.operating_institution,'IMOS'),:);
     else
         for jj =1 :size(regional_metadata,1)
-            if contains(site_metadata.(site_vars{3}){contains(site_metadata.Parameter,'Operating')},regional_metadata.operating_institution{jj})
+            if  contains(site_metadata(contains(site_metadata(:,1),'Operating'),3),regional_metadata.operating_institution{jj})
                 site_info = regional_metadata(jj,:); 
             end
         end
-    end      
+    end       
 
     vars = site_info.Properties.VariableNames; 
     for jj =1:length(vars)
