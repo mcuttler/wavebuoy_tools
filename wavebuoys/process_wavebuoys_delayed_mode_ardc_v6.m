@@ -448,7 +448,7 @@ for b = 1:size(buoy_metadata,1)
         site_info = regional_metadata(contains(regional_metadata.operating_institution,'IMOS'),:);
     else
         for jj =1 :size(regional_metadata,1)
-            if  contains(site_metadata(contains(site_metadata(:,1),'Operating'),3),regional_metadata.operating_institution{jj})
+            if  contains(regional_metadata.operating_institution{jj},site_metadata(contains(site_metadata(:,1),'Operating'),3))
                 site_info = regional_metadata(jj,:); 
             end
         end
