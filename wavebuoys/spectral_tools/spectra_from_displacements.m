@@ -205,10 +205,8 @@ if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heav
     b2 = (2 .* coUV) ./ ( UU + VV );    
 
     %calculate check factor- ratio of horizontal to vertical displacements in each frequency bin,
-    %for linear waves in deep water should be 1. NOTE: often seen written
-    %in the inverse with vertical in numerator, but this has the
-    %disadvantage of blowing up for frequencies with near 0 energy
-    Check=(UU+VV)./S;
+    %for linear waves in deep water should be 1. 
+    Check=S./(UU+VV);
 
     %primary directional spectrum --- direction at each frequency  
     dir1 = rad2deg ( atan2(b1,a1) );          
