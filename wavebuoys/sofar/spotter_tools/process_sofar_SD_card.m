@@ -21,7 +21,7 @@ function [displacements, displacements_hdr, surface_temp, baro, gps, smart_moori
 
 %% displacements
 disp('concatenating displacements'); 
-files = dir([sofarpath '\*_FLT.csv']); 
+files = dir([sofarpath '\*_FLT*']); 
 if ~isempty(files)
     displacements=[];
     for i = 1:size(files,1)
