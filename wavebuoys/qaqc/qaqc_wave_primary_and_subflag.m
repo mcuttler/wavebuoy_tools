@@ -1,8 +1,8 @@
 %% qaqc subflag
 % This code determines the 'reason' that data received the primary qa flag
-% Only determines reason for bad or questionable data (primary flag of 3)
+% Only determines reason for bad or questionable data (primary flag of 4 or 3)
 
-function [primary_flag, sub_flag] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests); 
+function [primary_flag, sub_flag] = qaqc_wave_primary_and_subflag(bulkparams, fields, qaqc_tests) 
 
 
 for i = 1:size(bulkparams.time,1)
@@ -10,16 +10,8 @@ for i = 1:size(bulkparams.time,1)
 	% matrix is [r, c] = [tests, parameters] 
     dum = [];        
     for j = 1:length(fields)
-        for jj = 1:length(qaqc_tests)            
-            if jj==3
-                if j == bulkparams.(['qf_' qaqc_tests{jj}])(i,2)                
-                    dum(jj,j) = bulkparams.(['qf_' qaqc_tests{jj}])(i,1);
-                else
-                    dum(jj,j) = 1; 
-                end
-            else
-                dum(jj,j) = bulkparams.([fields{j} '_' qaqc_tests{jj}])(i,1);
-            end
+        for jj = 1:length(qaqc_tests)                        
+            dum(jj,j) = bulkparams.([fields{j} '_' qaqc_tests{jj}])(i,1);
         end
     end
     
@@ -28,32 +20,27 @@ for i = 1:size(bulkparams.time,1)
     %for first data point, only rely on QARTOD 19 (range test) - all others
     %require mulitple time points 
     if i == 1
-        test19 = find(strcmp(qaqc_tests,'19')==1); 
-        if sum(dum(test19,:))==length(fields); %everything is a value of 1 (pass)
+        test19 = find(contains(qaqc_tests,'range')==1); 
+        if sum(dum(test19,:))==length(fields) %everything is a value of 1 (pass)
             primary_flag(i,1)=1; 
             sub_flag(i,1) = -127; 
         else %something not 1, so figure out which was outside range 
             check_idx = find(dum(test19,:)==max(dum(test19,:))); 
             primary_flag(i,1) = dum(test19,check_idx(1)); 
-            %look at second column for test 19 to determine cause
-            if bulkparams.qf_19(i,2)==1
+            %build new matrix to check which one failed 
+            if contains(fields{check_idx},'h')
                 sub_flag(i,1) = 16; %hs
-            elseif bulkparams.qf_19(i,2)==2
+            elseif contains(fields{check_idx},'t')
                 sub_flag(i,1) = 17; %tp
-            elseif bulkparams.qf_19(i,2) ==3
-                sub_flag(i,1) = 18; %dp
+            elseif contains(fields{check_idx},'d')
+                sub_flag(i,1) = 18; %dp            
             end                       
         end
     else
 		
         dd = max(dum,[],2); %find max value in each row to determine which test has 'worst' fail/suspect 
         didx = find(dd==max(dd)); %find the test that has most fails 
-        if length(didx)>1
-            %sum across rows to see which test has most fails/suspect
-%             dd2 = sum(dum(didx,:),2); 
-%             didx2 = find(dd2==max(dd2)); 
-%             if didx
-           
+        if length(didx)>1           
             didx = didx(end);%assigns to last test, this could probably be better 
         end
         
@@ -87,6 +74,10 @@ for i = 1:size(bulkparams.time,1)
         end
     end
 end
+
+%finish by over-writing the above based on the watch circle 
+primary_flag(bulkparams.qc_flag_watch>=3) = bulkparams.qc_flag_watch(bulkparams.qc_flag_watch>=3); 
+sub_flag(bulkparams.qc_flag_watch>=3) = 37; 
 end
     
 

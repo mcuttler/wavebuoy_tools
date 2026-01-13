@@ -69,8 +69,8 @@ qaqc.MINT = 5;
 
 %settings UWA 'master flag' test (combination of QARTOD19 and QARTOD20) -
 %requires 3 data points 
-qaqc.rocHs = 0.5; 
-qaqc.HsLim = 12; 
+qaqc.rocHs = 2; 
+qaqc.HsLim = 14; 
 qaqc.rocTp = 12; 
 qaqc.TpLim = 25; 
 qaqc.rocSST = 2; 

@@ -30,7 +30,7 @@ else
         
         %for first data point, only rely on QARTOD 19 (range test) - all others require mulitple time points 
         if i == 1
-            test19 = find(strcmp(qaqc_tests,'19')==1); 
+            test19 = find(contains(qaqc_tests,'range')==1); 
             if dum(test19)==1
                 primary_flag(i,1) = 1;
                 sub_flag(i,1) = -127;
