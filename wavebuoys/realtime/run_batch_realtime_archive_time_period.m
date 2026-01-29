@@ -1,17 +1,14 @@
 %% run batch process
 
 % tic
-
-clear; clc;
-%add wavebuoy_tools to path 
-addpath(genpath('C:\Data\wavebuoy_tools')); 
+addpath(genpath('C:\Data\wavebuoy_tools'));  
 
 %suppress warnings
 warning('off')
 
 %read in metadata for buoys to run
-dpath = 'Y:\CUTTLER_wawaves\Data\vicwaves'; 
-dname = 'vicwaves_backfill.csv'; 
+dpath = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\auswaves'; 
+dname = 'auswaves_backfill.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
