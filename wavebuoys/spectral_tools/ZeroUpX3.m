@@ -1,4 +1,4 @@
-function  [zup] = ZeroUpX3(eta, dt)
+function  [zup] = ZeroUpX3(eta, dt,h)
 %
 % Calculate significant wave height Hs and mean period Tz based on zero
 % upcrossing of the wave record eta. Also obtain individual wave heights 
@@ -7,6 +7,8 @@ function  [zup] = ZeroUpX3(eta, dt)
 % Basically the same as ZeroUpX2, with the addition of Crests and Troughs
 %
 %Originally by Adi K (UWA-Albany). 
+%Modified Jan 2026 by J Hansen to also calculate steepness based on linear
+%dispersion 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 k = 1:(length(eta)-1);
@@ -17,14 +19,20 @@ zup.Periods = zeros(n, 1);
 zup.Heights = zeros(n, 1);
 zup.Crests = zeros(n, 1);
 zup.Troughs = zeros(n, 1);
+zup.L = zeros(n, 1);
+zup.steepness = zeros(n, 1);
+
 
 for m = 1:n
-%     ts = interp1([eta(p(m)) eta(p(m)+1)], dt * [p(m) p(m)+1], 0);
-%     te = interp1([eta(p(m+1)) eta(p(m+1)+1)], dt * [p(m+1) p(m+1)+1], 0);
 
-    % Linear interpolation to get zero-upcrossing times
+
+    % ts = interp1([eta(p(m)) eta(p(m)+1)], dt * [p(m) p(m)+1], 0);
+    % te = interp1([eta(p(m+1)) eta(p(m+1)+1)], dt * [p(m+1) p(m+1)+1], 0);
+
+    %interpolate but not usin gbuilt in 
     ts = dt * (p(m) - eta(p(m)) / (eta(p(m)+1) - eta(p(m))));
     te = dt * (p(m+1) - eta(p(m+1)) / (eta(p(m+1)+1) - eta(p(m+1))));
+
     zup.Periods(m) = te - ts; % wave period
     
     maxpos = max(eta(p(m)+1 : p(m+1)));
@@ -33,6 +41,11 @@ for m = 1:n
     
     zup.Crests(m) = maxpos; % crest
     zup.Troughs(m) = maxneg; % trough
+
+    zup.L(m)=LDIS(zup.Periods(m),h);
+    zup.steepness(m)=zup.Heights(m)./zup.L(m);
+
+
 end
 
 SortedH = sort(zup.Heights, 'descend');
