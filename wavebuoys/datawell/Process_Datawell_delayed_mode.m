@@ -78,8 +78,8 @@ spec_params = spec_params(I25,:);
 %% only keep latitude/longitude at some time as waves
 for i = 1:size(time25,1)
     ind = find(abs(time25(i) - time80)==min(abs(time25(i) - time80))); 
-    data.lon(i,1) = rad2deg(data80(ind,4)); 
-    data.lat(i,1) = rad2deg(data80(ind,3)); 
+    data.lon(i,1) = rad2deg(data80(ind(1),4)); 
+    data.lat(i,1) = rad2deg(data80(ind(1),3)); 
 end
 clear ind i 
 %% calculate frequency and spectral coefficients     

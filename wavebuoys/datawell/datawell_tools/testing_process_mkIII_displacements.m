@@ -12,7 +12,7 @@
 %contain several days...
 
 %% pull in Hs values and time stamp (time stamp corresponds to start of sample interval)
-dum = dir('X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\Buoy_displacement_processing\Tantabiddi_buoy_data\Tantabiddi_19_20\processed_SDT'); 
+dum = dir('x:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\Buoy_displacement_processing\Tantabiddi_DoT_buoy_data\Tantabiddi_19_20\processed_SDT'); 
 dum = dum(3:end); 
 sdt = struct('time',[],'hs',[]); 
 for i = 1:size(dum); 
@@ -31,13 +31,13 @@ clear I
 %% process displacements 
 %Get list of files in directory
 addpath('C:\Data\wavebuoy_tools\wavebuoys\datawell\datawell_tools'); 
-dum = dir('X:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\Buoy_displacement_processing\Tantabiddi_buoy_data\Tantabiddi_19_20\processed_RDT'); 
+dum = dir('x:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\Buoy_displacement_processing\Tantabiddi_DoT_buoy_data\Tantabiddi_19_20\processed_RDT'); 
 dum = dum(3:end); 
 % determine date of each file and number of days covered
 yrs = [2019; 2020]; 
 cnt = 1; 
 displacements = struct('time',[],'heave',[], 'north',[],'west',[],'checksum',[]); 
-for i = 1:50; %size(dum,1); 
+for i = 1:size(dum,1); 
     disp(['Processing ' num2str(i) ' out of ' num2str(size(dum,1)) '...']); 
     %skip TMP files
     if ~strcmp(dum(i).name(1:3),'TMP')
@@ -104,6 +104,21 @@ displacements.heave = displacements.heave(I,:);
 displacements.north = displacements.north(I,:); 
 displacements.west = displacements.west(I,:); 
 
+%% above is saved in 30 minute blocks
+%construct master time vector and reshape
+fs=1.28;
+tmp=repmat(displacements.time,1,size(displacements.heave,2));
+vec=repmat([0:(1/fs)/(24*3600):(1800-1/fs)/(24*3600)],size(displacements.heave,1),1);
+time_temp=tmp+vec;
+
+Tant_dw.time_disp=reshape(time_temp,size(time_temp,1)*size(time_temp,2),1);
+Tant_dw.heave=reshape(displacements.heave,size(time_temp,1)*size(time_temp,2),1);
+Tant_dw.west=reshape(displacements.west,size(time_temp,1)*size(time_temp,2),1);
+Tant_dw.north=reshape(displacements.north,size(time_temp,1)*size(time_temp,2),1);
+
+
+%save
+save('x:\LOWE_IMOS_Deakin_Collab_JUN2020\Data\Buoy_displacement_processing\Tantabiddi_DoT_buoy_data\DoT_DWR3_Tantabiddi_displacements.mat','Tant_dw','-v7.3')
 
 
 

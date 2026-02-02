@@ -1,17 +1,14 @@
 %% run batch process
 
 % tic
-
-clear; clc;
-%add wavebuoy_tools to path 
-addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools')); 
+addpath(genpath('C:\Data\wavebuoy_tools'));  
 
 %suppress warnings
 warning('off')
 
 %read in metadata for buoys to run
-dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wawaves_buoy_log_metadata2.csv'; 
+dpath = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\auswaves'; 
+dname = 'auswaves_backfill.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -32,7 +29,7 @@ for dd = 1:size(sites,1)
             end
         end
         %run the realtime workflow 
-        % disp(['running ' sites{dd}]); 
+        disp(['running ' sites{dd}]); 
         
         
         data = []; 
@@ -63,17 +60,19 @@ for dd = 1:size(sites,1)
                     if isstruct(data)
                         fields = fieldnames(SpotData); 
                         for mm = 1:length(fields)
-                            if contains(fields{mm},'1') | contains(fields{mm},'2') | contains(fields{mm},'freq') | contains(fields{mm},'direction') | contains(fields{mm},'variance') | contains(fields{mm},'df')
-                                %check size of columns
-                                dc = size(data.(fields{mm}),2); ds = size(SpotData.(fields{mm}),2);                                     
-                                if dc < ds
-                                    data.(fields{mm})(:,end+1:size(SpotData.(fields{mm}),2)) = nan; 
-                                elseif ds < dc
-                                    SpotData.(fields{mm})(:,end+1:size(data.(fields{mm}),2)) = nan;  
-                                end                                                                                                                                     
-                            end
-                            
                             data.(fields{mm}) = [data.(fields{mm}); SpotData.(fields{mm})]; 
+
+                            % if contains(fields{mm},'1') | contains(fields{mm},'2') | contains(fields{mm},'freq') | contains(fields{mm},'direction') | contains(fields{mm},'variance') | contains(fields{mm},'df')
+                                % %check size of columns
+                                % dc = size(data.(fields{mm}),2); ds = size(SpotData.(fields{mm}),2);                                     
+                                % if dc < ds
+                            %         data.(fields{mm})(:,end+1:size(SpotData.(fields{mm}),2)) = nan; 
+                            %     elseif ds < dc
+                            %         SpotData.(fields{mm})(:,end+1:size(data.(fields{mm}),2)) = nan;  
+                            %     end                                                                                                                                     
+                            % end
+                            % 
+                            % data.(fields{mm}) = [data.(fields{mm}); SpotData.(fields{mm})]; 
                         end                        
                     else
                         data = SpotData;                          
@@ -96,10 +95,10 @@ for dd = 1:size(sites,1)
              disp(['archiving mat files']);      
              if ~isfield(data,'systime')
                  data.systime = data.time; 
-                 data.batteryVoltage = ones(size(data.hsig,1)).*nan; 
-                 data.batteryPower = ones(size(data.hsig,1)).*nan; 
-                 data.humidity = ones(size(data.hsig,1)).*nan; 
-                 data.solarVoltage = ones(size(data.hsig,1)).*nan; 
+                 data.batteryVoltage = ones(size(data.hsig,1),1).*nan; 
+                 data.batteryPower = ones(size(data.hsig,1),1).*nan; 
+                 data.humidity = ones(size(data.hsig,1),1).*nan; 
+                 data.solarVoltage = ones(size(data.hsig,1),1).*nan; 
              end
              realtime_archive_mat(buoy_info, data);          
              

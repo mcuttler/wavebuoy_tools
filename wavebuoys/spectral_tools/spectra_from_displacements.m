@@ -17,6 +17,13 @@ function [out]=spectra_from_displacements(heave,north,east,nfft,nover,fs,merge,t
 %                 - info.fmax is maximum frequency cuttoff for SS wave statistics
 %                 - info.fminSS is minimum frequency cutoff for SS wave stations (and max cutoff for IG wave stats)
 %                 - info.fminIG is minimum frequency cutoff for IG wave statistics
+%                 - info.h is site depth, for calculating wavelength via linear dispersion
+%                 - info.QC is flag to complete displacement based QC or not, 1= yes; 0= no
+%                 - info.bad_data_thresh fraction (e.g. 0.6667) of segments which must contain unflagged displacements for results to be kept, ignored if info.QC=0  
+%                 - info.hs0_thresh max value of Hmax/Hs, segments with values above this are flagged as bad, ignored if info.QC=0
+%                 - info.t0_thresh max value of T0 to Tz, segments with values above this are flagged as bad, ignored if info.QC=0    
+
+    
 %
 %v1.0, JEH 6 Jan, 2022
 %v1.1, JEH 2 Sept 2022 , modified to include peak period and direction
@@ -38,7 +45,7 @@ windows =floor((1/nover)*(pts/nfft -1)+1);   % number of windows/segments
 
 
 %COMPUTE ZERO UP CROSSING WAVE HEIGHTS FOR OUTLIER DETECTION
-[zup] = ZeroUpX3(heave, 1/fs); %NOTE- use complete record- originally was doing segment by segment but think this is better
+[zup] = ZeroUpX3(heave, 1/fs,info.h); %NOTE- use complete record- originally was doing segment by segment but think this is better
 Hs0=zup.Hs;
 heights=zup.Heights;
 periods=zup.Periods;
@@ -51,28 +58,28 @@ for q=1:windows
     et_segs(:,q) = east((q-1)*(nover*nfft)+1  :  (q-1)*(nover*nfft)+nfft); 
 %     %ZERO CROSSING ANALYSIS- used also to identify segments with bad
 %     %displacement data
-    [zup] = ZeroUpX3(hv_segs(:,q), 1/fs); 
+    [zup] = ZeroUpX3(hv_segs(:,q), 1/fs,info.h); 
     Hs_seg(q)=zup.Hs;
     heights_seg{q}=zup.Heights;
     periods_seg{q}=zup.Periods;
     T0_seg(q)=zup.Tz;
+    steep_seg{q}=zup.steepness;
 end
 
 %FIND SEGMENTS WITH NaNs AND BAD DATA
 cnt=1;
-rw=[];
-for jj=1:windows
-    ff=find(isnan([hv_segs(:,jj) ; nt_segs(:,jj) ; et_segs(:,jj)])); %combine heave, east, north into one and just look for any nans
-    %look for unrealistic values- compare individual segment values but those from the overall record- 
-     %******* cut off values for unrealitic values- from Table3 in Adi's JTEC paper, but cahnge to 4*T0 and add > 30s
-    if ~isempty(ff) | max(heights_seg{jj})>info.hs0_thresh*Hs0  | max(periods_seg{jj})> info.t0_thresh*T0 | max(periods_seg{jj})> 30
-        if max(heights)>info.hs0_thresh*Hs0
-            jj;
-        elseif max(periods)> info.t0_thresh*T0
-            jj;
-        end            
-        rw(cnt)=jj;
-        cnt=cnt+1;
+rw = []; 
+if info.QC==1 %flag to complete QC or not, 1=yes, 0= No
+    for jj=1:windows
+        ff=find(isnan([hv_segs(:,jj) ; nt_segs(:,jj) ; et_segs(:,jj)])); %combine heave, east, north into one and just look for any nans
+        %look for unrealistic values- compare individual segment values but those from the overall record- 
+         %******* cut off values for unrealitic values- from Table3 in Adi's JTEC paper, but cahnge to 4*T0 and add > 30s
+         %##### Jan 2026 add steepness cut off as well, exclude segments where
+         %the max steepness exceeds 1/7
+        if ~isempty(ff) | max(heights_seg{jj})>info.hs0_thresh*Hs0  | max(periods_seg{jj})> info.t0_thresh*T0 | max(periods_seg{jj})> 30 | max(steep_seg{jj})> 1/7    
+            rw(cnt)=jj; %store indicies of segments that have been flagged, these segments are deleted below
+            cnt=cnt+1;
+        end
     end
 end
 
@@ -80,6 +87,7 @@ end
 %SET THRESHOLD TO CONTINUE BASED ON 'BAD_DATA_THRESH'
 %Set percentage of windows that are bad data and will cause processing to
 %stop 
+
 if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heave==0))/length(heave)<0.1)
     
     if ~isempty(rw)
@@ -205,10 +213,8 @@ if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heav
     b2 = (2 .* coUV) ./ ( UU + VV );    
 
     %calculate check factor- ratio of horizontal to vertical displacements in each frequency bin,
-    %for linear waves in deep water should be 1. NOTE: often seen written
-    %in the inverse with vertical in numerator, but this has the
-    %disadvantage of blowing up for frequencies with near 0 energy
-    Check=(UU+VV)./S;
+    %for linear waves in deep water should be 1. 
+    Check=S./(UU+VV);
 
     %primary directional spectrum --- direction at each frequency  
     dir1 = rad2deg ( atan2(b1,a1) );          

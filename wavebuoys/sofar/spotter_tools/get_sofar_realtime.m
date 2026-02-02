@@ -19,6 +19,8 @@ tend = datestr(datenum(now)+ hours(2),30);
 startDate = [tstart 'Z']; 
 endDate = [tend 'Z']; 
 
+%URL will ignore the processingSource term in buoys_metadata (but it's used
+%below for filtering)
 uri_waves=URI(['https://api.sofarocean.com/api/wave-data?spotterId=' buoy_info.serial...
     '&includeSurfaceTempData=true&includeWindData=true&includeFrequencyData=true&includeDirectionalMoments=true&'...
     'includePartitionData=true&includeBarometerData=true&processingSources=all'...
@@ -28,12 +30,15 @@ resp = send(r,uri_waves);
 status = resp.StatusCode;
 disp([status]); 
 
-
+%URL will ignore the processingSource term in buoys_metadata (but it's used
+%below for filtering)
 uri_sensor= URI(['https://api.sofarocean.com/api/sensor-data?spotterId=' buoy_info.serial '&startDate=' startDate '&endDate=' endDate]); 
 resp_sensor = send(r,uri_sensor);
 status = resp_sensor.StatusCode;
 disp([status]); 
 
+%URL will ignore the processingSource term in buoys_metadata (but it's used
+%below for filtering)
 uri_latest = URI(['https://api.sofarocean.com/api/latest-data?spotterId=' buoy_info.serial]);
 resp_latest = send(r,uri_latest);
 status = resp_latest.StatusCode;
@@ -54,9 +59,23 @@ if isfield(resp.Body.Data.data,'waves')
         end
     end            
     
-    %use HDR if available
-    if ~isempty(indHDR)
-        indEmbedded = indHDR; 
+    %based on info in buoys_metadata.csv
+    if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+        tEnd_hdr = datetime(datenum(resp.Body.Data.data.waves(indHDR(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum'); 
+        %extra catch in case there's no partition data transmitted via embedded 
+        if ~isempty(indEmbedded)
+            tEnd_embedded = datetime(datenum(resp.Body.Data.data.waves(indEmbedded(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum');
+        else
+            tEnd_embedded = tEnd_hdr;
+        end
+
+        if tEnd_embedded-tEnd_hdr <= minutes(10) %in waves:standard HDR and embedded offset by 10min
+            indEmbedded = indHDR;
+        else
+            indEmbedded = indEmbedded;
+        end
+    else
+        indEmbedded = indEmbedded; 
     end    
 
     for j = 1:size(indEmbedded,1)
@@ -92,13 +111,28 @@ if isfield(resp.Body.Data.data,'wind')
             elseif strcmp(resp.Body.Data.data.wind(j).processing_source,'hdr')
                 indHDR = [indHDR; j]; 
             end
-        end            
-        
-        %use HDR if available
-        if ~isempty(indHDR)
-            indEmbedded = indHDR; 
         end 
-        
+
+        %based on info in buoys_metadata.csv
+        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+            tEnd_hdr = datetime(datenum(resp.Body.Data.data.wind(indHDR(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum'); 
+            %extra catch in case there's no wind data transmitted via
+            %embedded 
+            if ~isempty(indEmbedded)
+                tEnd_embedded = datetime(datenum(resp.Body.Data.data.wind(indEmbedded(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum');
+            else
+                tEnd_embedded = tEnd_hdr;
+            end
+
+            if tEnd_embedded-tEnd_hdr <= minutes(10) %in waves:standard HDR and embedded offset by 10min
+                indEmbedded = indHDR;
+            else
+                indEmbedded = indEmbedded;
+            end
+        else
+            indEmbedded = indEmbedded; 
+        end 
+
         for j = 1:size(indEmbedded,1)      
             Spotter.wind_speed(j,1) = resp.Body.Data.data.wind(indEmbedded(j)).speed;    
             Spotter.wind_dir(j,1) = resp.Body.Data.data.wind(indEmbedded(j)).direction;
@@ -191,12 +225,25 @@ if isfield(resp.Body.Data.data,'frequencyData')
             end
         end
         
-        %use HDR if available
-        if ~isempty(indHDR)
-            indSpec = indHDR; 
+        %based on info in buoys_metadata.csv
+        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+            tEnd_hdr = datetime(datenum(resp.Body.Data.data.frequencyData(indHDR(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum'); 
+            %extra catch in case there's no spectral data transmitted via
+            %embedded 
+            if ~isempty(indEmbedded)
+                tEnd_embedded = datetime(datenum(resp.Body.Data.data.frequencyData(indEmbedded(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum');
+            else
+                tEnd_embedded = tEnd_hdr;
+            end
+
+            if tEnd_embedded-tEnd_hdr <= minutes(10) %in waves:standard HDR and embedded offset by 10min
+                indSpec = indHDR;
+            else
+                indSpec = indEmbedded;
+            end
         else
-            indSpec = indEmbedded;
-        end
+            indSpec = indEmbedded; 
+        end 
         
         for j = 1:size(indSpec,1)
             Spotter.spec_time(j,1) = datenum(resp.Body.Data.data.frequencyData(indSpec(j)).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
@@ -250,12 +297,24 @@ if isfield(resp.Body.Data.data,'partitionData')
             end
         end
         
-        %use HDR if available
-        if ~isempty(indHDR)
-            indPart = indHDR; 
+        %based on info in buoys_metadata.csv
+        if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+            tEnd_hdr = datetime(datenum(resp.Body.Data.data.partitionData(indHDR(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum'); 
+            %extra catch in case there's no partition data transmitted via embedded 
+            if ~isempty(indEmbedded)
+                tEnd_embedded = datetime(datenum(resp.Body.Data.data.partitionData(indEmbedded(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum');
+            else
+                tEnd_embedded = tEnd_hdr;
+            end
+
+            if tEnd_embedded-tEnd_hdr <= minutes(10) %in waves:standard HDR and embedded offset by 10min
+                indPart = indHDR;
+            else
+                indPart = indEmbedded;
+            end
         else
-            indPart = indEmbedded;
-        end
+            indPart = indEmbedded; 
+        end 
         
         for j = 1:size(indPart,1)
             Spotter.part_time(j,1) = datenum(resp.Body.Data.data.partitionData(indPart(j)).timestamp,'yyyy-mm-ddTHH:MM:SS'); 
@@ -326,12 +385,24 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
         end
     end    
     
-    %use HDR if available 
-    if ~isempty(indHDR)
-        indTemp = indHDR; 
+    %based on info in buoys_metadata.csv
+    if ~contains(buoy_info.processingSource,'embedded')&~isempty(indHDR)
+        tEnd_hdr = datetime(datenum(resp.Body.Data.data.surfaceTemp(indHDR(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum'); 
+        %extra catch in case there's no partition data transmitted via embedded 
+        if ~isempty(indEmbedded)
+            tEnd_embedded = datetime(datenum(resp.Body.Data.data.surfaceTemp(indEmbedded(end)).timestamp,'yyyy-mm-ddTHH:MM:SS'),'convertfrom','datenum');
+        else
+            tEnd_embedded = tEnd_hdr;
+        end
+
+        if tEnd_embedded-tEnd_hdr <= minutes(10) %in waves:standard HDR and embedded offset by 10min
+            indTemp = indHDR;
+        else
+            indTemp = indEmbedded;
+        end
     else
         indTemp = indEmbedded; 
-    end
+    end 
     
     for j = 1:size(indTemp,1)
             Spotter.surf_temp(j,1) = resp.Body.Data.data.surfaceTemp(indTemp(j)).degrees;
@@ -348,6 +419,7 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
             Spotter.bott_temp(j,1)= -9999; 
         end
     end
+    
  %smart mooring
 elseif ~isempty(resp_sensor.Body.Data.data)  
     %get unique sensor positions
@@ -543,11 +615,11 @@ end
 
 %% check that mooring data has correc time stamps to continue
 
-if Spotter.temp_time(end)>Spotter.time(end)
-    flag = 1; 
-else
-    flag = 0;
-end
+% if Spotter.temp_time(end)>=Spotter.time(end)
+%     flag = 1; 
+% else
+%     flag = 0;
+% end
 % flag = 1; 
 
 

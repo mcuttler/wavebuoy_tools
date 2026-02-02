@@ -19,7 +19,7 @@
 % in.WDTOL - directional tolerance 
 % in.WSPTOL - spreading tolerance
 % in.rep_fail - number of previous time poins to compare for fail
-% in.rep_fail - number of previous time poins to compare for suspect
+% in.rep_suspect - number of previous time poins to compare for suspect
 
 
 %
@@ -54,7 +54,7 @@ function [QCFlag] = qartod_16_flat_line(in, tol,data)
 
 if length(data)>=in.rep_suspect
     % first check for 'suspect' values
-    QCFlag_suspect  = zeros(size(data,1),1); 
+    QCFlag_suspect  = []; 
     %start at in.rep_suspect or in.rep_fail, assume all preceding points get
     %that flag
     for ii=1:size(data,1)
@@ -67,9 +67,9 @@ if length(data)>=in.rep_suspect
     end
     
     %% now check for fail values
-    QCFlag_fail  = zeros(size(data,1),1); 
+    QCFlag_fail  = [];
     %
-    for ii=1:size(data,1); 
+    for ii=1:size(data,1)
         %check if first n values are 'equal' within tolerance
          if ii<=in.rep_fail
              %not assessed
@@ -87,7 +87,7 @@ if length(data)>=in.rep_suspect
     
 else
     disp('Dataset not long enough for FLATLINE TEST'); 
-    QCFlag = ones(length(in.WVHGT),1).*2;
+    QCFlag = ones(size(data,1),1).*2;
 end
 
 %% subfunctions
