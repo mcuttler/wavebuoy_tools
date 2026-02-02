@@ -50,13 +50,15 @@ dist_dev=sqrt((xdev-xdev_dep)^2+(ydev-ydev_dep)^2);
 
 if c-time_dev>in_cut/24 %if time difference greater than cutoff, development site
     %set up email details
+
     warning.time = 1; 
     setpref('Internet','SMTP_Server','smtp.gmail.com');
     setpref('Internet','E_mail','wa.wavebuoy.alert@gmail.com');
     setpref('Internet','SMTP_Username','wa.wavebuoy.alert');
-    %ADD PASSCODE: rvwqxkuaiaqfarht
+    %ADD PASSCODE: rvwqxkuaiaqfarht; upzwbqxpdmkankvg
     %Or password: UWAwavebuoys1
-    setpref('Internet','SMTP_Password','rvwqxkuaiaqfarht');
+
+    setpref('Internet','SMTP_Password','upzwbqxpdmkankvg');
     props = java.lang.System.getProperties;
     props.setProperty('mail.smtp.auth','true');
     props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
@@ -80,7 +82,7 @@ if dist_dev>dev_watch %if development site buoy offsite
     setpref('Internet','SMTP_Server','smtp.gmail.com');
     setpref('Internet','E_mail','wa.wavebuoy.alert@gmail.com');
     setpref('Internet','SMTP_Username','wa.wavebuoy.alert');
-    setpref('Internet','SMTP_Password','rvwqxkuaiaqfarht');
+    setpref('Internet','SMTP_Password','upzwbqxpdmkankvg');
     props = java.lang.System.getProperties;
     props.setProperty('mail.smtp.auth','true');
     props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');

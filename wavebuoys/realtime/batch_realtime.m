@@ -278,6 +278,11 @@ elseif strcmp(buoy_info.type,'datawell')==1
     dw_data.wind_speed = dd; 
     dw_data.wind_time = dw_data.time; 
     dw_data.systime = dw_data.time; 
+    if size(dw_data.name,1)~=size(dw_data.time,1)
+        for kk = 1:size(dw_data.time,1)
+            dw_data.name{kk} = buoy_info.name; 
+        end
+    end
     
     %check that it's new data
     if all(check)~=0
@@ -316,11 +321,11 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 end
                 
                 %code to update the buoy info master file for website to read
-                try
-                    update_website_buoy_info(buoy_info, data); 
-                catch
-                    log_message = [log_message, ' (5) code failed updating buoys.csv']; 
-                end 
+                % try
+                %     update_website_buoy_info(buoy_info, data); 
+                % catch
+                %     log_message = [log_message, ' (5) code failed updating buoys.csv']; 
+                % end 
 
             end
         end
@@ -353,11 +358,11 @@ elseif strcmp(buoy_info.type,'datawell')==1
         end
         
         %code to update the buoy info master file for website to read                       
-        try
-            update_website_buoy_info(buoy_info, data); 
-        catch
-            log_message = [log_message, ' (5) code failed updating buoys.csv']; 
-        end 
+        % try
+        %     update_website_buoy_info(buoy_info, data); 
+        % catch
+        %     log_message = [log_message, ' (5) code failed updating buoys.csv']; 
+        % end 
     end
 end
 
