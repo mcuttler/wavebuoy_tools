@@ -350,11 +350,11 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 end
                 
                 %code to update the buoy info master file for website to read
-                % try
-                %     update_website_buoy_info(buoy_info, data); 
-                % catch
-                %     log_message = [log_message, ' (5) code failed updating buoys.csv']; 
-                % end 
+                try
+                    update_website_buoy_info(buoy_info, data); 
+                catch
+                    log_message = [log_message, ' (5) code failed updating buoys.csv']; 
+                end 
 
             end
         end
@@ -388,11 +388,11 @@ elseif strcmp(buoy_info.type,'datawell')==1
         end
         
         %code to update the buoy info master file for website to read                       
-        % try
-        %     update_website_buoy_info(buoy_info, data); 
-        % catch
-        %     log_message = [log_message, ' (5) code failed updating buoys.csv']; 
-        % end 
+        try
+            update_website_buoy_info(buoy_info, data); 
+        catch
+            log_message = [log_message, ' (5) code failed updating buoys.csv']; 
+        end 
     end
 end
 
