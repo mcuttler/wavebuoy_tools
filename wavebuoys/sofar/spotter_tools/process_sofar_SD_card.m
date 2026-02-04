@@ -57,7 +57,7 @@ end
 
 %% SST 
 disp('concatenating surface temperature'); 
-files = dir([sofarpath '\*_SST.csv']); 
+files = dir([sofarpath '\*_SST*']); 
 if ~isempty(files)
     
     surface_temp=[];
@@ -94,7 +94,7 @@ else
 end
 %% baro
 disp('concatenating barometric pressure'); 
-files = dir([sofarpath '\*_BARO.csv']); 
+files = dir([sofarpath '\*_BARO*']); 
 if ~isempty(files) 
     
     baro=[];
@@ -128,7 +128,7 @@ else
 end
 %% smart_mooring --- BristleMouth
 disp('concatenating smart mooring Bristlemouth'); 
-files = dir([sofarpath '\*_SENS_IND.csv']); 
+files = dir([sofarpath '\*_SENS_IND*']); 
 
 if ~isempty(files)
     for i = 1:size(files,1)    
@@ -179,7 +179,7 @@ end
 
 % add the extra 'aggregate' files 
 disp('concatenating smart mooring Bristlemouth agg'); 
-files = dir([sofarpath '\*_SENS_AGG.csv']); 
+files = dir([sofarpath '\*_SENS_AGG*']); 
 
 if ~isempty(files)
     for i = 1:size(files,1)    
@@ -231,7 +231,7 @@ end
 
 %SMD files 
 disp('concatenating smart mooring data'); 
-files = dir([sofarpath '\*_SMD.csv']); 
+files = dir([sofarpath '\*_SMD*']); 
 
 if ~isempty(files)
     for i = 1:size(files,1)    
@@ -302,7 +302,7 @@ end
 
 %% GPS
 disp('concatenating gps positions'); 
-files = dir([sofarpath '\*_LOC.csv']); 
+files = dir([sofarpath '\*_LOC*']); 
 if ~isempty(files)
      gps=[];
      for i = 1:size(files,1)
@@ -343,7 +343,7 @@ end
 
 %% HDR files 
 disp('concatenating hdr files'); 
-files = dir([sofarpath '\*_HDR.csv']); 
+files = dir([sofarpath '\*_HDR*']); 
 
 if ~isempty(files)
     displacements_hdr=[];

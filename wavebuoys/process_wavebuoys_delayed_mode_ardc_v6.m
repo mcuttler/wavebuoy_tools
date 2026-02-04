@@ -14,12 +14,12 @@
 %% set initial paths for wave buoy tools 
 clear; clc; close all;
 %location of wavebuoy_tools repo
-mpath = 'C:\Users\00084142\CUTTLER_GitHub\wavebuoy_tools'; 
+mpath = 'D:\CUTTLER_GitHub\wavebuoy_tools'; 
 addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
-dpath = 'X:\CUTTLER_wawaves\Data\nswwaves'; 
-dname = 'nsw_delayed_mode_buoys_to_process.csv'; 
+dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
+dname = 'wa_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 %only keep buoys that are set to be processed 
@@ -82,10 +82,15 @@ for b = 1:size(buoy_metadata,1)
         tr = timerange(displacements.Time(1)-minutes(2), displacements.Time(end),'closed'); 
 
         %crop remaining variables; 
-        gps.Time.TimeZone = 'UTC'; 
-        baro.Time.TimeZone = 'UTC'; 
-        gps = gps(tr,:); 
-        baro = baro(tr,:); 
+        if istimetable(gps)
+            gps.Time.TimeZone = 'UTC'; 
+             gps = gps(tr,:); 
+        end
+
+        if istimetable(baro)
+            baro.Time.TimeZone = 'UTC';             
+            baro = baro(tr,:); 
+        end
         
         %create time range based on cropped displacements - keep temp. time
         %stamps. 
@@ -144,8 +149,10 @@ for b = 1:size(buoy_metadata,1)
         
         %settings for qc as part of the spectral_from_displacements processing 
         info.bad_data_thresh=2/3; 
-        info.hs0_thresh = 3; 
-        info.t0_thresh = 5; 
+        info.hs0_thresh = buoy_info.displacement_hs0_thresh; 
+        info.t0_thresh = buoy_info.displacement_t0_thresh; 
+        info.h = buoy_info.DeployDepth; 
+        info.QC = buoy_info.displacement_qc; 
         
         %%  calculate integrated wave paremeters loop over and calculate parameters 
         for i = 1:length(dt)-1
@@ -205,7 +212,7 @@ for b = 1:size(buoy_metadata,1)
                     end
                     
                     %calculate zero crossing heights
-                    [zup] = ZeroUpX3(dum.z, 1/fs);
+                    [zup] = ZeroUpX3(dum.z, 1/fs, info.h);
                     bulkparams.height_0{i}=zup.Heights;
                     bulkparams.periods_0{i}=zup.Periods;
                     bulkparams.crests{i}=zup.Crests;
@@ -481,100 +488,100 @@ for b = 1:size(buoy_metadata,1)
        %% Organise for netCDF following IMOS-ARDC conventions      
                        
         %make time a datenum for netCDF codes 
-        data.time = datenum(data.time); 
-        data.temp_time = datenum(data.temp_time); 
-        data.disp_time = datenum(data.disp_time); 
-
-        %modify author name
-        buoy_info.author = strrep(buoy_info.author,'-',', '); 
+        % data.time = datenum(data.time); 
+        % data.temp_time = datenum(data.temp_time); 
+        % data.disp_time = datenum(data.disp_time); 
+        % 
+        % %modify author name
+        % buoy_info.author = strrep(buoy_info.author,'-',', '); 
         
         %%  Integral Wave Parameters 
         
-        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
-        
-        if strcmp(buoy_info.type,'datawell')
-            varsfile = [mpath '\wavebuoys\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
-        else
-            varsfile = [mpath '\wavebuoys\imos_nc\metadata\bulkwave_parameters_DM_mapping.csv']; 
-        end
-        globfile_Int = globfile;
-        varsfile_Int = varsfile;
-        bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
-        
-        %% displacements
-        
-        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
-        if strcmp(buoy_info.type,'datawell')
-            varsfile = [mpath '\wavebuoys\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
-        else
-            varsfile = [mpath '\wavebuoys\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
-        end
-        
-        %divide displacements into 2week blocks and may x, y, z and time single
-        %column variables 
-        disp_buoy_info = buoy_info; %create dum info variable as time needs to change in code below 
-        %transpose so can stack in time 
-        data.disp_time = data.disp_time'; data.x = data.x'; data.y = data.y'; data.z = data.z'; 
-        data.disp_time = data.disp_time(:); 
-        data.x = data.x(:); 
-        data.y = data.y(:); 
-        data.z = data.z(:); 
-        
-        %make whole days to match python (times are in datenum, so use datenum)
-        d1 = floor(data.disp_time(1)); 
-        d2 = ceil(data.disp_time(end)); 
-        
-        ttdum = d1:14:d2; 
-        for i = 1:length(ttdum)
-            if i == length(ttdum)
-                ind = find(data.disp_time>=ttdum(i) & data.disp_time<d2);  
-            else
-                ind = find(data.disp_time>=ttdum(i) & data.disp_time<ttdum(i+1));
-            end
-            displacements.time = data.disp_time(ind); 
-            displacements.x = data.x(ind); 
-            displacements.y = data.y(ind); 
-            displacements.z = data.z(ind); 
-            %find lat/lon from bulkparameters that's inside displacements time
-            ind = find(data.time>=displacements.time(1) & data.time<=displacements.time(end)); 
-            displacements.lat = data.lat(ind); 
-            displacements.lon = data.lon(ind); 
-            displacements.time_location = data.time(ind);
-            disp_buoy_info.startdate = displacements.time(1); 
-            disp_buoy_info.enddate = displacements.time(end);
-            dfields = {'operating_institution_long_name', 'instrument', 'site_name','acknowledgement','citation',...
-                'principal_investigator','principal_investigator_email','serial','naming_authority'}; 
-            for mm = 1:length(dfields)
-                disp_buoy_info.(dfields{mm}) = buoy_info.(dfields{mm}); 
-            end
-            
-            displacements_to_IMOS_ARDC_nc(displacements, disp_buoy_info, globfile, varsfile); 
-        end
-        
-        globfile_Disp = globfile;
-        varsfile_Disp = varsfile;              
-        %% spectral data
-        
-        globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
-        if strcmp(buoy_info.type,'datawell')
-            varsfile = [mpath '\wavebuoys\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
-        else
-            varsfile = [mpath '\wavebuoys\imos_nc\metadata\spectral_parameters_DM_mapping.csv']; 
-        end
-        
-        spec_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile);
-        
-        globfile_Spec = globfile;
-        varsfile_Spec = varsfile;
-        %%  overwrite previous .mat file with final info 
-        %convert back to datetime for easier plotting in future 
-        data.time = datetime(data.time,'convertfrom','datenum'); data.time.TimeZone = 'UTC'; 
-        data.disp_time = datetime(data.disp_time,'convertfrom','datenum'); data.disp_time.TimeZone='UTC'; 
-        data.temp_time = datetime(data.temp_time,'convertfrom','datenum'); data.temp_time.TimeZone='UTC'; 
-        fname = make_imos_ardc_filename(buoy_info,'ALL'); 
-        fname = strrep(fname,'nc','mat'); 
-        save(fname,'baro','buoy_info','buoy_metadata','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg',...
-            'globfile_Spec','globfile_Disp','globfile_Int','varsfile_Spec','varsfile_Disp','varsfile_Int','buoy_info','disp_buoy_info','mpath','-v7.3'); 
+        % globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_integralParams_ardc.txt']; 
+        % 
+        % if strcmp(buoy_info.type,'datawell')
+        %     varsfile = [mpath '\wavebuoys\imos_nc\metadata\bulkwave_parameters_DM_mapping_DWR4.csv']; 
+        % else
+        %     varsfile = [mpath '\wavebuoys\imos_nc\metadata\bulkwave_parameters_DM_mapping.csv']; 
+        % end
+        % globfile_Int = globfile;
+        % varsfile_Int = varsfile;
+        % bulkparams_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile); 
+        % 
+        % %% displacements
+        % 
+        % globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_rawDispl_ardc.txt']; 
+        % if strcmp(buoy_info.type,'datawell')
+        %     varsfile = [mpath '\wavebuoys\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
+        % else
+        %     varsfile = [mpath '\wavebuoys\imos_nc\metadata\rawDispl_parameters_DM_mapping.csv']; 
+        % end
+        % 
+        % %divide displacements into 2week blocks and may x, y, z and time single
+        % %column variables 
+        % disp_buoy_info = buoy_info; %create dum info variable as time needs to change in code below 
+        % %transpose so can stack in time 
+        % data.disp_time = data.disp_time'; data.x = data.x'; data.y = data.y'; data.z = data.z'; 
+        % data.disp_time = data.disp_time(:); 
+        % data.x = data.x(:); 
+        % data.y = data.y(:); 
+        % data.z = data.z(:); 
+        % 
+        % %make whole days to match python (times are in datenum, so use datenum)
+        % d1 = floor(data.disp_time(1)); 
+        % d2 = ceil(data.disp_time(end)); 
+        % 
+        % ttdum = d1:14:d2; 
+        % for i = 1:length(ttdum)
+        %     if i == length(ttdum)
+        %         ind = find(data.disp_time>=ttdum(i) & data.disp_time<d2);  
+        %     else
+        %         ind = find(data.disp_time>=ttdum(i) & data.disp_time<ttdum(i+1));
+        %     end
+        %     displacements.time = data.disp_time(ind); 
+        %     displacements.x = data.x(ind); 
+        %     displacements.y = data.y(ind); 
+        %     displacements.z = data.z(ind); 
+        %     %find lat/lon from bulkparameters that's inside displacements time
+        %     ind = find(data.time>=displacements.time(1) & data.time<=displacements.time(end)); 
+        %     displacements.lat = data.lat(ind); 
+        %     displacements.lon = data.lon(ind); 
+        %     displacements.time_location = data.time(ind);
+        %     disp_buoy_info.startdate = displacements.time(1); 
+        %     disp_buoy_info.enddate = displacements.time(end);
+        %     dfields = {'operating_institution_long_name', 'instrument', 'site_name','acknowledgement','citation',...
+        %         'principal_investigator','principal_investigator_email','serial','naming_authority'}; 
+        %     for mm = 1:length(dfields)
+        %         disp_buoy_info.(dfields{mm}) = buoy_info.(dfields{mm}); 
+        %     end
+        % 
+        %     displacements_to_IMOS_ARDC_nc(displacements, disp_buoy_info, globfile, varsfile); 
+        % end
+        % 
+        % globfile_Disp = globfile;
+        % varsfile_Disp = varsfile;              
+        % %% spectral data
+        % 
+        % globfile = [mpath '\wavebuoys\imos_nc\metadata\glob_att_spectral_ardc.txt']; 
+        % if strcmp(buoy_info.type,'datawell')
+        %     varsfile = [mpath '\wavebuoys\imos_nc\metadata\spectral_parameters_DM_mapping_DWR4.csv']; 
+        % else
+        %     varsfile = [mpath '\wavebuoys\imos_nc\metadata\spectral_parameters_DM_mapping.csv']; 
+        % end
+        % 
+        % spec_to_IMOS_ARDC_nc(data, buoy_info, globfile, varsfile);
+        % 
+        % globfile_Spec = globfile;
+        % varsfile_Spec = varsfile;
+        % %%  overwrite previous .mat file with final info 
+        % %convert back to datetime for easier plotting in future 
+        % data.time = datetime(data.time,'convertfrom','datenum'); data.time.TimeZone = 'UTC'; 
+        % data.disp_time = datetime(data.disp_time,'convertfrom','datenum'); data.disp_time.TimeZone='UTC'; 
+        % data.temp_time = datetime(data.temp_time,'convertfrom','datenum'); data.temp_time.TimeZone='UTC'; 
+        % fname = make_imos_ardc_filename(buoy_info,'ALL'); 
+        % fname = strrep(fname,'nc','mat'); 
+        % save(fname,'baro','buoy_info','buoy_metadata','data','gps','surface_temp','smart_mooring_bm','smart_mooring_bm_agg',...
+        %     'globfile_Spec','globfile_Disp','globfile_Int','varsfile_Spec','varsfile_Disp','varsfile_Int','buoy_info','disp_buoy_info','mpath','-v7.3'); 
     end
 end
 

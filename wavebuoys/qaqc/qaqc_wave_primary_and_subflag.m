@@ -26,6 +26,10 @@ for i = 1:size(bulkparams.time,1)
             sub_flag(i,1) = -127; 
         else %something not 1, so figure out which was outside range 
             check_idx = find(dum(test19,:)==max(dum(test19,:))); 
+            if length(check_idx)>1
+                check_idx = check_idx(1);
+            end
+            
             primary_flag(i,1) = dum(test19,check_idx(1)); 
             %build new matrix to check which one failed 
             if contains(fields{check_idx},'h')
