@@ -294,6 +294,11 @@ elseif strcmp(buoy_info.type,'datawell')==1
     dw_data.wind_speed = dd; 
     dw_data.wind_time = dw_data.time; 
     dw_data.systime = dw_data.time; 
+    if size(dw_data.name,1)~=size(dw_data.time,1)
+        for kk = 1:size(dw_data.time,1)
+            dw_data.name{kk} = buoy_info.name; 
+        end
+    end
     
     %add 'name' for text writing
     for i = 1:size(dw_data.time,1)
