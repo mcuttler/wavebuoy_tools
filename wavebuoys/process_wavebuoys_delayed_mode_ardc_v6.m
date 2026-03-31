@@ -19,7 +19,7 @@ addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
 dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wa_delayed_mode_buoys_to_process.csv'; 
+dname = 'wa_delayed_mode_buoys_to_process-datawell.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 %only keep buoys that are set to be processed 
@@ -307,6 +307,7 @@ for b = 1:size(buoy_metadata,1)
             'frequency','hs','tm','tp','dp','dpspr', 'curr_mag','curr_dir',...
             'curr_mag_std','curr_dir_std','temp_time','surf_temp','bott_temp','w','w_std',...
             'gps_time','gps_pos','disp_tstart','disp_time','z','y','x'}; 
+
         for i = 1:length(dw_vars)
             data.(dw_vars{i}) = []; 
         end
@@ -316,6 +317,7 @@ for b = 1:size(buoy_metadata,1)
         %lib to convert to CSV)
         %get all the field to process 20 file is 1D spectra
         files=dir((fullfile(buoy_info.datapath,'*-20.csv'))); 
+
         for kk=1:length(files)
             %skip 1970 file that always seems to appear
             if strcmp(files(kk).name(1:4),'1970')
@@ -333,21 +335,28 @@ for b = 1:size(buoy_metadata,1)
                 filed = fullfile(buoy_info.datapath, [files(kk).name(1:10) '-displacement.csv']);                      
                 
                 %load and organize data for each file containing 4 days of data
-                [temp] = Process_Datawell_delayed_mode(buoy_info, file20, file21, file25, file28, file80, file82, file23, filed);   
-                %add dummy variables for meanspr and dm as don't exist in datawell?
-                temp.dm = ones(size(temp.hs,1),1).*-9999; 
-                temp.meanspr = ones(size(temp.hs,1),1).*-9999;             
+                try
+                    [temp] = Process_Datawell_delayed_mode(buoy_info, file20, file21, file25, file28, file80, file82, file23, filed);   
+                    %add dummy variables for meanspr and dm as don't exist in datawell?
+                    temp.dm = ones(size(temp.hs,1),1).*-9999; 
+                    temp.meanspr = ones(size(temp.hs,1),1).*-9999;      
+                    process_flag = 1;
+                catch
+                    disp(['processing datawell for this file could not be completed']);
+                    process_flag = 0; 
+                end       
+
             end
             
             %now append
-            if cnt==1
+            if cnt==1 & process_flag==1
                 data=temp;                          
                 data.pkspr = data.dpspr;
                 data = rmfield(data,'dpspr');
                 
                 cnt=cnt+1;
                 clear temp
-            else
+            elseif cnt>1 & process_flag ==1 
                 fields = fieldnames(data); 
                 for jj = 1:length(fields)
                     if strcmp(fields{jj}, 'spec2D')
@@ -362,6 +371,7 @@ for b = 1:size(buoy_metadata,1)
                 cnt=cnt+1;
             end         
         end
+
         %now down-sample temperature to same time as waves - this gets rid of current data as well      
         data_nc = rmfield(data,{'surf_temp','bott_temp','curr_mag','curr_dir','curr_mag_std','curr_dir_std','w','w_std','curr_dir_std'}); 
         if size(data.temp_time,1)~=size(data.time,1)
