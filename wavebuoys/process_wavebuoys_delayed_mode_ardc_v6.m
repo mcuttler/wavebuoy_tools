@@ -121,7 +121,7 @@ for b = 1:size(buoy_metadata,1)
         tend = buoy_info.endtimeUTC +hours(buoy_info.time_crop_end); 
         
         %set spectral processing time window
-        spec_window = 30; %minutes 
+        spec_window = 60; %minutes 
         min_samples = spec_window*60*fs; %expected number of samples 
         dt = [tstart:minutes(spec_window):tend]; 
         
