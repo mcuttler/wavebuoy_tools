@@ -19,7 +19,7 @@ addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
 dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wa_delayed_mode_buoys_to_process-datawell.csv'; 
+dname = 'wa_delayed_mode_buoys_to_process.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 %only keep buoys that are set to be processed 
@@ -121,7 +121,7 @@ for b = 1:size(buoy_metadata,1)
         tend = buoy_info.endtimeUTC +hours(buoy_info.time_crop_end); 
         
         %set spectral processing time window
-        spec_window = 60; %minutes 
+        spec_window = 30; %minutes 
         min_samples = spec_window*60*fs; %expected number of samples 
         dt = [tstart:minutes(spec_window):tend]; 
         
@@ -153,6 +153,7 @@ for b = 1:size(buoy_metadata,1)
         info.t0_thresh = buoy_info.displacement_t0_thresh; 
         info.h = buoy_info.DeployDepth; 
         info.QC = buoy_info.displacement_qc; 
+        % info.QC = 0; 
         
         %%  calculate integrated wave paremeters loop over and calculate parameters 
         for i = 1:length(dt)-1
@@ -226,6 +227,19 @@ for b = 1:size(buoy_metadata,1)
         end    
         
         data = bulkparams; 
+
+        %calculate Hmax from zero-crossing
+        for i = 1:size(data.height_0,2)
+            hmax = nanmax(data.height_0{i});
+            if isempty(hmax)
+                data.hmax(i,1) = nan;
+            else
+                data.hmax(i,1) = hmax;
+            end
+     
+        end
+
+
         clear bulkparams
         
         %remove NaT
