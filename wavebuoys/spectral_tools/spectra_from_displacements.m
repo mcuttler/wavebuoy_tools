@@ -80,6 +80,25 @@ if info.QC==1 %flag to complete QC or not, 1=yes, 0= No
             rw(cnt)=jj; %store indicies of segments that have been flagged, these segments are deleted below
             cnt=cnt+1;
         end
+        QC.Hmax_Hs(jj)=max(heights_seg{jj})/Hs0;
+        QC.Tzmax_T0(jj)=max(periods_seg{jj})/T0;
+        QC.max_period(jj)=max(periods_seg{jj});
+        QC.max_steepness(jj)=max(steep_seg{jj});
+        if max(heights_seg{jj})>info.hs0_thresh*Hs0
+            QC.flag_Hmax(jj)=0;
+        else
+            QC.flag_Hmax(jj)=1;
+        end
+        if max(periods_seg{jj})> info.t0_thresh*T0
+            QC.flag_Tz(jj)=0;
+        else
+            QC.flag_Tz(jj)=1;
+        end
+        if max(steep_seg{jj})> 1/7   
+            QC.flag_steep(jj)=0;
+        else
+            QC.flag_steep(jj)=1;
+        end
     end
 end
 
@@ -281,7 +300,12 @@ if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heav
         out.Check=Check;
         out.segments=windows;
         out.segments_used=windows-length(rw);
-        
+        if info.QC==1
+            out.QC=QC;
+            out.master_QC=1; %master_QC=1 means usable data returned
+        else
+            out.master_QC=NaN; %NaN means no QC applied
+        end
 
     elseif strcmp(type,'enu') %enu = velocity
         %apply depth correction
@@ -322,12 +346,24 @@ if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heav
         out.Check=Check;
         out.segments=windows;
         out.segments_used=windows-length(rw);
+        if info.QC==1
+            out.QC=QC;
+            out.master_QC=1; %master_QC=1 means usable data returned
+        else
+            out.master_QC=NaN; %NaN means no QC applied
+        end
 
     end
      
 else %too much missing/bad data do not compute spectrum
     
-    out=NaN;
+
+    if info.QC==1
+            out.QC=QC;
+            out.master_QC=0; %master QC flag 1=usable data, 0=failed QC, see QC structure
+    else
+        out.master_QC=0; %add catch here, if no QC applied can still fail e.g. if too many 0 values or 
+    end
     
 end
 
