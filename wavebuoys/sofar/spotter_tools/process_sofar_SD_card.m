@@ -57,7 +57,7 @@ end
 
 %% SST 
 disp('concatenating surface temperature'); 
-files = dir([sofarpath '\*_SST.csv']); 
+files = dir([sofarpath '\*_SST*']); 
 if ~isempty(files)
     
     surface_temp=[];
@@ -94,7 +94,7 @@ else
 end
 %% baro
 disp('concatenating barometric pressure'); 
-files = dir([sofarpath '\*_BARO.csv']); 
+files = dir([sofarpath '\*_BARO*']); 
 if ~isempty(files) 
     
     baro=[];
@@ -128,7 +128,7 @@ else
 end
 %% smart_mooring --- BristleMouth
 disp('concatenating smart mooring Bristlemouth'); 
-files = dir([sofarpath '\*_SENS_IND.csv']); 
+files = dir([sofarpath '\*_SENS_IND*']); 
 
 if ~isempty(files)
     for i = 1:size(files,1)    
@@ -179,7 +179,7 @@ end
 
 % add the extra 'aggregate' files 
 disp('concatenating smart mooring Bristlemouth agg'); 
-files = dir([sofarpath '\*_SENS_AGG.csv']); 
+files = dir([sofarpath '\*_SENS_AGG*']); 
 
 if ~isempty(files)
     for i = 1:size(files,1)    
@@ -231,7 +231,7 @@ end
 
 %SMD files 
 disp('concatenating smart mooring data'); 
-files = dir([sofarpath '\*_SMD.csv']); 
+files = dir([sofarpath '\*_SMD*']); 
 
 if ~isempty(files)
     for i = 1:size(files,1)    
@@ -302,7 +302,7 @@ end
 
 %% GPS
 disp('concatenating gps positions'); 
-files = dir([sofarpath '\*_LOC.csv']); 
+files = dir([sofarpath '\*_LOC*']); 
 if ~isempty(files)
      gps=[];
      for i = 1:size(files,1)
@@ -342,38 +342,40 @@ else
 end
 
 %% HDR files 
-disp('concatenating hdr files'); 
-files = dir([sofarpath '\*_HDR.csv']); 
-
-if ~isempty(files)
-    displacements_hdr=[];
-    for i = 1:size(files,1)
-        
-
-        %skip first 0000 files as usually contain no data
-        if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
-    
-            dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
-            
-            %should only have 5 variables
-            dum = dum(:,1:5); 
-            dum.Properties.VariableNames = {'GPSEpoch','x','y','z','n'}; 
-            
-            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime');     
-            dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,dum.n./1000, 'RowTimes',dt,'VariableNames',{'x','y','z','n'});  
-            displacements_hdr = [displacements_hdr; dumt]; 
-    
-            clear dum dt dumt; 
-        end
-        
-    end
-
-    %mask out NaT
-    mask = ~isnat(displacements_hdr.Time); 
-    displacements_hdr = displacements_hdr(mask,:); 
-else
+disp('skipping hdr files')
+% disp('concatenating hdr files'); 
+% files = dir([sofarpath '\*_HDR*']); 
+% 
+% if ~isempty(files)
+%     displacements_hdr=[];
+%     for i = 1:size(files,1)
+% 
+% 
+%         %skip first 0000 files as usually contain no data
+%         if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
+% 
+%             dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
+% 
+%             %should only have 5 variables
+%             dum = dum(:,1:5); 
+%             dum.Properties.VariableNames = {'GPSEpoch','x','y','z','n'}; 
+% 
+%             dt = datetime(dum.GPSEpoch,'convertfrom','posixtime');     
+%             dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,dum.n./1000, 'RowTimes',dt,'VariableNames',{'x','y','z','n'});  
+%             displacements_hdr = [displacements_hdr; dumt]; 
+% 
+%             clear dum dt dumt; 
+%         end
+% 
+%     end
+% 
+%     %mask out NaT
+%     mask = ~isnat(displacements_hdr.Time); 
+%     displacements_hdr = displacements_hdr(mask,:); 
+% else
     displacements_hdr = nan; 
-end
+% end
+
 
 
 end

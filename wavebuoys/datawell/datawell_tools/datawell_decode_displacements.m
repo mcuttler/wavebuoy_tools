@@ -38,6 +38,7 @@ data.disp_samples_unique = sync_data.samples;
 %decode hexstring 
 for i = 1:size(data.disp_time,1)
     [hn1,h] = datawell_hex_to_displacement(sync_data.hexstring{i});
+    
     %calc differences between hex data and disp data to find matching rows 
     for j = 1:3
         dhn1(:,j) = abs(disp_data.data(:,j)-hn1(1,j)); 
