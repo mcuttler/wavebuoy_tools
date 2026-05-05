@@ -342,38 +342,40 @@ else
 end
 
 %% HDR files 
-disp('concatenating hdr files'); 
-files = dir([sofarpath '\*_HDR*']); 
-
-if ~isempty(files)
-    displacements_hdr=[];
-    for i = 1:size(files,1)
-        
-
-        %skip first 0000 files as usually contain no data
-        if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
-    
-            dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
-            
-            %should only have 5 variables
-            dum = dum(:,1:5); 
-            dum.Properties.VariableNames = {'GPSEpoch','x','y','z','n'}; 
-            
-            dt = datetime(dum.GPSEpoch,'convertfrom','posixtime');     
-            dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,dum.n./1000, 'RowTimes',dt,'VariableNames',{'x','y','z','n'});  
-            displacements_hdr = [displacements_hdr; dumt]; 
-    
-            clear dum dt dumt; 
-        end
-        
-    end
-
-    %mask out NaT
-    mask = ~isnat(displacements_hdr.Time); 
-    displacements_hdr = displacements_hdr(mask,:); 
-else
+disp('skipping hdr files')
+% disp('concatenating hdr files'); 
+% files = dir([sofarpath '\*_HDR*']); 
+% 
+% if ~isempty(files)
+%     displacements_hdr=[];
+%     for i = 1:size(files,1)
+% 
+% 
+%         %skip first 0000 files as usually contain no data
+%         if strcmp(files(i).name(1:4),'0000')~=1 & files(i).bytes>200
+% 
+%             dum = readtable(fullfile(files(i).folder, files(i).name),'VariableNamingRule','preserve'); 
+% 
+%             %should only have 5 variables
+%             dum = dum(:,1:5); 
+%             dum.Properties.VariableNames = {'GPSEpoch','x','y','z','n'}; 
+% 
+%             dt = datetime(dum.GPSEpoch,'convertfrom','posixtime');     
+%             dumt = timetable(dum.x./1000, dum.y./1000, dum.z./1000,dum.n./1000, 'RowTimes',dt,'VariableNames',{'x','y','z','n'});  
+%             displacements_hdr = [displacements_hdr; dumt]; 
+% 
+%             clear dum dt dumt; 
+%         end
+% 
+%     end
+% 
+%     %mask out NaT
+%     mask = ~isnat(displacements_hdr.Time); 
+%     displacements_hdr = displacements_hdr(mask,:); 
+% else
     displacements_hdr = nan; 
-end
+% end
+
 
 
 end
