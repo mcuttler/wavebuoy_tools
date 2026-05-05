@@ -76,7 +76,7 @@ if info.QC==1 %flag to complete QC or not, 1=yes, 0= No
          %******* cut off values for unrealitic values- from Table3 in Adi's JTEC paper, but cahnge to 4*T0 and add > 30s
          %##### Jan 2026 add steepness cut off as well, exclude segments where
          %the max steepness exceeds 1/7
-        if ~isempty(ff) | max(heights_seg{jj})>info.hs0_thresh*Hs0  | max(periods_seg{jj})> info.t0_thresh*T0 | max(periods_seg{jj})> 30 | max(steep_seg{jj})> 1/7    
+        if ~isempty(ff) | max(heights_seg{jj})>info.hs0_thresh*Hs0  | max(periods_seg{jj})> info.t0_thresh*T0 | max(periods_seg{jj})> 30 | max(steep_seg{jj})> info.max_steep    
             rw(cnt)=jj; %store indicies of segments that have been flagged, these segments are deleted below
             cnt=cnt+1;
         end
@@ -300,6 +300,7 @@ if isempty(rw) | (length(rw)<windows*(1-info.bad_data_thresh) & length(find(heav
         out.Check=Check;
         out.segments=windows;
         out.segments_used=windows-length(rw);
+        
         if info.QC==1
             out.QC=QC;
             out.master_QC=1; %master_QC=1 means usable data returned
