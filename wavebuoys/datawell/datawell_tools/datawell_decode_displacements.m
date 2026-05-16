@@ -12,15 +12,19 @@
 function [data] = datawell_decode_displacements(file23, dispfile)
 
 %read in displacement file 
-disp_data = importdata(dispfile);
+disp_data = readtable(dispfile,'VariableNamingRule','preserve'); 
+disp_data.Properties.VariableNames = {'status','heave','north','west'};
 
 %read in sync info file
-sync_raw = readtable(file23); 
-sync_data.tstamp = table2array(sync_raw(:,1));  
-sync_data.datastamp = table2array(sync_raw(:,2));  
-sync_data.segs = table2array(sync_raw(:,3));  
-sync_data.samples = table2array(sync_raw(:,4));  
-sync_data.hexstring = table2array(sync_raw(:,5)); 
+sync_data = readtable(file23,'VariableNamingRule','preserve'); 
+sync_data.Properties.VariableNames = {'tstamp','datastamp','segs','samples','hexstring'}; 
+
+
+% sync_data.tstamp = table2array(sync_raw(:,1));  
+% sync_data.datastamp = table2array(sync_raw(:,2));  
+% sync_data.segs = table2array(sync_raw(:,3));  
+% sync_data.samples = table2array(sync_raw(:,4));  
+% sync_data.hexstring = table2array(sync_raw(:,5)); 
 
 %only keep unique time points
 [~, I, ~] = unique(sync_data.tstamp,'first'); 

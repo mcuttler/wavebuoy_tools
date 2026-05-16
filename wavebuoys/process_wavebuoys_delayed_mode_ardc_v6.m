@@ -19,7 +19,7 @@ addpath(genpath(mpath))
 
 %% read CSV with metadata for buoys to process DM data
 dpath = 'X:\CUTTLER_wawaves\Data\wawaves'; 
-dname = 'wa_delayed_mode_buoys_to_process.csv'; 
+dname = 'wa_delayed_mode_buoys_to_process-datawell.csv'; 
 
 buoy_metadata = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 %only keep buoys that are set to be processed 
