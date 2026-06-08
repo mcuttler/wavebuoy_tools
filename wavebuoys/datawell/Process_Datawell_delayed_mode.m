@@ -6,12 +6,12 @@
 function [data] = Process_Datawell_delayed_mode(buoy_info, file20, file21, file25, file28, file80, file82, file23, filed)
 
 % Grab data 
-data20 = importdata(file20);
-data21 = importdata(file21);
-data25 = importdata(file25);
-data28 = importdata(file28);
-data80 = importdata(file80);
-data82 = importdata(file82);
+data20 = table2array(readtable(file20,'VariableNamingRule','preserve')); 
+data21 = table2array(readtable(file21,'VariableNamingRule','preserve')); 
+data25 = table2array(readtable(file25,'VariableNamingRule','preserve')); 
+data28 = table2array(readtable(file28,'VariableNamingRule','preserve')); 
+data80 = table2array(readtable(file80,'VariableNamingRule','preserve')); 
+data82 =importdata(file82); 
 
 
 % extract data  

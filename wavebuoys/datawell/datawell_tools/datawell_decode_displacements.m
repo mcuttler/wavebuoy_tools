@@ -35,7 +35,7 @@ data.disp_samples_unique = sync_data.samples;
 %decode hexstring 
 for i = 1:size(data.disp_time,1)
     if data.disp_samples_unique(i)<4000
-        disp(['not enough samples collected for this block']); 
+        disp(['not enough samples collected for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
         data.disp_h(i,1:4608) = ones(1,4608).*nan; 
         data.disp_n(i,1:4608) = ones(1,4608).*nan; 
         data.disp_w(i,1:4608) = ones(1,4608).*nan; 
@@ -63,9 +63,10 @@ for i = 1:size(data.disp_time,1)
             dflag = disp_status(dstart:ind_h);
             for k = 1:length(dstart:ind_h)
                 data.flag{i,k} = dflag{k}; 
-            end        
+            end      
+
         elseif size(ind_h,1)>1 %too many matches
-            disp(['too many matches']); 
+            disp(['too many matches for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
             data.disp_h(i,1:4608) = ones(1,4608).*nan; 
             data.disp_n(i,1:4608) = ones(1,4608).*nan; 
             data.disp_w(i,1:4608) = ones(1,4608).*nan; 
@@ -73,7 +74,7 @@ for i = 1:size(data.disp_time,1)
                 data.flag{i,k} = disp_status{k}; 
             end      
         else
-            disp(['No matching data in displacements for t=' num2str(i)]); 
+            disp(['No matching data in displacements for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
             dstart = ind_h - (data.disp_samples_unique(i)-1);
             data.disp_h(i,1:length(dstart:ind_h)) = ones(1,length(dstart:ind_h)).*nan; 
             data.disp_n(i,1:length(dstart:ind_h)) = ones(1,length(dstart:ind_h)).*nan; 
