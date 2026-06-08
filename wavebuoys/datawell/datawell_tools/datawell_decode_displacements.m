@@ -32,41 +32,12 @@ data.disp_time = sync_data.tstamp;
 data.disp_time_utc = sync_data.tstamp; 
 data.disp_samples_unique = sync_data.samples;                
 
-%decode hexstring 
-for i = 1:size(data.disp_time,1)
-    if data.disp_samples_unique(i)<4000
-        disp(['not enough samples collected for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
-        data.disp_h(i,1:4608) = ones(1,4608).*nan; 
-        data.disp_n(i,1:4608) = ones(1,4608).*nan; 
-        data.disp_w(i,1:4608) = ones(1,4608).*nan; 
-        for k = 1:4608
-            data.flag{i,k} = disp_status{k}; 
-        end      
-    else
-        [hn1,h] = datawell_hex_to_displacement(sync_data.hexstring{i});
-        pattern = [hn1 h]; 
-        disp_pairs = [table2array(disp_data(1:end-1,:)) table2array(disp_data(2:end,:))];  
-        %set tolerance to account of floating numbers
-        tol = 1e-6; 
-        disp_pairs = round(disp_pairs / tol) * tol;
-        pattern = round(pattern / tol) * tol;
-        ind_h = find(ismember(disp_pairs, pattern, 'rows'))+1; 
-        
-        if size(ind_h,1) == 1 %check only 1 matching value
-            %extract displacements                     
-            dstart = ind_h - (data.disp_samples_unique(i)-1);
-            data.disp_h(i,1:length(dstart:ind_h)) = disp_data.heave(dstart:ind_h)'; 
-            data.disp_n(i,1:length(dstart:ind_h)) = disp_data.north(dstart:ind_h)'; 
-            data.disp_w(i,1:length(dstart:ind_h)) = disp_data.west(dstart:ind_h)';
-            
-            %include flag from datawell for good or not measurement
-            dflag = disp_status(dstart:ind_h);
-            for k = 1:length(dstart:ind_h)
-                data.flag{i,k} = dflag{k}; 
-            end      
-
-        elseif size(ind_h,1)>1 %too many matches
-            disp(['too many matches for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
+%decode hexstring
+%check class
+if strcmp(class(sync_data.hexstring),'cell')
+    for i = 1:size(data.disp_time,1)
+        if data.disp_samples_unique(i)<4000
+            disp(['not enough samples collected for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
             data.disp_h(i,1:4608) = ones(1,4608).*nan; 
             data.disp_n(i,1:4608) = ones(1,4608).*nan; 
             data.disp_w(i,1:4608) = ones(1,4608).*nan; 
@@ -74,17 +45,58 @@ for i = 1:size(data.disp_time,1)
                 data.flag{i,k} = disp_status{k}; 
             end      
         else
-            disp(['No matching data in displacements for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
-            dstart = ind_h - (data.disp_samples_unique(i)-1);
-            data.disp_h(i,1:length(dstart:ind_h)) = ones(1,length(dstart:ind_h)).*nan; 
-            data.disp_n(i,1:length(dstart:ind_h)) = ones(1,length(dstart:ind_h)).*nan; 
-            data.disp_w(i,1:length(dstart:ind_h)) = ones(1,length(dstart:ind_h)).*nan; 
-            dflag = disp_status(dstart:ind_h);
-            for k = 1:length(dstart:ind_h)
-                data.flag{i,k} = dflag{k}; 
-            end        
-        end               
-    end                   
+            [hn1,h] = datawell_hex_to_displacement(sync_data.hexstring{i});
+            pattern = [hn1 h]; 
+            disp_pairs = [table2array(disp_data(1:end-1,:)) table2array(disp_data(2:end,:))];  
+            %set tolerance to account of floating numbers
+            tol = 1e-6; 
+            disp_pairs = round(disp_pairs / tol) * tol;
+            pattern = round(pattern / tol) * tol;
+            ind_h = find(ismember(disp_pairs, pattern, 'rows'))+1; 
+            
+            if size(ind_h,1) == 1 %check only 1 matching value
+                %extract displacements     
+                disp(['processing block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
+                dstart = ind_h - (data.disp_samples_unique(i)-1);
+                data.disp_h(i,1:length(dstart:ind_h)) = disp_data.heave(dstart:ind_h)'; 
+                data.disp_n(i,1:length(dstart:ind_h)) = disp_data.north(dstart:ind_h)'; 
+                data.disp_w(i,1:length(dstart:ind_h)) = disp_data.west(dstart:ind_h)';
+                
+                %include flag from datawell for good or not measurement
+                dflag = disp_status(dstart:ind_h);
+                for k = 1:length(dstart:ind_h)
+                    data.flag{i,k} = dflag{k}; 
+                end      
+                
+            elseif size(ind_h,1)>1 %too many matches
+                disp(['too many matches for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
+                data.disp_h(i,1:4608) = ones(1,4608).*nan; 
+                data.disp_n(i,1:4608) = ones(1,4608).*nan; 
+                data.disp_w(i,1:4608) = ones(1,4608).*nan; 
+                for k = 1:4608
+                    data.flag{i,k} = disp_status{k}; 
+                end      
+            else
+                disp(['No matching data in displacements for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
+                dstart = ind_h - (data.disp_samples_unique(i)-1);
+                data.disp_h(i,1:length(dstart:ind_h)) = ones(1,length(dstart:ind_h)).*nan; 
+                data.disp_n(i,1:length(dstart:ind_h)) = ones(1,length(dstart:ind_h)).*nan; 
+                data.disp_w(i,1:length(dstart:ind_h)) = ones(1,length(dstart:ind_h)).*nan; 
+                dflag = disp_status(dstart:ind_h);
+                for k = 1:length(dstart:ind_h)
+                    data.flag{i,k} = dflag{k}; 
+                end        
+            end               
+        end                   
+    end
+else
+    disp(['No hexstrings to decode']);
+    data.disp_h(1,1:4608) = ones(1,4608).*nan; 
+    data.disp_n(1,1:4608) = ones(1,4608).*nan; 
+    data.disp_w(1,1:4608) = ones(1,4608).*nan; 
+    for k = 1:4608
+        data.flag{i,k} = disp_status{k}; 
+    end      
 end
 
 end
