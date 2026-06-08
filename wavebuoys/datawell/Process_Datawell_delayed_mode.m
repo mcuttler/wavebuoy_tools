@@ -141,6 +141,7 @@ data.time =  time25;
  %Datawell moorings do not have bottom temperature
  data.bott_temp = ones(size(data.temp_time,1),1).* -9999;      
  %% process displacements 
+ 
  [disp_data] = datawell_decode_displacements(file23, filed); 
  
  data.disp_time = ones(size(disp_data.disp_h,1), size(disp_data.disp_h,4608)).*nan; 
