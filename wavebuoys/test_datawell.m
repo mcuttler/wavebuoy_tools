@@ -261,5 +261,7 @@ buoy_metadata = buoy_metadata(buoy_metadata.process==1,:);
                 end
             end     
         end    
+
+        data.spectral_analysis = bulkparams; 
     
  
