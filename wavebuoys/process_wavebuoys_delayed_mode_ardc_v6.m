@@ -394,6 +394,8 @@ for b = 1:size(buoy_metadata,1)
         dum.y = data.y(:); 
         dum.z = data.z(:); 
         buoy_xyz = array2timetable([dum.x dum.y dum.z],'RowTimes',dum_dt, 'VariableNames',{'x','y','z'}); 
+        buoy_xyz.Time.TimeZone = 'UTC'; 
+
         clear dum_dt dum
      
 
