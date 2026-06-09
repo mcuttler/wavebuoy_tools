@@ -134,23 +134,132 @@ buoy_metadata = buoy_metadata(buoy_metadata.process==1,:);
             end         
         end
 
-        %now down-sample temperature to same time as waves - this gets rid of current data as well      
-        % data_nc = rmfield(data,{'surf_temp','bott_temp','curr_mag','curr_dir','curr_mag_std','curr_dir_std','w','w_std','curr_dir_std'}); 
-        % if size(data.temp_time,1)~=size(data.time,1)
-        %     for i = 1:size(data.time,1)
-        %         ind = find(abs(data.time(i) - data.temp_time)==min(abs(data.time(i) - data.temp_time))); 
-        %         if length(ind)>1
-        %             data_nc.surf_temp(i,1) = nanmean(data.surf_temp(ind));             
-        %             data_nc.bott_temp(i,1) = nanmean(data.bott_temp(ind)); 
-        %         else
-        %             data_nc.surf_temp(i,1) = (data.surf_temp(ind));             
-        %             data_nc.bott_temp(i,1) = (data.bott_temp(ind)); 
-        %         end
-        %     end
-        % end
-        % data_nc.temp_time= data.time; 
-        % data = data_nc; 
-        % clear data_nc
-    
+                %% set spectral analysis settings datawell 
+        disp_type = 'flt'; 
+        fs = 2.56; 
+        dum_dt = data.disp_time(:); 
+        dum.x = data.x(:); 
+        dum.y = data.y(:); 
+        dum.z = data.z(:); 
+        buoy_xyz = array2timetable([dum.x dum.y dum.z],'RowTimes',dum_dt, 'VariableNames',{'x','y','z'}); 
+        buoy_xyz.Time.TimeZone = 'UTC'; 
+
+        clear dum_dt dum
+     
+
+        %set start/stop time for buliding spectral analysis time blocks 
+        tstart = buoy_info.starttimeUTC +hours(buoy_info.time_crop_start);
+        tend = buoy_info.endtimeUTC +hours(buoy_info.time_crop_end); 
+        
+        %set spectral processing time window
+        spec_window = 30; %minutes 
+        min_samples = spec_window*60*fs; %expected number of samples 
+        dt = [tstart:minutes(spec_window):tend]; 
+        
+        %set up spectral info
+        %nfft=512; %#### this needs to be a function of the sample frequency see
+        %additional code below that will set this up such that the nfft is based
+        %on time rather than the number of samples which is based on the sample frequency 
+        segments=8; % number of segments to split the record into
+        nfft=2^(nextpow2(min_samples/segments));
+        nover=0.5; 
+        
+        %merge=3; %this also relates to the nfft and defines final resolution, the
+        %larger nfft is the larger this should be
+        if nfft==512
+            merge=3;
+        elseif nfft==1024
+            merge=5;
+        elseif nfft==2048
+            merge=7;
+        end
+        type = 'xyz'; 
+        info.hab = [];   
+        info.fmaxSS = 1/8; 
+        info.fmaxSea = 1/2; 
+        
+        %settings for qc as part of the spectral_from_displacements processing 
+        info.bad_data_thresh=2/3; 
+        info.hs0_thresh = buoy_info.displacement_hs0_thresh; 
+        info.t0_thresh = buoy_info.displacement_t0_thresh; 
+        info.h = buoy_info.DeployDepth; 
+        info.QC = buoy_info.displacement_qc; 
+        info.max_steep = 1/4; 
+
+        
+        %%  calculate integrated wave paremeters loop over and calculate parameters 
+        for i = 1:length(dt)-1
+            disp(['processing time block ' num2str(i) ' out of ' num2str(length(dt)-1)]); 
+            tr = timerange(dt(i), dt(i+1));  
+            
+            %get displacements for given time window 
+            dum = buoy_xyz(tr,:); 
+            
+            %set minimum number of samples to do analysis 
+            if abs(size(dum,1) - min_samples)<100     
+                %do the spectral analysis     
+                try
+                    out=spectra_from_displacements(dum.z,dum.y,dum.x,nfft,nover,fs,merge,'xyz',info);     
+                    
+                    if isstruct(out)    
+                        %partition the results from the spectral analysis 
+                        out=spectra_partitioning(out,info);
+                        bulkparams.time(i,1)=dt(i); 
+                        bulkparams.hs(i,1)=out.Hm0;
+                        bulkparams.hsSwell(i,1) = out.Hm0_Swell; 
+                        bulkparams.hsSea(i,1) = out.Hm0_Sea;
+                        bulkparams.hrms(i,1) = out.Hrms; 
+                        bulkparams.tp(i,1)=out.Tp;
+                        bulkparams.dp(i,1)=out.Dp;
+                        bulkparams.tm(i,1)=out.Tm1; 
+                        bulkparams.tm2(i,1)=out.Tm2;
+                        bulkparams.tmSwell(i,1) = out.Tm1_Swell; 
+                        bulkparams.tm2Swell(i,1) = out.Tm2_Swell;
+                        bulkparams.tmSea(i,1) = out.Tm1_Sea;
+                        bulkparams.tm2Sea(i,1) = out.Tm2_Sea;            
+                        bulkparams.dpspr(i,1) = out.spread_Dp; 
+                        bulkparams.dmspr(i,1)=out.spread;
+                        bulkparams.dmsprSwell(i,1) = out.spreadSwell; 
+                        bulkparams.dmsprSea(i,1) = out.spreadSea; 
+                        bulkparams.dm(i,1)=out.mdir1;
+                        bulkparams.dm2(i,1)=out.mdir2;
+                        bulkparams.dmSwell(i,1)=out.mdir1_Swell;
+                        bulkparams.dm2Swell(i,1)=out.mdir2_Swell;
+                        bulkparams.dmSea(i,1)=out.mdir1_Sea;
+                        bulkparams.dm2Sea(i,1)=out.mdir2_Sea;       
+                        
+                        bulkparams.dm_spec(i,:) = out.mdir1_spec; 
+                        bulkparams.frequency = out.f; 
+                        bulkparams.energy(i,:)=out.spec1D; 
+                        bulkparams.a1(i,:)=out.a1;
+                        bulkparams.a2(i,:)=out.a2;
+                        bulkparams.b1(i,:)=out.b1;
+                        bulkparams.b2(i,:)=out.b2;
+                        bulkparams.segments(i,1) = out.segments;                     
+                        bulkparams.segments_used(i,1) = out.segments_used;       
+                        bulkparams.check_fact(i,:) = out.Check; 
+                        
+                        %save bands for sea/swell
+                        if ~isfield(bulkparams,'sea_T_limits')
+                            bulkparams.sea_T_limits=out.sea_max_min_T;
+                            bulkparams.swell_T_limits=out.swell_max_min_T;
+                        end
+                        
+                        %calculate zero crossing heights
+                        [zup] = ZeroUpX3(dum.z, 1/fs, info.h);
+                        bulkparams.height_0{i}=zup.Heights;
+                        bulkparams.periods_0{i}=zup.Periods;
+                        bulkparams.crests{i}=zup.Crests;
+                        bulkparams.troughs{i}=zup.Troughs;
+                        bulkparams.hs_0{i}=zup.Hs;
+                        bulkparams.tz_0{i}=zup.Tz;
+                        clear zup                
+                    end 
+                    clear dum
+                catch
+                    disp(['could not complete spectral analysis']); 
+                end
+            end     
+        end    
     
  
