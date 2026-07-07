@@ -330,15 +330,14 @@ elseif strcmp(buoy_info.type,'datawell')==1
                 try
                     realtime_archive_mat(buoy_info, data);
                     realtime_backup_mat(buoy_info, data);
-                    limit = size(dw_data.time,1) - size(archive_data.time,1); 
+                    limit = size(data.time,1) - size(archive_data.time,1); 
                     realtime_archive_text(buoy_info, data, limit);             
                 catch
                     log_message = [log_message, ' (3) code failed on archiving or making text file'];
                 end                           
                 
-                %output MEM and SST plots 
-                % plot_idx = find(data.time>archive_data.time(end)); 
-                plot_idx = size(data.time,1); 
+                %output MEM and SST plots                 
+                plot_idx = find(data.time>archive_data.time(end));
                 if strcmp(buoy_info.DataType,'spectral')    
                     try
                         for ii = 1:size(plot_idx,1); 
