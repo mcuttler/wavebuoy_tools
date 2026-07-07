@@ -53,13 +53,9 @@ if c-time_dev>in_cut/24 %if time difference greater than cutoff, development sit
 
     warning.time = 1; 
     setpref('Internet','SMTP_Server','smtp.gmail.com');
-    setpref('Internet','E_mail','wa.wavebuoy.alert@gmail.com');
-    setpref('Internet','SMTP_Username','wa.wavebuoy.alert');
-    %ADD PASSCODE: rvwqxkuaiaqfarht; very old
-    %OLD VM (pre 2026) passcode: insirgbnvojqsznr
-    %NEW VM (2026-01) PASSCODE: upzwbqxpdmkankvg
-    %Or password: UWAwavebuoys1
-    setpref('Internet','SMTP_Password','upzwbqxpdmkankvg');
+    setpref('Internet','E_mail',buoy_info.smtp.email{1});
+    setpref('Internet','SMTP_Username',buoy_info.smtp.username{1});
+    setpref('Internet','SMTP_Password',buoy_info.smtp.passkey{1});  
 
 
     props = java.lang.System.getProperties;
@@ -74,7 +70,7 @@ if c-time_dev>in_cut/24 %if time difference greater than cutoff, development sit
     sendmail('michael.cuttler@uwa.edu.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
     sendmail('carlin.alerts@outlook.com.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
     sendmail('matt.hatcher@uwa.edu.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
-    sendmail('ronni.king@uwa.edu.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
+    sendmail('thiago.caminha@uwa.edu.au',['Development site buoy data >' num2str(in_cut) ' hrs old'],['Development site buoy data last reported ' num2str(dt) '  hrs ago']) ;
 else
     warning.time = 0; 
 end
@@ -83,9 +79,9 @@ if dist_dev>dev_watch %if development site buoy offsite
     %set up email details
     warning.gps = 1; 
     setpref('Internet','SMTP_Server','smtp.gmail.com');
-    setpref('Internet','E_mail','wa.wavebuoy.alert@gmail.com');
-    setpref('Internet','SMTP_Username','wa.wavebuoy.alert');
-    setpref('Internet','SMTP_Password','upzwbqxpdmkankvg');
+    setpref('Internet','E_mail',buoy_info.smtp.email{1});
+    setpref('Internet','SMTP_Username',buoy_info.smtp.username{1});
+    setpref('Internet','SMTP_Password',buoy_info.smtp.passkey{1});  
 
     props = java.lang.System.getProperties;
     props.setProperty('mail.smtp.auth','true');
@@ -102,7 +98,7 @@ if dist_dev>dev_watch %if development site buoy offsite
     sendmail('carlin.alerts@outlook.com.au',mail_title, mail_message);
     sendmail('michael.cuttler@uwa.edu.au',mail_title, mail_message);
     sendmail('matt.hatcher@uwa.edu.au',mail_title, mail_message);
-    sendmail('ronni.king@uwa.edu.au',mail_title, mail_message);
+    sendmail('thiago.caminha@uwa.edu.au', mail_title, mail_message) ;
 else
     warning.gps = 0; 
 end

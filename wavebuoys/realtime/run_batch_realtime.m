@@ -36,6 +36,9 @@ for jj = 1:size(buoy_metadata,1)
             buoy_info.(buoy_info_fields{kk}) = buoy_metadata.(buoy_info_fields{kk})(jj);  
         end
     end
+
+    %add email info for alerts
+    buoy_info.smtp = readtable('G:\auswaves\buoys_alert_smtp.csv','VariableNamingRule','preserve');
     
     %run the realtime workflow 
     % disp(['running ' buoy_info.name]); %comment out when running for real 

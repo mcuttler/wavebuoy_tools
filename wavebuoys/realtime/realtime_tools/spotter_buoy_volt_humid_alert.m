@@ -19,11 +19,9 @@ if V < V_min % If voltage below voltage min warning
     %set up email details
     warning.volts = 1; 
     setpref('Internet','SMTP_Server','smtp.gmail.com');
-    setpref('Internet','E_mail','wa.wavebuoy.alert@gmail.com');
-    setpref('Internet','SMTP_Username','wa.wavebuoy.alert');
-    %ADD PASSCODE: rvwqxkuaiaqfarht
-    %Or password: UWAwavebuoys2
-    setpref('Internet','SMTP_Password','insirgbnvojqsznr');
+    setpref('Internet','E_mail',buoy_info.smtp.email{1});
+    setpref('Internet','SMTP_Username',buoy_info.smtp.username{1});
+    setpref('Internet','SMTP_Password',buoy_info.smtp.passkey{1});  
     props = java.lang.System.getProperties;
     props.setProperty('mail.smtp.auth','true');
     props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
@@ -37,7 +35,7 @@ if V < V_min % If voltage below voltage min warning
     sendmail('michael.cuttler@uwa.edu.au', mail_title, mail_message) ;
     sendmail('carlin.alerts@outlook.com.au', mail_title, mail_message) ;
     sendmail('matt.hatcher@uwa.edu.au', mail_title, mail_message) ;
-    sendmail('ronni.king@uwa.edu.au', mail_title, mail_message) ;
+    sendmail('thiago.caminha@uwa.edu.au', mail_title, mail_message) ;
 else
     warning.volts = 0; 
 end
@@ -48,9 +46,9 @@ if Humid > Humid_max %If humidity is above set threshhold for warning email
     %set up email details
     warning.humid = 1; 
     setpref('Internet','SMTP_Server','smtp.gmail.com');
-    setpref('Internet','E_mail','wa.wavebuoy.alert@gmail.com');
-    setpref('Internet','SMTP_Username','wa.wavebuoy.alert');
-    setpref('Internet','SMTP_Password','insirgbnvojqsznr');
+    setpref('Internet','E_mail',buoy_info.smtp.email{1});
+    setpref('Internet','SMTP_Username',buoy_info.smtp.username{1});
+    setpref('Internet','SMTP_Password',buoy_info.smtp.passkey{1});  
     props = java.lang.System.getProperties;
     props.setProperty('mail.smtp.auth','true');
     props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
