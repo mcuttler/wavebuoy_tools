@@ -8,7 +8,7 @@ warning('off')
 
 %read in metadata for buoys to run
 dpath = '\\drive.irds.uwa.edu.au\OGS-COD-001\CUTTLER_wawaves\Data\website\auswaves'; 
-dname = 'auswaves_backfill.csv'; 
+dname = 'auswaves_archive_time_period.csv'; 
 
 buoy_metadata_master = readtable(fullfile(dpath,dname),'VariableNamingRule','preserve'); 
 
@@ -46,8 +46,8 @@ for dd = 1:size(sites,1)
             end       
             
             %set start/end date for data grab
-            tstart_master = datenum(buoy_info.DeployDate); 
-            tend_master = datenum(buoy_info.RetrieveDate); 
+            tstart_master = datenum(buoy_info.backfill_start); 
+            tend_master = datenum(buoy_info.backfill_end); 
             tloop = tstart_master:1:tend_master;    
             
             %loop over every date 
