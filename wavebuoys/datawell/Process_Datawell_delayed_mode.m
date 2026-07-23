@@ -145,7 +145,7 @@ data.time =  time25;
  [disp_data] = datawell_decode_displacements(file23, filed); 
  
  data.disp_time = ones(size(disp_data.disp_h,1), size(disp_data.disp_h,4608)).*nan; 
- data.disp_time(:,1) = disp_data.disp_time_utc; 
+ data.disp_time(:,1) = datenum(disp_data.disp_time_utc); 
  data.x = -disp_data.disp_w(:,1:4608); %converts to E! 
  data.y = disp_data.disp_n(:,1:4608); 
  data.z = disp_data.disp_h(:,1:4608); 
@@ -157,6 +157,8 @@ data.time =  time25;
          data.disp_time(ii,jj) = data.disp_time(ii,jj-1)+dt; 
      end
  end
+ data.disp_time = datetime(data.disp_time,'convertfrom','datenum'); 
+ 
 
 end
 
