@@ -33,6 +33,7 @@ data.disp_time_utc = sync_data.tstamp;
 data.disp_samples_unique = sync_data.samples;                
 
 %decode hexstring 
+
 for i = 1:size(data.disp_time,1)
     if data.disp_samples_unique(i)<4000
         disp(['not enough samples collected for block ' num2str(i) ' out of ' num2str(size(data.disp_time,1))]); 
@@ -43,6 +44,7 @@ for i = 1:size(data.disp_time,1)
             data.flag{i,k} = disp_status{k}; 
         end      
     else
+        
         [hn1,h] = datawell_hex_to_displacement(sync_data.hexstring{i});
         pattern = [hn1 h]; 
         disp_pairs = [table2array(disp_data(1:end-1,:)) table2array(disp_data(2:end,:))];  
