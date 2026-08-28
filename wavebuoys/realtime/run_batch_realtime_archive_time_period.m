@@ -28,7 +28,8 @@ for dd = 1:size(sites,1)
                 mkdir(fullfile(buoy_metadata.web_path{1}, sites{dd},'text_archive', num2str(yrs(yy)))); 
             end
         end
-        %run the realtime workflow 
+
+        %% run the realtime workflow 
         disp(['running ' sites{dd}]); 
         
         
@@ -46,8 +47,14 @@ for dd = 1:size(sites,1)
             end       
             
             %set start/end date for data grab
-            tstart_master = datenum(buoy_info.backfill_start); 
-            tend_master = datenum(buoy_info.backfill_end); 
+            try
+                tstart_master = datenum(buoy_info.backfill_start); 
+                tend_master = datenum(buoy_info.backfill_end); 
+            catch
+                tstart_master = datenum(buoy_info.DeployDate); 
+                tend_master = datenum(buoy_info.RetrieveDate); 
+            end
+            
             tloop = tstart_master:1:tend_master;    
             
             %loop over every date 
@@ -84,6 +91,7 @@ for dd = 1:size(sites,1)
             % clear tstart_master tend_master tloop 
         end
         
+        %% qaqc and archive 
          if ~isempty(data)
              for i = 1:size(data.time,1)
                  data.name{i,1} = buoy_info.name; 
