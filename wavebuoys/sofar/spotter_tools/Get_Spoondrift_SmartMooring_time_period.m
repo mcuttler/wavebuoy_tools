@@ -37,7 +37,7 @@ disp([status]);
 %% WAVES AND WIND
 %check for wave parameters
 if isfield(resp_waves.Body.Data.data,'waves')
-    for j = 1:size(resp_waves.Body.Data.data.waves)
+    for j = 1:size(resp_waves.Body.Data.data.waves,1)
         Spotter.serialID{j,1} = buoy_info.serial; 
         Spotter.time(j,1) = datenum(resp_waves.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
         Spotter.hsig(j,1) = resp_waves.Body.Data.data.waves(j).significantWaveHeight;        
@@ -55,7 +55,7 @@ end
 
 %check for wind data 
 if isfield(resp_waves.Body.Data.data,'wind')
-    for j = 1:size(resp_waves.Body.Data.data.wind)
+    for j = 1:size(resp_waves.Body.Data.data.wind,1)
         Spotter.wind_speed(j,1) = resp_waves.Body.Data.data.wind(j).speed;
         Spotter.wind_dir(j,1) = resp_waves.Body.Data.data.wind(j).direction;
         Spotter.wind_time(j,1) = datenum(resp_waves.Body.Data.data.wind(j).timestamp,'yyyy-mm-ddTHH:MM:SS');

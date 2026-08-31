@@ -1,7 +1,7 @@
 %% run batch process
 
 % tic
-addpath(genpath('C:\Data\wavebuoy_tools'));  
+addpath(genpath('D:\CUTTLER_GitHub\wavebuoy_tools'));  
 
 %suppress warnings
 warning('off')
@@ -99,6 +99,7 @@ for dd = 1:size(sites,1)
              
              disp(['qaqc data']);         
              [data] = qaqc_bulkparams_realtime_website(buoy_info, data, SpotData);   
+             
              
              disp(['archiving mat files']);      
              if ~isfield(data,'systime')

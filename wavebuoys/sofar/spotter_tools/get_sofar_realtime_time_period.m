@@ -40,7 +40,7 @@ if isfield(resp.Body.Data.data,'waves')
     %isolate HDR and embedded 
     indEmbedded =[]; 
     indHDR = []; 
-    for j = 1:size(resp.Body.Data.data.waves)
+    for j = 1:size(resp.Body.Data.data.waves,1)
         if strcmp(resp.Body.Data.data.waves(j).processing_source,'embedded')
             indEmbedded = [indEmbedded; j]; 
         elseif strcmp(resp.Body.Data.data.waves(j).processing_source,'hdr')
@@ -94,7 +94,7 @@ if isfield(resp.Body.Data.data,'wind')
         %isolate HDR and embedded 
         indEmbedded =[]; 
         indHDR = []; 
-        for j = 1:size(resp.Body.Data.data.wind)
+        for j = 1:size(resp.Body.Data.data.wind,1)
             if strcmp(resp.Body.Data.data.wind(j).processing_source,'embedded')
                 indEmbedded = [indEmbedded; j]; 
             elseif strcmp(resp.Body.Data.data.wind(j).processing_source,'hdr')
@@ -129,7 +129,7 @@ if isfield(resp.Body.Data.data,'wind')
             Spotter.wind_seasurfaceId(j,1) = resp.Body.Data.data.wind(indEmbedded(j)).seasurfaceId;
         end        
     else
-        for j = 1:size(resp.Body.Data.data.waves)
+        for j = 1:size(resp.Body.Data.data.waves,1)
             Spotter.wind_speed(j,1) = nan;
             Spotter.wind_dir(j,1) = nan;
             Spotter.wind_time(j,1) = datenum(resp.Body.Data.data.waves(j).timestamp,'yyyy-mm-ddTHH:MM:SS');
@@ -206,7 +206,7 @@ if isfield(resp.Body.Data.data,'frequencyData')
         %isolate HDR and embedded 
         indHDR = []; 
         indEmbedded = []; 
-        for j = 1:size(resp.Body.Data.data.frequencyData)
+        for j = 1:size(resp.Body.Data.data.frequencyData,1)
             if strcmp(resp.Body.Data.data.frequencyData(j).processing_source,'hdr')
                 indHDR = [indHDR; j]; 
             elseif strcmp(resp.Body.Data.data.frequencyData(j).processing_source,'embedded')
@@ -278,7 +278,7 @@ if isfield(resp.Body.Data.data,'partitionData')
         %isolate HDR and embedded 
         indHDR = []; 
         indEmbedded = []; 
-        for j = 1:size(resp.Body.Data.data.partitionData)
+        for j = 1:size(resp.Body.Data.data.partitionData,1)
             if strcmp(resp.Body.Data.data.partitionData(j).processing_source,'hdr')
                 indHDR = [indHDR; j]; 
             elseif strcmp(resp.Body.Data.data.partitionData(j).processing_source,'embedded')
@@ -366,7 +366,7 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
     %isolate HDR and embedded 
     indHDR = []; 
     indEmbedded = []; 
-    for j = 1:size(resp.Body.Data.data.surfaceTemp)
+    for j = 1:size(resp.Body.Data.data.surfaceTemp,1)
         if strcmp(resp.Body.Data.data.surfaceTemp(j).processing_source,'hdr')
             indHDR = [indHDR; j]; 
         elseif strcmp(resp.Body.Data.data.surfaceTemp(j).processing_source,'embedded')
@@ -400,11 +400,11 @@ if isfield(resp.Body.Data.data,'surfaceTemp')&~isempty(resp.Body.Data.data.surfa
     
     %check for bottom temperature data
     if isfield(resp.Body.Data.data,'bottomTemp')
-        for j = 1:size(indTemp)
+        for j = 1:size(indTemp,1)
             Spotter.bott_temp(j,1) = resp.Body.Data.data.bottomTemp(indTemp(j)).degrees;
         end
     else
-        for j = 1:size(indTemp)
+        for j = 1:size(indTemp,1)
             Spotter.bott_temp(j,1)= -9999; 
         end
     end

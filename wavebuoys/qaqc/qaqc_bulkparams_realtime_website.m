@@ -13,6 +13,7 @@ function [bulkparams] = qaqc_bulkparams_realtime_website(buoy_info, archive_data
 
 %append new data and archived data
 if strcmp(buoy_info.type,'sofar')
+    disp('merging data for QAQC'); 
     fields = fieldnames(new_data); 
     fields_archive = fieldnames(archive_data); 
     fields_int = intersect(fields, fields_archive);
@@ -31,13 +32,13 @@ if strcmp(buoy_info.type,'sofar')
         
     end
     %now include any missing fields from archive data
-    for j = 1:size(fields_archive)
+    for j = 1:size(fields_archive,1)
         if ~isfield(bulkparams, fields_archive{j})
             bulkparams.(fields_archive{j,:}) = archive_data.(fields_archive{j,:}); 
         end
     end 
     %now include missing parameters from new data
-    for j =1:size(fields); 
+    for j =1:size(fields,1); 
         if ~isfield(bulkparams, fields{j}); 
             bulkparams.(fields{j}) = new_data.(fields{j,:}); 
         end
@@ -46,6 +47,7 @@ elseif strcmp(buoy_info.type,'datawell');
     bulkparams = new_data; 
 end
 
+disp('removing duplicate times'); 
 bulkparams = remove_duplicates(bulkparams); 
 
 
@@ -76,8 +78,10 @@ qaqc.TpLim = 25;
 qaqc.rocSST = 2; 
 
 if isfield(qaqc, 'time_temp')
+    disp('qaqcing temp data');  
     [bulkparams.qf_waves, bulkparams.qf_sst, bulkparams.qf_bott_temp] = qaqc_uwa_waves_website(qaqc); 
 else
+    disp('qaqcing wave data'); 
     [bulkparams.qf_waves, ~, ~] = qaqc_uwa_waves_website(qaqc);
 end
 

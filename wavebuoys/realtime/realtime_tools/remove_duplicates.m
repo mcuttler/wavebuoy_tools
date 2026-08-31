@@ -26,6 +26,7 @@ for j = 1:length(fields)
 end
 
 %wave data
+disp('removing duplicates: wave data'); 
 for i = 1:length(t_wave)
     dataout.time(i,1) = t_wave(i); 
     idx = find(data.time==t_wave(i));     
@@ -64,6 +65,7 @@ for i = 1:length(t_wave)
 end
 
 %temp data (Datawell)
+disp('removing duplicates: temp. data'); 
 if isfield(data,'temp_time')&~contains(data.serialID{1},'SPOT')
     t_temp = unique(data.temp_time); 
     for i = 1:length(t_temp)
@@ -93,6 +95,7 @@ if isfield(data,'temp_time')&~contains(data.serialID{1},'SPOT')
 end
 
 %temp data (Spotter)
+disp('removing duplicates: temp. data'); 
 if isfield(data,'temp_time')&contains(data.serialID{1},'SPOT')
     t_temp = unique(data.temp_time); 
     for i = 1:length(t_temp)
@@ -122,6 +125,7 @@ if isfield(data,'temp_time')&contains(data.serialID{1},'SPOT')
 end
 
 %pressure data
+disp('removing duplicates: pressure data'); 
 if isfield(data,'press_time')
     p_temp = unique(data.press_time); 
     for i = 1:length(p_temp)
@@ -151,6 +155,7 @@ if isfield(data,'press_time')
 end
 
 %pressure std data
+disp('removing duplicates: pressure STD data'); 
 if isfield(data,'press_std_time')
     p_temp = unique(data.press_std_time); 
     for i = 1:length(p_temp)
@@ -215,6 +220,7 @@ end
 % end
 
 %spectral data - Spotter
+disp('removing duplicates: spectral data'); 
 if isfield(data,'spec_time')
     t_spec = unique(data.spec_time); 
     for i = 1:length(t_spec)
@@ -254,6 +260,7 @@ if isfield(data,'spec_time')
 end
 
 %partitioned data - Spotter
+disp('removing duplicates: partitioned data'); 
 if isfield(data,'part_time')
     t_spec = unique(data.part_time); 
     for i = 1:length(t_spec)
@@ -283,6 +290,7 @@ if isfield(data,'part_time')
 end
 
 %system data - Spotter
+disp('removing duplicates: system data'); 
 if isfield(data,'systime')
     t_spec = unique(data.systime); 
     for i = 1:length(t_spec)
@@ -312,6 +320,7 @@ if isfield(data,'systime')
 end
 
 %current meter data - Spotter Smart Mooring
+disp('removing duplicates: current meter data'); 
 if isfield(data,'curr_time')
     t_spec = unique(data.curr_time); 
     for i = 1:length(t_spec)
